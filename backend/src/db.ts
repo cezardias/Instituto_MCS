@@ -1,4 +1,4 @@
-﻿import Database from 'better-sqlite3'
+import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs'
 
@@ -35,8 +35,19 @@ const createProjects = `CREATE TABLE IF NOT EXISTS projects (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
+const createNews = `CREATE TABLE IF NOT EXISTS news (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  category TEXT NOT NULL,
+  content TEXT NOT NULL,
+  image_url TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
+db.exec(createNews)
 
 export default db

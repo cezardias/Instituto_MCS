@@ -14,39 +14,44 @@ const links = [
 ]
 
 export default function NavBar() {
-  const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const location = useLocation()
+  
+  // Como a página inicial agora também é clara, sempre usaremos o tema claro.
+  const isDarkHome = false
 
-  // Fecha o menu mobile quando a rota mudar
+  // Fecha o menu mobile quando muda de página
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
 
-  // Se a rota for a inicial (/), usamos fundo escuro e texto claro, senão fundo claro e texto escuro
-  const isHomePage = location.pathname === '/';
-  const navTextColor = isHomePage ? 'text-marfim' : 'text-carbono';
-  const borderColor = isHomePage ? 'border-gray-800/30' : 'border-gray-200';
+  const textColor = 'text-carbono'
+  const hoverColor = 'hover:text-dourado'
+  const borderColor = 'border-gray-200'
+  const bgMobileMenu = 'bg-marfim'
 
   return (
-    <header className="absolute top-0 left-0 w-full z-50">
-      <div className={`max-w-[1400px] mx-auto px-6 lg:px-8 py-6 flex items-center justify-between border-b ${borderColor}`}>
+    <header className="absolute w-full z-50">
+      <div className={`max-w-[1400px] mx-auto px-6 lg:px-8 py-4 md:py-6 flex items-center justify-between border-b ${borderColor}`}>
         <div className="flex items-center gap-2">
           <Link to="/">
             <img 
               src="/logo.png" 
-              alt="Instituto MCS" 
-              className={`h-16 object-contain ${!isHomePage ? 'mix-blend-multiply' : ''}`} 
+              alt="Instituto MCS Logo" 
+              className="h-12 md:h-16 w-auto mix-blend-multiply"
             />
           </Link>
         </div>
-        
-        {/* Menu Desktop */}
-        <nav className={`hidden lg:flex items-center gap-6 text-[0.65rem] font-bold tracking-widest ${navTextColor}`}>
+
+        {/* Desktop Menu */}
+        <nav className={`hidden lg:flex items-center gap-6 text-[0.65rem] font-bold tracking-[0.2em] ${textColor}`}>
           {links.map((link) => (
             <NavLink 
-              key={link.to} 
-              to={link.to}
-              className={({ isActive }) => `hover:text-dourado transition-colors ${isActive ? 'text-dourado' : ''}`}
+              key={link.label} 
+              to={link.to} 
+              className={({ isActive }) => 
+                `transition-colors ${isActive ? 'text-dourado border-b border-dourado pb-1' : hoverColor}`
+              }
             >
               {link.label}
             </NavLink>
@@ -62,7 +67,7 @@ export default function NavBar() {
 
         {/* Hamburger Menu Button (Mobile) */}
         <button 
-          className={`lg:hidden p-2 ${navTextColor}`}
+          className={`lg:hidden p-2 ${textColor}`}
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -77,12 +82,12 @@ export default function NavBar() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <nav className="lg:hidden bg-carbono text-marfim w-full flex flex-col border-b border-gray-800 absolute top-full left-0 shadow-2xl">
+        <nav className={`lg:hidden ${bgMobileMenu} ${textColor} w-full flex flex-col border-b border-gray-200 absolute top-full left-0 shadow-2xl`}>
           {links.map((link) => (
             <NavLink 
               key={link.to} 
               to={link.to}
-              className={({ isActive }) => `px-6 py-4 text-xs font-bold tracking-widest border-b border-gray-800/50 hover:bg-gray-800 transition-colors ${isActive ? 'text-dourado' : ''}`}
+              className={({ isActive }) => `px-6 py-4 text-xs font-bold tracking-widest border-b border-gray-100 hover:bg-gray-50 transition-colors ${isActive ? 'text-dourado' : ''}`}
             >
               {link.label}
             </NavLink>
