@@ -7,18 +7,18 @@ export default function HomePage() {
       <section className="relative pt-20 pb-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 grid lg:grid-cols-2 gap-12 items-center">
           
-          <div className="z-10">
-            <span className="text-dourado font-semibold tracking-wider text-sm uppercase mb-4 block">
+          <div className="z-10 text-center lg:text-left">
+            <span className="text-dourado font-semibold tracking-wider text-xs md:text-sm uppercase mb-4 block">
               | Instituto Movimento de Cultura Social
             </span>
-            <h1 className="font-serif text-5xl lg:text-7xl leading-tight mb-6">
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight mb-6">
               Transformamos realidades através da cultura, educação e oportunidades.
             </h1>
-            <p className="text-gray-300 text-lg max-w-lg mb-10 leading-relaxed">
+            <p className="text-gray-300 text-base md:text-lg max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
               Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
             </p>
-            <div className="flex gap-4">
-              <Link to="/projetos" className="bg-dourado text-carbono font-semibold py-4 px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2">
+            <div className="flex justify-center lg:justify-start gap-4">
+              <Link to="/projetos" className="bg-dourado text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center">
                 CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
               </Link>
             </div>
