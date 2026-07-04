@@ -222,7 +222,7 @@ export default function AdminDashboard() {
           {tab === 'documentos'  && <DocumentosTab />}
           {tab === 'compliance'  && <ComplianceTab />}
           {tab === 'canal'       && <DenunciasTab />}
-          {tab === 'ead'         && <EadTab />}
+          {tab === 'ead'         && <EadTab onClose={() => setTab('overview')} />}
           {tab === 'gestao_ead'  && <GestaoEadTab />}
           {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
@@ -1562,7 +1562,7 @@ function GestaoEadTab() {
 // ═══════════════════════════════════════════════════════════════════
 // PLATAFORMA EAD (NETFLIX STYLE)
 // ═══════════════════════════════════════════════════════════════════
-function EadTab() {
+function EadTab({ onClose }: { onClose: () => void }) {
   const [items, setItems] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState<Video|null>(null)
@@ -1608,14 +1608,17 @@ function EadTab() {
   return (
     <div className="fixed inset-0 bg-[#0f2027] z-50 overflow-y-auto">
       {/* Navbar Interna da EAD */}
-      <div className="sticky top-0 z-40 bg-gradient-to-b from-black/80 to-transparent pb-10 pt-6 px-8 flex justify-between items-center pointer-events-none">
+      <div className="sticky top-0 z-40 bg-gradient-to-b from-black/80 to-transparent pb-10 pt-6 px-8 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-dourado flex items-center justify-center text-[#0f2027] font-bold text-xl">▶️</div>
           <h2 className="font-serif text-2xl text-white drop-shadow-md">Instituto EAD</h2>
         </div>
+        <button onClick={onClose} className="flex items-center gap-2 border border-white/20 text-white/70 hover:bg-white/10 hover:text-white px-4 py-2 rounded-full text-xs font-bold transition-colors">
+          <span aria-hidden="true">&larr;</span> SAIR DA PLATAFORMA
+        </button>
       </div>
 
-      <div className="px-8 pb-20 -mt-10">
+      <div className="px-8 pb-20 -mt-2">
         {categories.length === 0 && (
           <div className="text-center text-white/50 pt-20">Nenhuma aula disponível no momento.</div>
         )}
