@@ -1,6 +1,6 @@
 import express from 'express'
 import db from '../db'
-import { authenticate } from '../middleware/auth'
+import { authMiddleware } from '../middleware/auth'
 
 const router = express.Router()
 
@@ -37,7 +37,7 @@ router.get('/:id', (req, res) => {
 })
 
 // Create news (admin only)
-router.post('/', authenticate, (req, res) => {
+router.post('/', authMiddleware, (req, res) => {
   const { title, category, content, image_url } = req.body
   const tenant_id = (req as any).user.tenant_id
 
@@ -55,7 +55,7 @@ router.post('/', authenticate, (req, res) => {
 })
 
 // Update news (admin only)
-router.put('/:id', authenticate, (req, res) => {
+router.put('/:id', authMiddleware, (req, res) => {
   const { id } = req.params
   const { title, category, content, image_url } = req.body
   const tenant_id = (req as any).user.tenant_id
@@ -71,7 +71,7 @@ router.put('/:id', authenticate, (req, res) => {
 })
 
 // Delete news (admin only)
-router.delete('/:id', authenticate, (req, res) => {
+router.delete('/:id', authMiddleware, (req, res) => {
   const { id } = req.params
   const tenant_id = (req as any).user.tenant_id
 

@@ -6,26 +6,37 @@ import QuemSomos from './pages/QuemSomos'
 import ProjectsPage from './pages/ProjectsPage'
 import TransparencyPage from './pages/TransparencyPage'
 import CompliancePage from './pages/CompliancePage'
-import DashboardPage from './pages/AdminDashboard'
+import AdminDashboard from './pages/AdminDashboard'
+import LoginPage from './pages/LoginPage'
 
-function App() {
+// Layout wrapper com NavBar + Footer (site público)
+function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
       <NavBar />
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/quem-somos" element={<QuemSomos />} />
-          <Route path="/projetos" element={<ProjectsPage />} /> {/* Placeholder until details page is created */}
-          <Route path="/banco-de-projetos" element={<ProjectsPage />} />
-          <Route path="/transparencia" element={<TransparencyPage />} />
-          <Route path="/compliance" element={<CompliancePage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-        </Routes>
-      </main>
+      <main className="flex-grow">{children}</main>
       <Footer />
     </div>
   )
 }
 
+function App() {
+  return (
+    <Routes>
+      {/* Rotas do painel administrativo (sem NavBar/Footer) */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/dashboard" element={<AdminDashboard />} />
+
+      {/* Rotas públicas (com NavBar + Footer) */}
+      <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />
+      <Route path="/quem-somos" element={<PublicLayout><QuemSomos /></PublicLayout>} />
+      <Route path="/projetos" element={<PublicLayout><ProjectsPage /></PublicLayout>} />
+      <Route path="/banco-de-projetos" element={<PublicLayout><ProjectsPage /></PublicLayout>} />
+      <Route path="/transparencia" element={<PublicLayout><TransparencyPage /></PublicLayout>} />
+      <Route path="/compliance" element={<PublicLayout><CompliancePage /></PublicLayout>} />
+    </Routes>
+  )
+}
+
 export default App
+
