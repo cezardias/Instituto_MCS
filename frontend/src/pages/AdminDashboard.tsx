@@ -13,6 +13,8 @@ interface News { id:number; title:string; category:string; content:string; image
 interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; created_at:string }
 interface Aluno { id:number; name:string; email:string; phone:string; area:string; status:string; birth_date:string; created_at:string }
 interface User { id:number; name:string; email:string; role:string; created_at:string }
+interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; created_at:string }
+interface AccountabilityReport { id:number; tenant_id:string; project_id:number; project_name?:string; title:string; document_url:string; status:string; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -203,7 +205,10 @@ export default function AdminDashboard() {
           {tab === 'alunos'      && <AlunosTab />}
           {tab === 'news'        && <NewsTab />}
           {tab === 'users'       && <UsersTab />}
-          {!['overview','projetos','alunos','news','users'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'financeiro'  && <FinanceiroTab />}
+          {tab === 'despesas'    && <DespesasTab />}
+          {tab === 'prestacao'   && <AccountabilityTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -858,6 +863,282 @@ function UsersTab() {
                   </td>
                   <td className="td-cell text-gray-400 text-xs">{new Date(u.created_at).toLocaleDateString('pt-BR')}</td>
                   <td className="td-cell"><button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RECURSOS RECEBIDOS TAB (FINANCEIRO)
+// ═══════════════════════════════════════════════════════════════════
+function FinanceiroTab() {
+  const [items, setItems] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({ category:'Doação', description:'', amount:'', date:'', status:'pago' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/finance?type=receita', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true); setError('')
+    try {
+      const r = await fetch('/api/finance', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'receita', amount: Number(form.amount)}) })
+      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({ category:'Doação', description:'', amount:'', date:'', status:'pago' }); load() }
+    } catch { setError('Erro de conexão') }
+    setSaving(false)
+  }
+  const del = async (id: number) => { if(!confirm('Excluir registro?')) return; await fetch(`/api/finance/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Recursos Recebidos</h2><p className="text-sm text-gray-400">Entradas financeiras (Receitas)</p></div>
+        <button onClick={() => setShowForm(true)} className="bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-700 flex items-center gap-2">+ Nova Receita</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
+            <div className="flex justify-between mb-6">
+              <h3 className="font-serif text-xl text-carbono">Registrar Receita</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
+            </div>
+            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            <form onSubmit={save} className="space-y-4">
+              <div><label className="label-dash">Categoria</label><select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="input-field"><option>Doação</option><option>Patrocínio</option><option>Edital Governamental</option><option>Convênio</option><option>Eventos</option></select></div>
+              <div><label className="label-dash">Descrição *</label><input required value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="input-field" placeholder="Origem do recurso" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="label-dash">Valor (R$) *</label><input required type="number" step="0.01" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} className="input-field" placeholder="0.00" /></div>
+                <div><label className="label-dash">Data *</label><input required type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} className="input-field" /></div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-emerald-600 text-white py-3 rounded-full text-sm font-bold disabled:opacity-60">{saving ? 'Salvando...' : 'Registrar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100">
+              <th className="th-cell">Data</th><th className="th-cell">Descrição</th><th className="th-cell">Categoria</th><th className="th-cell text-right">Valor</th><th className="th-cell" />
+            </tr></thead>
+            <tbody>
+              {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum registro encontrado</td></tr>}
+              {items.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="td-cell text-gray-500">{new Date(t.date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                  <td className="td-cell font-semibold text-carbono">{t.description}</td>
+                  <td className="td-cell text-gray-500">{t.category}</td>
+                  <td className="td-cell font-bold text-emerald-600 text-right">R$ {t.amount.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DESPESAS TAB
+// ═══════════════════════════════════════════════════════════════════
+function DespesasTab() {
+  const [items, setItems] = useState<Transaction[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({ category:'Operacional', description:'', amount:'', date:'', status:'pago' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/finance?type=despesa', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true); setError('')
+    try {
+      const r = await fetch('/api/finance', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'despesa', amount: Number(form.amount)}) })
+      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({ category:'Operacional', description:'', amount:'', date:'', status:'pago' }); load() }
+    } catch { setError('Erro de conexão') }
+    setSaving(false)
+  }
+  const del = async (id: number) => { if(!confirm('Excluir registro?')) return; await fetch(`/api/finance/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Despesas</h2><p className="text-sm text-gray-400">Saídas financeiras (Custos e Pagamentos)</p></div>
+        <button onClick={() => setShowForm(true)} className="bg-red-500 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-red-600 flex items-center gap-2">+ Nova Despesa</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
+            <div className="flex justify-between mb-6">
+              <h3 className="font-serif text-xl text-carbono">Registrar Despesa</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
+            </div>
+            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            <form onSubmit={save} className="space-y-4">
+              <div><label className="label-dash">Categoria</label><select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="input-field"><option>Operacional</option><option>Folha de Pagamento</option><option>Marketing</option><option>Eventos</option><option>Impostos</option></select></div>
+              <div><label className="label-dash">Descrição *</label><input required value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="input-field" placeholder="Motivo da despesa" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="label-dash">Valor (R$) *</label><input required type="number" step="0.01" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} className="input-field" placeholder="0.00" /></div>
+                <div><label className="label-dash">Data *</label><input required type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} className="input-field" /></div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-red-500 text-white py-3 rounded-full text-sm font-bold disabled:opacity-60">{saving ? 'Salvando...' : 'Registrar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100">
+              <th className="th-cell">Data</th><th className="th-cell">Descrição</th><th className="th-cell">Categoria</th><th className="th-cell text-right">Valor</th><th className="th-cell" />
+            </tr></thead>
+            <tbody>
+              {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum registro encontrado</td></tr>}
+              {items.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="td-cell text-gray-500">{new Date(t.date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                  <td className="td-cell font-semibold text-carbono">{t.description}</td>
+                  <td className="td-cell text-gray-500">{t.category}</td>
+                  <td className="td-cell font-bold text-red-500 text-right">- R$ {t.amount.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PRESTAÇÃO DE CONTAS TAB
+// ═══════════════════════════════════════════════════════════════════
+function AccountabilityTab() {
+  const [items, setItems] = useState<AccountabilityReport[]>([])
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({ project_id:'', title:'', document_url:'', status:'em_analise' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { 
+      const [r1, r2] = await Promise.all([
+        fetch('/api/accountability', {headers:authH()}),
+        fetch(`/api/projects?tenant_id=${TENANT}`, {headers:authH()})
+      ])
+      setItems(await r1.json()); setProjects(await r2.json())
+    } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true); setError('')
+    try {
+      const r = await fetch('/api/accountability', { method:'POST', headers:authH(), body:JSON.stringify({...form, project_id: Number(form.project_id)}) })
+      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({ project_id:'', title:'', document_url:'', status:'em_analise' }); load() }
+    } catch { setError('Erro de conexão') }
+    setSaving(false)
+  }
+  const del = async (id: number) => { if(!confirm('Excluir relatório?')) return; await fetch(`/api/accountability/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Prestação de Contas</h2><p className="text-sm text-gray-400">Relatórios vinculados a Projetos</p></div>
+        <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Relatório</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
+            <div className="flex justify-between mb-6">
+              <h3 className="font-serif text-xl text-carbono">Vincular Relatório</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
+            </div>
+            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            <form onSubmit={save} className="space-y-4">
+              <div>
+                <label className="label-dash">Projeto *</label>
+                <select required value={form.project_id} onChange={e=>setForm({...form,project_id:e.target.value})} className="input-field">
+                  <option value="">Selecione um projeto...</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                </select>
+              </div>
+              <div><label className="label-dash">Título do Relatório *</label><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="input-field" placeholder="Ex: Relatório Anual 2024" /></div>
+              <div><label className="label-dash">Link do Documento (PDF/Drive)</label><input type="url" value={form.document_url} onChange={e=>setForm({...form,document_url:e.target.value})} className="input-field" placeholder="https://" /></div>
+              <div>
+                <label className="label-dash">Status</label>
+                <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="input-field">
+                  <option value="em_analise">Em Análise</option>
+                  <option value="aprovado">Aprovado</option>
+                  <option value="rejeitado">Rejeitado</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold disabled:opacity-60">{saving ? 'Salvando...' : 'Salvar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100">
+              <th className="th-cell">Projeto</th><th className="th-cell">Relatório</th><th className="th-cell">Status</th><th className="th-cell">Documento</th><th className="th-cell" />
+            </tr></thead>
+            <tbody>
+              {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum relatório encontrado</td></tr>}
+              {items.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="td-cell font-semibold text-carbono">{t.project_name}</td>
+                  <td className="td-cell text-gray-500">{t.title}</td>
+                  <td className="td-cell">
+                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${t.status==='aprovado'?'bg-green-100 text-green-700':t.status==='rejeitado'?'bg-red-100 text-red-600':'bg-yellow-100 text-yellow-700'}`}>
+                      {t.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="td-cell">
+                    {t.document_url ? <a href={t.document_url} target="_blank" rel="noreferrer" className="text-dourado font-bold hover:underline">Ver Doc ↗</a> : <span className="text-gray-300">Sem link</span>}
+                  </td>
+                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
                 </tr>
               ))}
             </tbody>

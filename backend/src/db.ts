@@ -63,10 +63,35 @@ const createNews = `CREATE TABLE IF NOT EXISTS news (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
+const createTransactions = `CREATE TABLE IF NOT EXISTS transactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'receita' or 'despesa'
+  category TEXT NOT NULL,
+  description TEXT NOT NULL,
+  amount REAL NOT NULL,
+  date TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pago',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createAccountability = `CREATE TABLE IF NOT EXISTS accountability_reports (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  project_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  document_url TEXT,
+  status TEXT NOT NULL DEFAULT 'em_analise',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
 db.exec(createAlunos)
 db.exec(createNews)
+db.exec(createTransactions)
+db.exec(createAccountability)
 
 export default db
