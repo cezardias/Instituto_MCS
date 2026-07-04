@@ -13,3 +13,19 @@
     text-wrap: balance;
   }
 }
+
+@layer components {
+  .label-dash {
+    @apply block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1.5;
+  }
+  .input-field {
+    @apply w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-carbono focus:outline-none focus:border-dourado focus:ring-1 focus:ring-dourado/30 transition-all;
+  }
+  .th-cell {
+    @apply text-left px-4 py-3 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap;
+  }
+  .td-cell {
+    @apply px-4 py-4;
+  }
+}
+

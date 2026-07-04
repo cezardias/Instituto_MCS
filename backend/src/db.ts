@@ -29,9 +29,27 @@ const createProjects = `CREATE TABLE IF NOT EXISTS projects (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tenant_id TEXT NOT NULL,
   title TEXT NOT NULL,
-  status TEXT NOT NULL,
-  impact TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'em_execucao',
+  area TEXT NOT NULL DEFAULT 'Educação',
   location TEXT NOT NULL,
+  beneficiados INTEGER DEFAULT 0,
+  budget REAL DEFAULT 0,
+  start_date TEXT,
+  end_date TEXT,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createAlunos = `CREATE TABLE IF NOT EXISTS alunos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT,
+  area TEXT NOT NULL DEFAULT 'Educação',
+  project_id INTEGER,
+  status TEXT NOT NULL DEFAULT 'ativo',
+  birth_date TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
@@ -48,6 +66,7 @@ const createNews = `CREATE TABLE IF NOT EXISTS news (
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
+db.exec(createAlunos)
 db.exec(createNews)
 
 export default db

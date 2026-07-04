@@ -9,6 +9,9 @@ import adminRoutes from './routes/admin'
 import newsRoutes from './routes/news'
 import usersRoutes from './routes/users'
 import uploadRoutes from './routes/upload'
+import projectsRoutes from './routes/projects'
+import alunosRoutes from './routes/alunos'
+import statsRoutes from './routes/stats'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -32,6 +35,9 @@ app.use('/admin', adminRoutes)
 app.use('/api/news', newsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/projects', projectsRoutes)
+app.use('/api/alunos', alunosRoutes)
+app.use('/api/stats', statsRoutes)
 app.use('/graphql', graphqlHTTP({ schema, rootValue, graphiql: true }))
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 
