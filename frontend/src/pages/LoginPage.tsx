@@ -25,11 +25,11 @@ export default function LoginPage() {
         setError(data.error || 'Credenciais inválidas')
       } else {
         localStorage.setItem('mcs_token', data.token)
-        localStorage.setItem('mcs_user', JSON.stringify(data.user))
+        localStorage.setItem('mcs_user', JSON.stringify(data.user || { email }))
         navigate('/dashboard')
       }
     } catch {
-      setError('Erro de conexão. Tente novamente.')
+      setError('Erro de conexão com o servidor. Tente novamente.')
     } finally {
       setLoading(false)
     }

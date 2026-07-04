@@ -10,72 +10,74 @@ const links = [
   { label: 'BANCO DE PROJETOS', to: '/banco-de-projetos' },
   { label: 'NOTÍCIAS', to: '/noticias' },
   { label: 'PARCEIROS', to: '/parceiros' },
-  { label: 'CONTATO', to: '/contato' }
+  { label: 'CONTATO', to: '/contato' },
 ]
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
-  
-  // Como a página inicial agora também é clara, sempre usaremos o tema claro.
-  const isDarkHome = false
 
-  // Fecha o menu mobile quando muda de página
   useEffect(() => {
     setIsMobileMenuOpen(false)
   }, [location.pathname])
 
-  const textColor = 'text-carbono'
-  const hoverColor = 'hover:text-dourado'
-  const borderColor = 'border-gray-200'
-  const bgMobileMenu = 'bg-marfim'
-
   return (
-    <header className="absolute w-full z-50">
-      <div className={`max-w-[1400px] mx-auto px-6 lg:px-8 py-4 md:py-6 flex items-center justify-between border-b ${borderColor}`}>
-        <div className="flex items-center gap-2">
-          <Link to="/">
-            <img 
-              src="/logo.png" 
-              alt="Instituto MCS Logo" 
-              className="h-12 md:h-16 w-auto mix-blend-multiply"
-            />
-          </Link>
-        </div>
+    <header className="absolute w-full z-50 bg-marfim/95 backdrop-blur-sm border-b border-gray-200">
+      <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-16 flex items-center justify-between">
 
-        {/* Desktop Menu */}
-        <nav className={`hidden lg:flex items-center gap-6 text-[0.65rem] font-bold tracking-[0.2em] ${textColor}`}>
+        {/* Logo */}
+        <Link to="/" className="shrink-0">
+          <img
+            src="/logo.png"
+            alt="Instituto MCS"
+            className="h-10 xl:h-12 w-auto mix-blend-multiply"
+          />
+        </Link>
+
+        {/* ── Desktop Nav (xl+) ────────────────────── */}
+        <nav className="hidden xl:flex items-center gap-0 text-[0.6rem] font-bold tracking-[0.12em] text-carbono">
           {links.map((link) => (
-            <NavLink 
-              key={link.label} 
-              to={link.to} 
-              className={({ isActive }) => 
-                `transition-colors ${isActive ? 'text-dourado border-b border-dourado pb-1' : hoverColor}`
+            <NavLink
+              key={link.label}
+              to={link.to}
+              className={({ isActive }) =>
+                `px-3 py-2 transition-colors whitespace-nowrap hover:text-dourado ${
+                  isActive ? 'text-dourado border-b-2 border-dourado' : ''
+                }`
               }
             >
               {link.label}
             </NavLink>
           ))}
-          <Link 
-            to="/login" 
-            className="ml-2 border border-carbono text-carbono px-4 py-2 rounded-full text-[0.65rem] font-bold hover:bg-carbono hover:text-marfim transition-colors flex items-center gap-1.5"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-            ENTRAR
-          </Link>
-          <NavLink 
-            to="/doe" 
-            className="ml-1 bg-dourado text-carbono px-5 py-2 rounded-full text-[0.65rem] font-bold hover:bg-yellow-500 transition-colors flex items-center gap-1.5"
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-            DOE AGORA
-          </NavLink>
         </nav>
 
-        {/* Hamburger Menu Button (Mobile) */}
-        <button 
-          className={`lg:hidden p-2 ${textColor}`}
+        {/* ── CTA Buttons ──────────────────────────── */}
+        <div className="hidden xl:flex items-center gap-2 shrink-0">
+          <Link
+            to="/login"
+            className="flex items-center gap-1.5 border border-carbono text-carbono px-4 py-2 rounded-full text-[0.6rem] font-bold hover:bg-carbono hover:text-marfim transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            ENTRAR
+          </Link>
+          <Link
+            to="/doe"
+            className="flex items-center gap-1.5 bg-dourado text-carbono px-4 py-2 rounded-full text-[0.6rem] font-bold hover:bg-yellow-500 transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            DOE AGORA
+          </Link>
+        </div>
+
+        {/* ── Hamburger (< xl) ─────────────────────── */}
+        <button
+          className="xl:hidden p-2 text-carbono"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Abrir menu"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isMobileMenuOpen ? (
@@ -87,35 +89,45 @@ export default function NavBar() {
         </button>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* ── Mobile / Tablet Dropdown ─────────────── */}
       {isMobileMenuOpen && (
-        <nav className={`lg:hidden ${bgMobileMenu} ${textColor} w-full flex flex-col border-b border-gray-200 absolute top-full left-0 shadow-2xl`}>
-          {links.map((link) => (
-            <NavLink 
-              key={link.to} 
-              to={link.to}
-              className={({ isActive }) => `px-6 py-4 text-xs font-bold tracking-widest border-b border-gray-100 hover:bg-gray-50 transition-colors ${isActive ? 'text-dourado' : ''}`}
+        <div className="xl:hidden bg-marfim border-t border-gray-100 shadow-xl absolute w-full left-0">
+          <nav className="flex flex-col divide-y divide-gray-100">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `px-6 py-4 text-xs font-bold tracking-widest hover:bg-gray-50 transition-colors ${
+                    isActive ? 'text-dourado' : 'text-carbono'
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="px-6 py-5 flex flex-col gap-3 border-t border-gray-100">
+            <Link
+              to="/login"
+              className="w-full flex items-center justify-center gap-2 border border-carbono text-carbono py-3 rounded-full text-xs font-bold tracking-widest hover:bg-carbono hover:text-marfim transition-colors"
             >
-              {link.label}
-            </NavLink>
-          ))}
-          <div className="p-4 flex flex-col gap-3">
-            <Link 
-              to="/login" 
-              className="border border-carbono text-carbono w-full px-6 py-3 rounded-full font-bold hover:bg-carbono hover:text-marfim transition-colors flex items-center justify-center gap-2 text-xs tracking-widest"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
               ENTRAR NO PAINEL
             </Link>
-            <NavLink 
-              to="/doe" 
-              className="bg-dourado text-carbono w-full px-6 py-3 rounded-full font-bold hover:bg-yellow-500 transition-colors flex items-center justify-center gap-2 text-xs tracking-widest"
+            <Link
+              to="/doe"
+              className="w-full flex items-center justify-center gap-2 bg-dourado text-carbono py-3 rounded-full text-xs font-bold tracking-widest hover:bg-yellow-500 transition-colors"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
               DOE AGORA
-            </NavLink>
+            </Link>
           </div>
-        </nav>
+        </div>
       )}
     </header>
   )

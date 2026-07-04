@@ -26,6 +26,7 @@ app.use(tenantMiddleware)
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
 app.use('/auth', authRoutes)
+app.use('/api/auth', authRoutes)   // alias para o frontend via nginx
 app.use('/tenant', tenantRoutes)
 app.use('/admin', adminRoutes)
 app.use('/api/news', newsRoutes)
