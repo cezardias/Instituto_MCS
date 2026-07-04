@@ -138,6 +138,27 @@ const createVideoComments = `CREATE TABLE IF NOT EXISTS video_comments (
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 )`
 
+const createComunicados = `CREATE TABLE IF NOT EXISTS comunicados (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  author_name TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createPassaporteItems = `CREATE TABLE IF NOT EXISTS passaporte_items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  user_id INTEGER NOT NULL,
+  badge_name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  points INTEGER NOT NULL DEFAULT 0,
+  awarded_by INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
@@ -150,5 +171,7 @@ db.exec(createDenuncias)
 db.exec(createVideos)
 db.exec(createVideoLikes)
 db.exec(createVideoComments)
+db.exec(createComunicados)
+db.exec(createPassaporteItems)
 
 export default db

@@ -19,6 +19,8 @@ interface DocumentItem { id:number; title:string; type:string; document_url:stri
 interface Denuncia { id:number; name:string|null; email:string|null; subject:string; message:string; status:string; created_at:string }
 interface VideoComment { id:number; user_name:string; comment:string; created_at:string }
 interface Video { id:number; title:string; description:string; author:string; youtube_url:string; category:string; likes:number; userLiked:boolean; comments:VideoComment[]; created_at:string }
+interface Comunicado { id:number; title:string; message:string; author_name:string; created_at:string }
+interface PassaporteItem { id:number; user_name?:string; badge_name:string; description:string; points:number; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -234,7 +236,9 @@ export default function AdminDashboard() {
           {tab === 'canal'       && <DenunciasTab />}
           {tab === 'ead'         && <EadTab onClose={() => setTab('overview')} />}
           {tab === 'gestao_ead'  && <GestaoEadTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'comunicados' && <ComunicadosTab />}
+          {tab === 'passaporte'  && <PassaporteTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -1730,6 +1734,227 @@ function EadTab({ onClose }: { onClose: () => void }) {
               </form>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COMUNICADOS TAB
+// ═══════════════════════════════════════════════════════════════════
+function ComunicadosTab() {
+  const [items, setItems] = useState<Comunicado[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ title:'', message:'' })
+  const user = getUser()
+  const canEdit = ['admin', 'diretoria', 'coordenacao'].includes(user.role)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/comunicados', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await fetch('/api/comunicados', { method:'POST', headers:authH(), body:JSON.stringify(form) })
+    setForm({ title:'', message:'' })
+    setShowForm(false)
+    load()
+  }
+
+  const del = async (id:number) => {
+    if(confirm('Tem certeza?')) {
+      await fetch('/api/comunicados/'+id, { method:'DELETE', headers:authH() })
+      load()
+    }
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-dourado/20 text-dourado flex items-center justify-center text-2xl">📢</div>
+          <div>
+            <h2 className="font-serif text-3xl text-carbono">Mural de Comunicados</h2>
+            <p className="text-gray-500 text-sm">Avisos e mensagens oficiais do Instituto MCS.</p>
+          </div>
+        </div>
+        {canEdit && (
+          <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors">+ Novo Aviso</button>
+        )}
+      </div>
+
+      {showForm && (
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
+          <h3 className="font-bold text-sm text-carbono mb-4">Publicar Novo Comunicado</h3>
+          <form onSubmit={save} className="space-y-4">
+            <input required placeholder="Título (ex: Recesso Escolar)" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            <textarea required placeholder="Escreva a mensagem..." value={form.message} onChange={e=>setForm({...form,message:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm h-32 resize-none outline-none focus:border-dourado" />
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={()=>setShowForm(false)} className="px-6 py-2 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-100">CANCELAR</button>
+              <button type="submit" className="bg-dourado text-carbono px-6 py-2 rounded-full text-xs font-bold hover:bg-yellow-500">PUBLICAR AVISO</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando avisos...</div> : (
+        <div className="space-y-6">
+          {items.map(i => (
+            <div key={i.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-1.5 h-full bg-dourado rounded-l-3xl"></div>
+              <div className="flex justify-between items-start mb-3 pl-4">
+                <h3 className="font-bold text-xl text-carbono">{i.title}</h3>
+                {canEdit && (
+                  <button onClick={()=>del(i.id)} className="text-red-400 hover:text-red-600 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">EXCLUIR</button>
+                )}
+              </div>
+              <p className="text-gray-600 text-sm whitespace-pre-wrap pl-4 leading-relaxed mb-4">{i.message}</p>
+              <div className="pl-4 flex items-center gap-4 text-xs font-bold text-gray-400">
+                <span className="flex items-center gap-1">👤 {i.author_name}</span>
+                <span className="flex items-center gap-1">📅 {new Date(i.created_at).toLocaleDateString('pt-BR')}</span>
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhum comunicado no momento.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PASSAPORTE CULTURAL TAB
+// ═══════════════════════════════════════════════════════════════════
+function PassaporteTab() {
+  const [items, setItems] = useState<PassaporteItem[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ user_id:'', badge_name:'', description:'', points:'' })
+  const user = getUser()
+  const canEdit = ['admin', 'oficineiro', 'coordenacao'].includes(user.role)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { 
+      const [rItems, rUsers] = await Promise.all([
+        fetch('/api/passaporte', {headers:authH()}),
+        canEdit ? fetch('/api/users', {headers:authH()}) : Promise.resolve(null)
+      ])
+      setItems(await rItems.json())
+      if (rUsers) {
+        const u = await rUsers.json()
+        setUsers(Array.isArray(u) ? u : [])
+      }
+    } catch (err) { console.error(err) }
+    setLoading(false)
+  }, [canEdit])
+  
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await fetch('/api/passaporte', { method:'POST', headers:authH(), body:JSON.stringify({...form, points:Number(form.points)||0}) })
+    setForm({ user_id:'', badge_name:'', description:'', points:'' })
+    setShowForm(false)
+    load()
+  }
+
+  const del = async (id:number) => {
+    if(confirm('Tem certeza?')) {
+      await fetch('/api/passaporte/'+id, { method:'DELETE', headers:authH() })
+      load()
+    }
+  }
+
+  const totalPoints = items.reduce((acc, cur) => acc + (cur.points || 0), 0)
+
+  // Para visualização de alunos (agrupado por nome se for admin, ou listado direto se for aluno)
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-8 bg-gradient-to-r from-carbono to-gray-800 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-dourado/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-3xl">🏅</span>
+            <h2 className="font-serif text-3xl font-bold tracking-wide">Passaporte Cultural</h2>
+          </div>
+          <p className="text-gray-300 text-sm max-w-md">Portfólio verificado de conquistas, habilidades e participação no ecossistema de cultura urbana.</p>
+        </div>
+        {!canEdit && (
+          <div className="relative z-10 bg-white/10 backdrop-blur-md px-8 py-4 rounded-2xl border border-white/20 text-center">
+            <p className="text-[10px] text-dourado font-bold uppercase tracking-widest mb-1">Meus Pontos</p>
+            <p className="text-5xl font-bold font-serif">{totalPoints}</p>
+          </div>
+        )}
+        {canEdit && (
+          <button onClick={() => setShowForm(true)} className="relative z-10 bg-dourado text-carbono px-6 py-3 rounded-full text-sm font-bold hover:bg-yellow-500 shadow-lg">+ Conceder Selo</button>
+        )}
+      </div>
+
+      {showForm && canEdit && (
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
+          <h3 className="font-bold text-lg text-carbono mb-6">Conceder Nova Conquista</h3>
+          <form onSubmit={save} className="grid grid-cols-2 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Aluno</label>
+              <select required value={form.user_id} onChange={e=>setForm({...form,user_id:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado">
+                <option value="">Selecione o aluno...</option>
+                {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Selo / Medalha</label>
+              <input required placeholder="Ex: Líder de Turma, Oficina Concluída" value={form.badge_name} onChange={e=>setForm({...form,badge_name:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Descrição (O que o aluno fez?)</label>
+              <input required placeholder="Descreva a atividade ou conquista" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">PontosXP</label>
+              <input required type="number" placeholder="Ex: 50" value={form.points} onChange={e=>setForm({...form,points:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div className="flex items-end justify-end gap-3">
+              <button type="button" onClick={()=>setShowForm(false)} className="px-6 py-3 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-100">CANCELAR</button>
+              <button type="submit" className="bg-carbono text-marfim px-8 py-3 rounded-full text-xs font-bold hover:bg-gray-800">SALVAR CONQUISTA</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando passaporte...</div> : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map(i => (
+            <div key={i.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative">
+              {canEdit && (
+                <button onClick={()=>del(i.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
+              )}
+              <div className="w-14 h-14 bg-gradient-to-br from-yellow-100 to-yellow-300 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm">🌟</div>
+              <h4 className="font-bold text-lg text-carbono mb-1">{i.badge_name}</h4>
+              <p className="text-sm text-gray-500 mb-4 line-clamp-2" title={i.description}>{i.description}</p>
+              
+              <div className="flex justify-between items-end border-t border-gray-100 pt-4 mt-auto">
+                <div>
+                  {canEdit && <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Aluno: {i.user_name}</p>}
+                  <p className="text-[10px] font-bold text-gray-400 uppercase">{new Date(i.created_at).toLocaleDateString('pt-BR')}</p>
+                </div>
+                <div className="bg-gray-50 text-carbono px-3 py-1.5 rounded-lg text-xs font-bold shadow-inner">
+                  +{i.points} XP
+                </div>
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma conquista registrada ainda.</div>
+          )}
         </div>
       )}
     </div>

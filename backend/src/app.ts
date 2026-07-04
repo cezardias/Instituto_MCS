@@ -17,6 +17,8 @@ import accountabilityRoutes from './routes/accountability'
 import documentsRoutes from './routes/documents'
 import denunciasRoutes from './routes/denuncias'
 import videosRoutes from './routes/videos'
+import comunicadosRoutes from './routes/comunicados'
+import passaporteRoutes from './routes/passaporte'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -48,6 +50,8 @@ app.use('/api/accountability', accountabilityRoutes)
 app.use('/api/documents', documentsRoutes)
 app.use('/api/denuncias', denunciasRoutes)
 app.use('/api/videos', videosRoutes)
+app.use('/api/comunicados', comunicadosRoutes)
+app.use('/api/passaporte', passaporteRoutes)
 app.use('/graphql', graphqlHTTP({ schema, rootValue, graphiql: true }))
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 
