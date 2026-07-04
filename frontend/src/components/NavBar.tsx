@@ -27,7 +27,7 @@ export default function NavBar() {
       const res = await fetch('/api/denuncias', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenant_id: 'default', subject: form.subject, message: form.message })
+        body: JSON.stringify({ tenant_id: 'instituto-mcs', subject: form.subject, message: form.message })
       })
       if (!res.ok) throw new Error('Erro ao enviar')
       setStatus('success')
