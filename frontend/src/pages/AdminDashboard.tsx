@@ -215,8 +215,8 @@ export default function AdminDashboard() {
           {tab === 'impacto'     && <ImpactoTab />}
           {tab === 'documentos'  && <DocumentosTab />}
           {tab === 'compliance'  && <ComplianceTab />}
-          {tab === 'denuncias'   && <DenunciasTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','denuncias'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'canal'       && <DenunciasTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
