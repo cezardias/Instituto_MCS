@@ -106,6 +106,38 @@ const createDenuncias = `CREATE TABLE IF NOT EXISTS reports_denuncias (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
+const createVideos = `CREATE TABLE IF NOT EXISTS videos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  author TEXT NOT NULL,
+  youtube_url TEXT NOT NULL,
+  category TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createVideoLikes = `CREATE TABLE IF NOT EXISTS video_likes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  video_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(video_id) REFERENCES videos(id) ON DELETE CASCADE,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(video_id, user_id)
+)`
+
+const createVideoComments = `CREATE TABLE IF NOT EXISTS video_comments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  video_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  user_name TEXT NOT NULL,
+  comment TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(video_id) REFERENCES videos(id) ON DELETE CASCADE,
+  FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
@@ -115,5 +147,8 @@ db.exec(createTransactions)
 db.exec(createAccountability)
 db.exec(createDocuments)
 db.exec(createDenuncias)
+db.exec(createVideos)
+db.exec(createVideoLikes)
+db.exec(createVideoComments)
 
 export default db

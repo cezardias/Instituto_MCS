@@ -17,6 +17,8 @@ interface Transaction { id:number; tenant_id:string; type:string; category:strin
 interface AccountabilityReport { id:number; tenant_id:string; project_id:number; project_name?:string; title:string; document_url:string; status:string; created_at:string }
 interface DocumentItem { id:number; title:string; type:string; document_url:string; created_at:string }
 interface Denuncia { id:number; name:string|null; email:string|null; subject:string; message:string; status:string; created_at:string }
+interface VideoComment { id:number; user_name:string; comment:string; created_at:string }
+interface Video { id:number; title:string; description:string; author:string; youtube_url:string; category:string; likes:number; userLiked:boolean; comments:VideoComment[]; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -41,6 +43,10 @@ const SIDEBAR = [
     { id:'documentos', label:'Documentos', icon:'🗂️' },
     { id:'compliance', label:'Compliance', icon:'✅' },
     { id:'canal', label:'Canal de Denúncias', icon:'🔔' },
+  ]},
+  { group: 'EAD', items: [
+    { id:'ead', label:'Plataforma de Aulas', icon:'▶️' },
+    { id:'gestao_ead', label:'Gestão de Aulas', icon:'🎬', adminOnly: true },
   ]},
   { group: 'ADMIN', items: [
     { id:'users', label:'Usuários', icon:'👥' },
@@ -137,7 +143,7 @@ export default function AdminDashboard() {
           {SIDEBAR.map(group => (
             <div key={group.group}>
               {!collapsed && <p className="text-[9px] text-white/30 uppercase tracking-widest px-3 pb-1">{group.group}</p>}
-              {group.items.map(item => (
+              {group.items.filter(item => !item.adminOnly || user.role === 'admin').map(item => (
                 <button key={item.id} onClick={() => setTab(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all mb-0.5
                     ${tab === item.id ? 'bg-dourado/90 text-[#0f2027]' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
@@ -216,7 +222,9 @@ export default function AdminDashboard() {
           {tab === 'documentos'  && <DocumentosTab />}
           {tab === 'compliance'  && <ComplianceTab />}
           {tab === 'canal'       && <DenunciasTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'ead'         && <EadTab />}
+          {tab === 'gestao_ead'  && <GestaoEadTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -1467,6 +1475,243 @@ function DenunciasTab() {
           {items.length === 0 && (
             <div className="text-center py-20 text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">Nenhuma mensagem na caixa de entrada.</div>
           )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GESTÃO EAD (ADMIN ONLY)
+// ═══════════════════════════════════════════════════════════════════
+function GestaoEadTab() {
+  const [items, setItems] = useState<Video[]>([])
+  const [loading, setLoading] = useState(true)
+  const [form, setForm] = useState({ title:'', description:'', author:'', youtube_url:'', category:'' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/videos', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await fetch('/api/videos', { method:'POST', headers:authH(), body:JSON.stringify(form) })
+    setForm({ title:'', description:'', author:'', youtube_url:'', category:'' })
+    load()
+  }
+
+  const del = async (id:number) => {
+    if(confirm('Tem certeza?')) {
+      await fetch('/api/videos/'+id, { method:'DELETE', headers:authH() })
+      load()
+    }
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-dourado/20 text-dourado flex items-center justify-center text-xl">🎬</div>
+        <h2 className="font-serif text-2xl text-carbono">Gestão de Aulas EAD</h2>
+      </div>
+
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-8">
+        <h3 className="font-bold text-sm text-carbono mb-4">Cadastrar Novo Vídeo</h3>
+        <form onSubmit={save} className="grid grid-cols-2 gap-4">
+          <input required placeholder="Título" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="col-span-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm" />
+          <input required placeholder="Autor / Professor" value={form.author} onChange={e=>setForm({...form,author:e.target.value})} className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm" />
+          <input required placeholder="Categoria (ex: Oficina de Rima)" value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm" />
+          <input required placeholder="URL do YouTube (https://youtube.com/watch?v=...)" value={form.youtube_url} onChange={e=>setForm({...form,youtube_url:e.target.value})} className="col-span-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm" />
+          <textarea required placeholder="Descrição" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="col-span-2 bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm h-20 resize-none" />
+          <div className="col-span-2 flex justify-end">
+            <button type="submit" className="bg-dourado text-carbono px-6 py-2 rounded-full text-xs font-bold hover:bg-yellow-500">SALVAR VÍDEO</button>
+          </div>
+        </form>
+      </div>
+
+      {loading ? <div className="text-center py-10">Carregando...</div> : (
+        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-xs text-gray-500 uppercase font-bold">
+              <tr><th className="px-6 py-4">Vídeo</th><th className="px-6 py-4">Categoria</th><th className="px-6 py-4 text-right">Ações</th></tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {items.map(i => (
+                <tr key={i.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <p className="font-bold text-carbono">{i.title}</p>
+                    <p className="text-[10px] text-gray-400">{i.author}</p>
+                  </td>
+                  <td className="px-6 py-4"><span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-[10px] font-bold">{i.category}</span></td>
+                  <td className="px-6 py-4 text-right">
+                    <button onClick={()=>del(i.id)} className="text-red-500 hover:text-red-700 font-bold text-xs uppercase">Excluir</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PLATAFORMA EAD (NETFLIX STYLE)
+// ═══════════════════════════════════════════════════════════════════
+function EadTab() {
+  const [items, setItems] = useState<Video[]>([])
+  const [loading, setLoading] = useState(true)
+  const [playing, setPlaying] = useState<Video|null>(null)
+  const [commentText, setCommentText] = useState('')
+
+  const load = useCallback(async () => {
+    try { const r = await fetch('/api/videos', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const toggleLike = async (id:number) => {
+    await fetch('/api/videos/'+id+'/like', { method:'POST', headers:authH() })
+    load()
+    if (playing && playing.id === id) {
+      setPlaying(prev => prev ? {...prev, userLiked: !prev.userLiked, likes: prev.likes + (prev.userLiked ? -1 : 1)} : null)
+    }
+  }
+
+  const postComment = async (id:number) => {
+    if (!commentText.trim()) return
+    await fetch('/api/videos/'+id+'/comments', { method:'POST', headers:authH(), body:JSON.stringify({comment: commentText}) })
+    setCommentText('')
+    load()
+    const r = await fetch('/api/videos', {headers:authH()})
+    const fresh = await r.json()
+    setItems(fresh)
+    setPlaying(fresh.find((v:Video)=>v.id===id))
+  }
+
+  const getYoutubeId = (url:string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+    const match = url.match(regExp)
+    return (match && match[2].length === 11) ? match[2] : null
+  }
+
+  // Agrupar por categoria
+  const categories = Array.from(new Set(items.map(i=>i.category)))
+
+  if (loading) return <div className="text-center py-20 text-carbono">Carregando plataforma...</div>
+
+  return (
+    <div className="fixed inset-0 bg-[#0f2027] z-50 overflow-y-auto">
+      {/* Navbar Interna da EAD */}
+      <div className="sticky top-0 z-40 bg-gradient-to-b from-black/80 to-transparent pb-10 pt-6 px-8 flex justify-between items-center pointer-events-none">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-dourado flex items-center justify-center text-[#0f2027] font-bold text-xl">▶️</div>
+          <h2 className="font-serif text-2xl text-white drop-shadow-md">Instituto EAD</h2>
+        </div>
+      </div>
+
+      <div className="px-8 pb-20 -mt-10">
+        {categories.length === 0 && (
+          <div className="text-center text-white/50 pt-20">Nenhuma aula disponível no momento.</div>
+        )}
+        
+        {categories.map(cat => (
+          <div key={cat} className="mb-12">
+            <h3 className="text-white font-bold text-xl mb-4 px-2">{cat}</h3>
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x hide-scrollbar">
+              {items.filter(i=>i.category===cat).map(video => {
+                const yId = getYoutubeId(video.youtube_url)
+                const thumb = yId ? `https://img.youtube.com/vi/${yId}/maxresdefault.jpg` : '/quemsomos.png'
+                
+                return (
+                  <div key={video.id} onClick={()=>setPlaying(video)} className="snap-start shrink-0 w-72 group cursor-pointer relative rounded-xl overflow-hidden bg-gray-900 border border-white/10 transition-transform hover:scale-105 hover:z-10 hover:border-dourado/50">
+                    <img src={thumb} alt={video.title} onError={(e:any)=>{e.target.src=`https://img.youtube.com/vi/${yId}/hqdefault.jpg`}} className="w-full h-40 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 p-4 w-full">
+                      <p className="text-white font-bold text-sm truncate">{video.title}</p>
+                      <p className="text-white/60 text-[10px] truncate">{video.author}</p>
+                      <div className="flex items-center gap-3 mt-2 text-[10px] font-bold text-white/40">
+                        <span className="flex items-center gap-1"><span className={video.userLiked ? 'text-dourado' : 'text-gray-400'}>♥</span> {video.likes}</span>
+                        <span className="flex items-center gap-1"><span className="text-gray-400">💬</span> {video.comments?.length||0}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Video Modal Player */}
+      {playing && (
+        <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col md:flex-row overflow-hidden">
+          {/* Player Area */}
+          <div className="flex-1 relative flex flex-col items-center justify-center p-4 lg:p-10 overflow-y-auto hide-scrollbar">
+            <button onClick={()=>setPlaying(null)} className="absolute top-6 left-6 z-50 text-white/50 hover:text-white flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-xs font-bold transition-colors">
+              <span aria-hidden="true">&larr;</span> VOLTAR
+            </button>
+            <div className="w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 shrink-0">
+              {getYoutubeId(playing.youtube_url) ? (
+                <iframe 
+                  className="w-full h-full" 
+                  src={`https://www.youtube.com/embed/${getYoutubeId(playing.youtube_url)}?autoplay=1&rel=0&color=white`} 
+                  allow="autoplay; encrypted-media; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white/30">URL de Vídeo Inválida</div>
+              )}
+            </div>
+            
+            {/* Info and Actions */}
+            <div className="w-full max-w-5xl mt-6 flex justify-between items-start gap-6 shrink-0 pb-10">
+              <div>
+                <h2 className="text-2xl lg:text-3xl font-serif text-white mb-2">{playing.title}</h2>
+                <p className="text-white/60 text-sm mb-4">Com <strong>{playing.author}</strong></p>
+                <p className="text-white/80 text-sm max-w-3xl leading-relaxed whitespace-pre-wrap">{playing.description}</p>
+              </div>
+              <button onClick={()=>toggleLike(playing.id)} className={`shrink-0 flex flex-col items-center justify-center gap-1 w-20 h-20 rounded-2xl transition-all ${playing.userLiked ? 'bg-dourado text-[#0f2027]' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+                <span className="text-2xl leading-none">♥</span>
+                <span className="text-[10px] font-bold tracking-widest uppercase">({playing.likes})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Comments Sidebar */}
+          <div className="w-full md:w-80 lg:w-96 bg-[#152a33] border-l border-white/10 flex flex-col shrink-0 h-full">
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-white font-bold">Comentários ({playing.comments?.length||0})</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 hide-scrollbar">
+              {playing.comments?.map(c => (
+                <div key={c.id}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-6 h-6 rounded-full bg-dourado/20 text-dourado flex items-center justify-center text-[10px] font-bold">{c.user_name?.[0]||'U'}</div>
+                    <span className="text-xs font-bold text-white/80">{c.user_name}</span>
+                    <span className="text-[9px] text-white/30">{new Date(c.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-sm text-white/60 pl-8 break-words">{c.comment}</p>
+                </div>
+              ))}
+              {!playing.comments?.length && <p className="text-xs text-white/40 text-center py-10">Nenhum comentário ainda.</p>}
+            </div>
+            <div className="p-6 bg-black/20 border-t border-white/10 shrink-0">
+              <form onSubmit={e=>{e.preventDefault(); postComment(playing.id)}} className="flex flex-col gap-3">
+                <textarea 
+                  value={commentText} onChange={e=>setCommentText(e.target.value)} 
+                  placeholder="Adicione um comentário..." 
+                  className="w-full bg-black/30 border border-white/10 text-white text-sm px-4 py-3 rounded-xl outline-none focus:border-dourado resize-none h-20 placeholder:text-white/30" 
+                />
+                <button type="submit" disabled={!commentText.trim()} className="bg-dourado text-[#0f2027] font-bold text-xs py-2 rounded-full hover:bg-yellow-500 disabled:opacity-50 transition-colors">COMENTAR</button>
+              </form>
+            </div>
+          </div>
         </div>
       )}
     </div>
