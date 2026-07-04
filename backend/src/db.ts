@@ -86,6 +86,26 @@ const createAccountability = `CREATE TABLE IF NOT EXISTS accountability_reports 
   FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 )`
 
+const createDocuments = `CREATE TABLE IF NOT EXISTS documents (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  type TEXT NOT NULL, -- 'relatorio' ou 'documento'
+  document_url TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createDenuncias = `CREATE TABLE IF NOT EXISTS reports_denuncias (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT,
+  email TEXT,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pendente',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 db.exec(createProjects)
@@ -93,5 +113,7 @@ db.exec(createAlunos)
 db.exec(createNews)
 db.exec(createTransactions)
 db.exec(createAccountability)
+db.exec(createDocuments)
+db.exec(createDenuncias)
 
 export default db

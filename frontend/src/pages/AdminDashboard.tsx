@@ -15,6 +15,8 @@ interface Aluno { id:number; name:string; email:string; phone:string; area:strin
 interface User { id:number; name:string; email:string; role:string; created_at:string }
 interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; created_at:string }
 interface AccountabilityReport { id:number; tenant_id:string; project_id:number; project_name?:string; title:string; document_url:string; status:string; created_at:string }
+interface DocumentItem { id:number; title:string; type:string; document_url:string; created_at:string }
+interface Denuncia { id:number; name:string|null; email:string|null; subject:string; message:string; status:string; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -208,7 +210,13 @@ export default function AdminDashboard() {
           {tab === 'financeiro'  && <FinanceiroTab />}
           {tab === 'despesas'    && <DespesasTab />}
           {tab === 'prestacao'   && <AccountabilityTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'indicadores' && <IndicadoresTab />}
+          {tab === 'relatorios'  && <RelatoriosTab />}
+          {tab === 'impacto'     && <ImpactoTab />}
+          {tab === 'documentos'  && <DocumentosTab />}
+          {tab === 'compliance'  && <ComplianceTab />}
+          {tab === 'denuncias'   && <DenunciasTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','denuncias'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -1143,6 +1151,322 @@ function AccountabilityTab() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INDICADORES TAB
+// ═══════════════════════════════════════════════════════════════════
+function IndicadoresTab() {
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Indicadores de Desempenho</h2>
+        <p className="text-sm text-gray-400">Acompanhamento das principais métricas</p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Engajamento Mensal</p>
+          <p className="text-3xl font-bold text-dourado">+ 45%</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Taxa de Conclusão (Projetos)</p>
+          <p className="text-3xl font-bold text-dourado">92%</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Novos Voluntários</p>
+          <p className="text-3xl font-bold text-dourado">128</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Satisfação</p>
+          <p className="text-3xl font-bold text-dourado">9.8/10</p>
+        </div>
+      </div>
+      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center h-64 text-gray-400 flex-col">
+        <div className="text-4xl mb-4">📊</div>
+        <p className="font-semibold">Módulo de Gráficos Avançados</p>
+        <p className="text-sm">Em breve (Integração com BI)</p>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RELATÓRIOS TAB
+// ═══════════════════════════════════════════════════════════════════
+function RelatoriosTab() {
+  const [items, setItems] = useState<DocumentItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ title:'', document_url:'' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/documents?type=relatorio', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await fetch('/api/documents', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'relatorio'}) })
+      setShowForm(false); setForm({ title:'', document_url:'' }); load()
+    } catch (err) { console.error(err) }
+  }
+  const del = async (id: number) => { if(!confirm('Excluir relatório?')) return; await fetch(`/api/documents/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Relatórios Gerenciais</h2><p className="text-sm text-gray-400">Atividades, Operações e Auditorias</p></div>
+        <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800">+ Novo Relatório</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
+            <h3 className="font-serif text-xl mb-6">Adicionar Relatório</h3>
+            <form onSubmit={save} className="space-y-4">
+              <div><label className="label-dash">Título</label><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="input-field" placeholder="Ex: Relatório de Atividades 2024" /></div>
+              <div><label className="label-dash">Link do Arquivo (PDF)</label><input required type="url" value={form.document_url} onChange={e=>setForm({...form,document_url:e.target.value})} className="input-field" placeholder="https://" /></div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
+                <button type="submit" className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100"><th className="th-cell">Título</th><th className="th-cell">Data</th><th className="th-cell">Arquivo</th><th className="th-cell" /></tr></thead>
+            <tbody>
+              {items.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <td className="td-cell font-semibold text-carbono">{t.title}</td>
+                  <td className="td-cell text-gray-500">{new Date(t.created_at).toLocaleDateString('pt-BR')}</td>
+                  <td className="td-cell"><a href={t.document_url} target="_blank" rel="noreferrer" className="text-dourado font-bold hover:underline">Download</a></td>
+                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                </tr>
+              ))}
+              {items.length === 0 && <tr><td colSpan={4} className="text-center py-12 text-gray-400">Nenhum relatório cadastrado.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// IMPACTO SOCIAL TAB
+// ═══════════════════════════════════════════════════════════════════
+function ImpactoTab() {
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Impacto Social</h2>
+        <p className="text-sm text-gray-400">O retorno das nossas ações para a sociedade</p>
+      </div>
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 text-7xl opacity-20">🌍</div>
+          <p className="text-sm font-bold uppercase tracking-widest mb-1 opacity-80">Comunidades Atendidas</p>
+          <p className="text-5xl font-serif mt-2">12</p>
+          <p className="text-sm mt-4 opacity-90">+3 adicionadas neste semestre</p>
+        </div>
+        <div className="bg-gradient-to-br from-dourado to-yellow-500 rounded-3xl p-8 text-carbono shadow-lg relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 text-7xl opacity-20">❤️</div>
+          <p className="text-sm font-bold uppercase tracking-widest mb-1 opacity-80">Vidas Transformadas</p>
+          <p className="text-5xl font-serif mt-2">5.420</p>
+          <p className="text-sm mt-4 opacity-90">Impacto direto e indireto</p>
+        </div>
+        <div className="bg-gradient-to-br from-carbono to-gray-800 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+          <div className="absolute -right-4 -top-4 text-7xl opacity-20">🌱</div>
+          <p className="text-sm font-bold uppercase tracking-widest mb-1 opacity-80">ODS Alcançados</p>
+          <p className="text-5xl font-serif mt-2">8</p>
+          <p className="text-sm mt-4 opacity-90">Alinhamento com a ONU</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DOCUMENTOS TAB
+// ═══════════════════════════════════════════════════════════════════
+function DocumentosTab() {
+  const [items, setItems] = useState<DocumentItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ title:'', document_url:'' })
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/documents?type=documento', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await fetch('/api/documents', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'documento'}) })
+      setShowForm(false); setForm({ title:'', document_url:'' }); load()
+    } catch (err) { console.error(err) }
+  }
+  const del = async (id: number) => { if(!confirm('Excluir documento?')) return; await fetch(`/api/documents/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Documentos Institucionais</h2><p className="text-sm text-gray-400">Estatuto, CNPJ, Certidões</p></div>
+        <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800">+ Novo Documento</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
+            <h3 className="font-serif text-xl mb-6">Adicionar Documento</h3>
+            <form onSubmit={save} className="space-y-4">
+              <div><label className="label-dash">Título</label><input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="input-field" placeholder="Ex: Estatuto Social Atualizado" /></div>
+              <div><label className="label-dash">Link do Arquivo (PDF)</label><input required type="url" value={form.document_url} onChange={e=>setForm({...form,document_url:e.target.value})} className="input-field" placeholder="https://" /></div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
+                <button type="submit" className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100"><th className="th-cell">Título do Documento</th><th className="th-cell">Data de Inserção</th><th className="th-cell">Acesso</th><th className="th-cell" /></tr></thead>
+            <tbody>
+              {items.map(t => (
+                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <td className="td-cell font-semibold text-carbono flex items-center gap-3"><span className="text-xl">📄</span> {t.title}</td>
+                  <td className="td-cell text-gray-500">{new Date(t.created_at).toLocaleDateString('pt-BR')}</td>
+                  <td className="td-cell"><a href={t.document_url} target="_blank" rel="noreferrer" className="text-dourado font-bold hover:underline">Baixar Arquivo</a></td>
+                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                </tr>
+              ))}
+              {items.length === 0 && <tr><td colSpan={4} className="text-center py-12 text-gray-400">Nenhum documento cadastrado.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// COMPLIANCE TAB
+// ═══════════════════════════════════════════════════════════════════
+function ComplianceTab() {
+  const policies = [
+    { name: 'Código de Ética e Conduta', status: 'Em Vigor', date: 'Atualizado em Mai/2024' },
+    { name: 'Adequação LGPD', status: 'Em Vigor', date: 'Atualizado em Mar/2025' },
+    { name: 'Política Anticorrupção', status: 'Em Vigor', date: 'Atualizado em Jan/2024' },
+    { name: 'Manual de Compras', status: 'Em Revisão', date: 'Vence em Ago/2025' },
+  ]
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Compliance & Integridade</h2>
+        <p className="text-sm text-gray-400">Gerenciamento de políticas e adequações</p>
+      </div>
+      
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-6 flex items-center justify-between">
+        <div>
+          <h3 className="font-bold text-lg text-carbono">Índice de Conformidade</h3>
+          <p className="text-gray-500 text-sm mt-1">Sua organização atende aos padrões de governança.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-4xl font-serif text-green-600">92%</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Conforme</p>
+          </div>
+        </div>
+      </div>
+
+      <h4 className="font-bold text-carbono mb-4">Políticas e Diretrizes</h4>
+      <div className="grid md:grid-cols-2 gap-4">
+        {policies.map(p => (
+          <div key={p.name} className="bg-white p-5 rounded-2xl border border-gray-100 flex items-center justify-between">
+            <div>
+              <p className="font-bold text-carbono">{p.name}</p>
+              <p className="text-xs text-gray-400 mt-1">{p.date}</p>
+            </div>
+            <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${p.status==='Em Vigor'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}`}>
+              {p.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DENUNCIAS TAB
+// ═══════════════════════════════════════════════════════════════════
+function DenunciasTab() {
+  const [items, setItems] = useState<Denuncia[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/denuncias', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const changeStatus = async (id: number, status: string) => {
+    await fetch(`/api/denuncias/${id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ status }) })
+    load()
+  }
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Canal de Denúncias</h2>
+        <p className="text-sm text-gray-400">Mensagens sigilosas recebidas pelo portal</p>
+      </div>
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="space-y-4">
+          {items.map(t => (
+            <div key={t.id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h4 className="font-bold text-carbono">{t.subject}</h4>
+                  <p className="text-xs text-gray-400 mt-1">Enviado por: {t.name || 'Anônimo'} • {t.email || 'Sem e-mail'} • {new Date(t.created_at).toLocaleString('pt-BR')}</p>
+                </div>
+                <div className="flex gap-2">
+                  {t.status === 'pendente' && <button onClick={() => changeStatus(t.id, 'em_analise')} className="text-[10px] font-bold px-3 py-1.5 rounded-full border border-yellow-200 text-yellow-700 hover:bg-yellow-50 transition-colors">Em Análise</button>}
+                  {t.status !== 'resolvido' && <button onClick={() => changeStatus(t.id, 'resolvido')} className="text-[10px] font-bold px-3 py-1.5 rounded-full border border-green-200 text-green-700 hover:bg-green-50 transition-colors">Concluir</button>}
+                  <span className={`text-[10px] font-bold px-3 py-1.5 rounded-full ${t.status==='pendente'?'bg-red-100 text-red-700':t.status==='resolvido'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}`}>
+                    {t.status.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">
+                {t.message}
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="text-center py-20 text-gray-400 bg-white rounded-2xl border border-gray-100 shadow-sm">Nenhuma mensagem na caixa de entrada.</div>
+          )}
         </div>
       )}
     </div>
