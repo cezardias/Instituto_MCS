@@ -8,6 +8,7 @@ import TransparencyPage from './pages/TransparencyPage'
 import CompliancePage from './pages/CompliancePage'
 import AdminDashboard from './pages/AdminDashboard'
 import LoginPage from './pages/LoginPage'
+import NoticiasPage from './pages/NoticiasPage'
 
 // Layout wrapper com NavBar + Footer (site público)
 function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,7 @@ function App() {
       <Route path="/banco-de-projetos" element={<PublicLayout><ProjectsPage /></PublicLayout>} />
       <Route path="/transparencia" element={<PublicLayout><TransparencyPage /></PublicLayout>} />
       <Route path="/compliance" element={<PublicLayout><CompliancePage /></PublicLayout>} />
+      <Route path="/noticias" element={<PublicLayout><NoticiasPage /></PublicLayout>} />
     </Routes>
   )
 }
