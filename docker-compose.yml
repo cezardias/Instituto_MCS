@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - '5183:5173'
+    environment:
+      - VITE_API_URL=http://localhost:4010
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    ports:
+      - '4010:4000'
+    environment:
+      - PORT=4000
+      - JWT_SECRET=supersecretchangeme
+      - DATABASE_FILE=/app/data/mcs.db
+      - AI_SERVICE_URL=http://ai:5010
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+    depends_on:
+      - ai
+
+  ai:
+    build: ./ai
+    ports:
+      - '5010:5000'
+    environment:
+      - MODEL_PATH=/models/gpt4all.bin
+    volumes:
+      - ./ai/models:/models

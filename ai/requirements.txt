@@ -1,0 +1,5 @@
+﻿fastapi==0.111.1
+uvicorn==0.23.2
+pydantic==2.9.0
+# Instalar pacote GPT4All localmente usando pip ou solicitando build custom
+# Exemplo: pip install gpt4all
