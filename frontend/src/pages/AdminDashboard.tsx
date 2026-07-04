@@ -814,12 +814,20 @@ function NewsTab() {
 // USERS TAB
 // ═══════════════════════════════════════════════════════════════════
 function UsersTab() {
-  const [users, setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ name:'', email:'', password:'', role:'user' })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', role: 'aluno',
+    personal_email: '', cpf: '', rg: '', phone: '', address: ''
+  })
+  const [parentForm, setParentForm] = useState({
+    name: '', email: '', personal_email: '', cpf: '', rg: '', phone: ''
+  })
+  const [photo, setPhoto] = useState<File | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -831,77 +839,161 @@ function UsersTab() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
     try {
-      const r = await fetch('/api/users',{method:'POST',headers:authH(),body:JSON.stringify(form)})
-      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({name:'',email:'',password:'',role:'user'}); load() }
+      let photo_url = ''
+      if (photo) {
+        const fd = new FormData()
+        fd.append('image', photo)
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (uploadRes.ok) {
+          const ud = await uploadRes.json()
+          photo_url = ud.url
+        }
+      }
+
+      const payload = {
+        ...form,
+        photo_url,
+        parent: form.role === 'aluno' ? parentForm : null
+      }
+
+      const r = await fetch('/api/users',{method:'POST',headers:authH(),body:JSON.stringify(payload)})
+      if (!r.ok) { 
+        const d = await r.json(); setError(d.error||'Erro ao criar usuário') 
+      } else { 
+        setShowForm(false)
+        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:''})
+        setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:''})
+        setPhoto(null)
+        load() 
+      }
     } catch { setError('Erro de conexão') }
     setSaving(false)
   }
+  
   const del = async (id: number) => { if(!confirm('Excluir usuário?')) return; await fetch(`/api/users/${id}`,{method:'DELETE',headers:authH()}); load() }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <div><h2 className="font-serif text-2xl text-carbono">Usuários</h2><p className="text-sm text-gray-400">{users.length} cadastrados</p></div>
-        <button onClick={() => { setShowForm(true); setError('') }} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Usuário</button>
+        <div><h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2><p className="text-sm text-gray-400">{users.length} usuários cadastrados no ecossistema</p></div>
+        <button onClick={() => { setShowForm(true); setError('') }} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
-            <div className="flex justify-between mb-6">
-              <h3 className="font-serif text-xl text-carbono">Novo Usuário</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
-            </div>
-            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
-            <form onSubmit={save} className="space-y-4">
-              <div><label className="label-dash">Nome *</label><input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="input-field" /></div>
-              <div><label className="label-dash">E-mail *</label><input required type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className="input-field" /></div>
-              <div><label className="label-dash">Senha *</label><input required type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} className="input-field" /></div>
-              <div><label className="label-dash">Perfil</label>
-                <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="input-field">
-                  <option value="admin">Administrador (Controle Total)</option>
-                  <option value="aluno">Aluno (Passaporte, Aulas)</option>
-                  <option value="responsavel">Responsável (Eventos, Autorizações)</option>
-                  <option value="oficineiro">Oficineiro (Gestão de turmas)</option>
-                  <option value="coordenacao">Coordenação (Indicadores, Projetos)</option>
-                  <option value="diretoria">Diretoria (Financeiro, Compliance)</option>
-                </select>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto pt-10 pb-20">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl p-8 relative">
+            <div className="flex justify-between mb-6 border-b border-gray-100 pb-4">
+              <div>
+                <h3 className="font-serif text-2xl text-carbono">Novo Cadastro</h3>
+                <p className="text-xs text-gray-400">Preencha os dados (o login será gerado automaticamente se não informado)</p>
               </div>
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold disabled:opacity-60">{saving ? 'Criando...' : 'Criar Usuário'}</button>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl hover:text-carbono">×</button>
+            </div>
+            {error && <div className="mb-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
+            
+            <form onSubmit={save} className="space-y-6">
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="label-dash block mb-1">Perfil (Qual a função no Instituto?) *</label>
+                  <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="input-field w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50">
+                    <option value="aluno">Aluno (Cria cadastro do Pai/Mãe junto)</option>
+                    <option value="oficineiro">Oficineiro (Gestão de turmas)</option>
+                    <option value="coordenacao">Coordenação (Indicadores, Projetos)</option>
+                    <option value="diretoria">Diretoria (Financeiro, Compliance)</option>
+                    <option value="admin">Administrador (Controle Total)</option>
+                  </select>
+                </div>
+
+                <div className="col-span-2"><h4 className="font-bold text-gray-600 text-sm border-b pb-2 mt-2">Dados Pessoais do Titular</h4></div>
+
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Nome Completo *</label><input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">E-mail Pessoal</label><input type="email" value={form.personal_email} onChange={e=>setForm({...form,personal_email:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">CPF</label><input value={form.cpf} onChange={e=>setForm({...form,cpf:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">RG</label><input value={form.rg} onChange={e=>setForm({...form,rg:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Telefone / WhatsApp</label><input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Endereço Completo</label><input value={form.address} onChange={e=>setForm({...form,address:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+
+                <div className="col-span-2">
+                  <label className="label-dash text-xs text-gray-500 font-bold block mb-1">Foto de Perfil</label>
+                  <input type="file" accept="image/*" onChange={e=>setPhoto(e.target.files?.[0] || null)} className="w-full text-sm" />
+                </div>
+              </div>
+
+              {form.role === 'aluno' && (
+                <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
+                  <h4 className="font-bold text-blue-800 text-sm border-b border-blue-200 pb-2">Dados do Responsável (Pai / Mãe)</h4>
+                  <p className="text-xs text-blue-600 mb-4">Ao preencher, o sistema criará o usuário do responsável automaticamente.</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Nome do Responsável *</label><input required value={parentForm.name} onChange={e=>setParentForm({...parentForm,name:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">E-mail Pessoal (Responsável)</label><input type="email" value={parentForm.personal_email} onChange={e=>setParentForm({...parentForm,personal_email:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                    
+                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">CPF (Responsável)</label><input value={parentForm.cpf} onChange={e=>setParentForm({...parentForm,cpf:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Telefone (Responsável)</label><input value={parentForm.phone} onChange={e=>setParentForm({...parentForm,phone:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3.5 rounded-full text-sm font-bold hover:bg-gray-50">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : 'FINALIZAR CADASTRO'}</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Nome</th><th className="th-cell">E-mail</th><th className="th-cell">Perfil</th><th className="th-cell">Criado em</th><th className="th-cell" />
-            </tr></thead>
-            <tbody>
-              {users.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum usuário</td></tr>}
-              {users.map(u => (
-                <tr key={u.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                  <td className="td-cell">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-carbono text-marfim flex items-center justify-center font-bold text-sm shrink-0">{u.name[0]}</div>
-                      <span className="font-semibold text-carbono">{u.name}</span>
-                    </div>
-                  </td>
-                  <td className="td-cell text-gray-500">{u.email}</td>
-                  <td className="td-cell">
-                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full ${u.role==='admin'?'bg-carbono text-marfim':'bg-gray-100 text-gray-600'}`}>{u.role==='admin'?'Admin':'Editor'}</span>
-                  </td>
-                  <td className="td-cell text-gray-400 text-xs">{new Date(u.created_at).toLocaleDateString('pt-BR')}</td>
-                  <td className="td-cell"><button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando usuários...</div> : (
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50 text-gray-500 font-bold text-xs uppercase tracking-wider">
+                <tr>
+                  <th className="px-6 py-4">Usuário</th>
+                  <th className="px-6 py-4">E-mail (Login)</th>
+                  <th className="px-6 py-4">Perfil</th>
+                  <th className="px-6 py-4 text-center">CPF</th>
+                  <th className="px-6 py-4 text-right">Ações</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {users.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum usuário cadastrado.</td></tr>}
+                {users.map(u => (
+                  <tr key={u.id} className="hover:bg-gray-50/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        {u.photo_url ? (
+                          <img src={u.photo_url} alt={u.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">{u.name[0]?.toUpperCase()}</div>
+                        )}
+                        <div>
+                          <p className="font-bold text-carbono">{u.name}</p>
+                          <p className="text-[11px] text-gray-400">{new Date(u.created_at).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">{u.email}</td>
+                    <td className="px-6 py-4">
+                      <span className={`text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider ${
+                        u.role==='admin' ? 'bg-red-50 text-red-600' :
+                        u.role==='aluno' ? 'bg-blue-50 text-blue-600' :
+                        u.role==='responsavel' ? 'bg-purple-50 text-purple-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>{u.role}</span>
+                    </td>
+                    <td className="px-6 py-4 text-center text-gray-400">{u.cpf || '-'}</td>
+                    <td className="px-6 py-4 text-right">
+                      <button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import db from '../db'
 import { hashPassword, comparePassword, generateToken } from '../auth'
+import { authMiddleware } from '../middleware/auth'
 
 const router = Router()
 
@@ -53,9 +54,27 @@ router.post('/login', async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      tenant_id: user.tenant_id
+      tenant_id: user.tenant_id,
+      must_change_password: !!user.must_change_password
     }
   })
+})
+
+router.post('/change-password', authMiddleware, async (req, res) => {
+  const { new_password } = req.body
+  const userId = (req as any).user.id
+
+  if (!new_password || new_password.length < 6) {
+    return res.status(400).json({ error: 'A nova senha deve ter pelo menos 6 caracteres' })
+  }
+
+  try {
+    const password_hash = await hashPassword(new_password)
+    db.prepare('UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?').run(password_hash, userId)
+    res.json({ success: true })
+  } catch (err: any) {
+    res.status(500).json({ error: 'Erro ao alterar senha' })
+  }
 })
 
 export default router

@@ -15,6 +15,14 @@ const createUsers = `CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'user',
+  personal_email TEXT,
+  cpf TEXT,
+  rg TEXT,
+  phone TEXT,
+  address TEXT,
+  photo_url TEXT,
+  must_change_password BOOLEAN DEFAULT 0,
+  parent_id INTEGER,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
@@ -161,6 +169,16 @@ const createPassaporteItems = `CREATE TABLE IF NOT EXISTS passaporte_items (
 
 db.exec(createTenants)
 db.exec(createUsers)
+
+// Graceful upgrade for existing users table
+try { db.exec("ALTER TABLE users ADD COLUMN personal_email TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN cpf TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN rg TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN phone TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN address TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN photo_url TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN parent_id INTEGER") } catch(e) {}
 db.exec(createProjects)
 db.exec(createAlunos)
 db.exec(createNews)

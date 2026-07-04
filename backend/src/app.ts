@@ -15,13 +15,14 @@ import statsRoutes from './routes/stats'
 import financeRoutes from './routes/finance'
 import accountabilityRoutes from './routes/accountability'
 import documentsRoutes from './routes/documents'
-import denunciasRoutes from './routes/denuncias'
 import videosRoutes from './routes/videos'
 import comunicadosRoutes from './routes/comunicados'
 import passaporteRoutes from './routes/passaporte'
+import uploadsRoutes from './routes/uploads'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
+import path from 'path'
 import db from './db'
 import { hashPassword } from './auth'
 
@@ -29,7 +30,11 @@ dotenv.config()
 
 const app = express()
 app.use(cors())
-app.use(json())
+app.use(express.json())
+
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')))
+
 app.use(tenantMiddleware)
 
 // Serve uploaded files statically
@@ -52,6 +57,7 @@ app.use('/api/denuncias', denunciasRoutes)
 app.use('/api/videos', videosRoutes)
 app.use('/api/comunicados', comunicadosRoutes)
 app.use('/api/passaporte', passaporteRoutes)
+app.use('/api/upload', uploadsRoutes)
 app.use('/graphql', graphqlHTTP({ schema, rootValue, graphiql: true }))
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom'
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [mustChangePassword, setMustChangePassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -26,10 +28,41 @@ export default function LoginPage() {
       } else {
         localStorage.setItem('mcs_token', data.token)
         localStorage.setItem('mcs_user', JSON.stringify(data.user || { email }))
-        navigate('/dashboard')
+        
+        if (data.user?.must_change_password) {
+          setMustChangePassword(true)
+        } else {
+          navigate('/dashboard')
+        }
       }
     } catch {
       setError('Erro de conexão com o servidor. Tente novamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const token = localStorage.getItem('mcs_token')
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ new_password: newPassword })
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || 'Erro ao alterar senha')
+      } else {
+        navigate('/dashboard')
+      }
+    } catch {
+      setError('Erro de conexão com o servidor.')
     } finally {
       setLoading(false)
     }
@@ -56,53 +89,85 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-                E-mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-5 py-4 text-sm text-carbono focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-all"
-                placeholder="seu@email.com.br"
-              />
-            </div>
+          {mustChangePassword ? (
+            <form onSubmit={handleChangePassword} className="space-y-6">
+              <div className="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl px-5 py-4 text-sm">
+                <strong>Atenção LGPD:</strong> Este é o seu primeiro acesso. Por motivos de segurança, você deve criar uma nova senha agora.
+              </div>
+              <div>
+                <label htmlFor="new_password" className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+                  Nova Senha
+                </label>
+                <input
+                  id="new_password"
+                  type="password"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-5 py-4 text-sm text-carbono focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-all"
+                  placeholder="Mínimo 6 caracteres"
+                />
+              </div>
 
-            <div>
-              <label htmlFor="password" className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
-                Senha
-              </label>
-              <input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-5 py-4 text-sm text-carbono focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-all"
-                placeholder="••••••••"
-              />
-            </div>
+              <button
+                type="submit"
+                disabled={loading || newPassword.length < 6}
+                className="w-full bg-carbono text-marfim py-4 rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              >
+                {loading ? 'Atualizando...' : 'ATUALIZAR SENHA E ENTRAR'}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+                  E-mail Institucional
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-5 py-4 text-sm text-carbono focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-all"
+                  placeholder="seu.nome@institutomcs.org.br"
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-carbono text-marfim py-4 rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  Entrando...
-                </>
-              ) : 'ENTRAR NO PAINEL'}
-            </button>
-          </form>
+              <div>
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
+                  Senha
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-5 py-4 text-sm text-carbono focus:outline-none focus:ring-2 focus:ring-dourado/40 focus:border-dourado transition-all"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-carbono text-marfim py-4 rounded-full font-bold hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Acessando...
+                  </>
+                ) : (
+                  'ACESSAR PAINEL'
+                )}
+              </button>
+            </form>
+          )}
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">

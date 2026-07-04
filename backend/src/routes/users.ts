@@ -24,27 +24,62 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Create user (admin only)
 router.post('/', authMiddleware, async (req, res) => {
-  const { name, email, password, role } = req.body
+  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if ((req as any).user.role !== 'admin') {
     return res.status(403).json({ error: 'Forbidden' })
   }
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Missing required fields' })
+  if (!name) return res.status(400).json({ error: 'Name is required' })
+
+  // Auto-generate system email if not provided
+  const generateEmail = (n: string) => {
+    const clean = n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    const parts = clean.split(' ').filter(p => p.length > 0)
+    if (parts.length > 1) return `${parts[0]}.${parts[parts.length-1]}@institutomcs.org.br`
+    return `${parts[0]}@institutomcs.org.br`
   }
 
+  const systemEmail = email || generateEmail(name)
+  const systemPassword = password || '123456'
+
   try {
-    const hashedPassword = await hashPassword(password)
-    const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)')
-    const info = stmt.run(tenant_id, name, email, hashedPassword, role || 'user')
-    res.status(201).json({ id: info.lastInsertRowid })
+    const hashedPassword = await hashPassword(systemPassword)
+    let finalId = 0
+    
+    // Begin transaction
+    db.exec('BEGIN TRANSACTION')
+
+    try {
+      let parent_id = null
+      
+      // If role is aluno and parent info exists, create parent first
+      if (role === 'aluno' && parent && parent.name) {
+        const parentSystemEmail = parent.email || generateEmail(parent.name)
+        const parentHashedPassword = await hashPassword('123456')
+        
+        const parentStmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        const pInfo = parentStmt.run(tenant_id, parent.name, parentSystemEmail, parentHashedPassword, 'responsavel', parent.personal_email || null, parent.cpf || null, parent.rg || null, parent.phone || null, 1)
+        parent_id = pInfo.lastInsertRowid
+      }
+
+      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id)
+      
+      finalId = Number(info.lastInsertRowid)
+      db.exec('COMMIT')
+    } catch (e: any) {
+      db.exec('ROLLBACK')
+      throw e
+    }
+    
+    res.status(201).json({ id: finalId, email: systemEmail })
   } catch (error: any) {
     if (error.message.includes('UNIQUE constraint failed')) {
-      return res.status(400).json({ error: 'Email already exists' })
+      return res.status(400).json({ error: 'Email já existe (talvez o nome gerado colidiu)' })
     }
-    res.status(500).json({ error: 'Failed to create user' })
+    res.status(500).json({ error: 'Failed to create user: ' + error.message })
   }
 })
 
