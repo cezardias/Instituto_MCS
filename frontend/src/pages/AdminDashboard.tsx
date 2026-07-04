@@ -23,34 +23,40 @@ interface Video { id:number; title:string; description:string; author:string; yo
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
   { group: 'GESTÃO', items: [
-    { id:'overview', label:'Dashboard Executivo', icon:'⊞' },
-    { id:'projetos', label:'Projetos', icon:'🚀' },
-    { id:'alunos', label:'Alunos', icon:'🎓' },
-    { id:'news', label:'Notícias', icon:'📰' },
-    { id:'parceiros', label:'Parceiros', icon:'🤝' },
+    { id:'overview', label:'Dashboard Executivo', icon:'⊞', roles:['admin', 'diretoria'] },
+    { id:'projetos', label:'Projetos', icon:'🚀', roles:['admin', 'coordenacao', 'oficineiro'] },
+    { id:'alunos', label:'Alunos', icon:'🎓', roles:['admin', 'coordenacao', 'oficineiro', 'responsavel'] },
+    { id:'frequencia', label:'Frequência', icon:'📅', roles:['admin', 'responsavel'] },
+    { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
+    { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
+    { id:'parceiros', label:'Parceiros', icon:'🤝', roles:['admin'] },
   ]},
   { group: 'FINANCEIRO', items: [
-    { id:'financeiro', label:'Recursos Recebidos', icon:'💰' },
-    { id:'despesas', label:'Despesas', icon:'📉' },
-    { id:'prestacao', label:'Prestação de Contas', icon:'📋' },
+    { id:'financeiro', label:'Recursos Recebidos', icon:'💰', roles:['admin', 'diretoria'] },
+    { id:'despesas', label:'Despesas', icon:'📉', roles:['admin', 'diretoria'] },
+    { id:'prestacao', label:'Prestação de Contas', icon:'📋', roles:['admin', 'diretoria'] },
   ]},
   { group: 'MONITORAMENTO', items: [
-    { id:'indicadores', label:'Indicadores', icon:'📊' },
-    { id:'relatorios', label:'Relatórios', icon:'📄' },
-    { id:'impacto', label:'Impacto Social', icon:'🌱' },
+    { id:'indicadores', label:'Indicadores', icon:'📊', roles:['admin', 'coordenacao'] },
+    { id:'relatorios', label:'Relatórios', icon:'📄', roles:['admin', 'oficineiro'] },
+    { id:'impacto', label:'Impacto Social', icon:'🌱', roles:['admin', 'coordenacao', 'diretoria'] },
   ]},
   { group: 'GOVERNANÇA', items: [
-    { id:'documentos', label:'Documentos', icon:'🗂️' },
-    { id:'compliance', label:'Compliance', icon:'✅' },
-    { id:'canal', label:'Canal de Denúncias', icon:'🔔' },
+    { id:'documentos', label:'Documentos Institucionais', icon:'🗂️', roles:['admin', 'diretoria'] },
+    { id:'compliance', label:'Compliance', icon:'✅', roles:['admin', 'diretoria'] },
+    { id:'canal', label:'Canal de Denúncias', icon:'🔔', roles:['admin', 'diretoria'] },
   ]},
-  { group: 'EAD', items: [
-    { id:'ead', label:'Plataforma de Aulas', icon:'▶️' },
-    { id:'gestao_ead', label:'Gestão de Aulas', icon:'🎬', adminOnly: true },
+  { group: 'EAD & ALUNOS', items: [
+    { id:'ead', label:'Plataforma de Aulas', icon:'▶️', roles:['admin', 'aluno', 'oficineiro', 'coordenacao', 'diretoria', 'responsavel'] },
+    { id:'passaporte', label:'Passaporte Cultural', icon:'🏅', roles:['admin', 'aluno'] },
+    { id:'gestao_ead', label:'Gestão de Aulas', icon:'🎬', roles:['admin'] },
+  ]},
+  { group: 'PORTAL DOS PAIS', items: [
+    { id:'autorizacoes', label:'Autorizações Digitais', icon:'✍️', roles:['admin', 'responsavel'] },
   ]},
   { group: 'ADMIN', items: [
-    { id:'users', label:'Usuários', icon:'👥' },
-    { id:'config', label:'Configurações', icon:'⚙️' },
+    { id:'users', label:'Usuários e Perfis', icon:'👥', roles:['admin'] },
+    { id:'config', label:'Configurações', icon:'⚙️', roles:['admin'] },
   ]},
 ]
 
@@ -112,9 +118,13 @@ function Sparkline({ points, color='#C9A84C' }: { points:number[], color?:string
 // ═══════════════════════════════════════════════════════════════════
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const [tab, setTab] = useState('overview')
-  const [collapsed, setCollapsed] = useState(false)
   const user = getUser()
+  
+  // Find the first tab the user has access to
+  const defaultTab = SIDEBAR.flatMap(g=>g.items).find(i => !i.roles || i.roles.includes(user?.role || 'user'))?.id || 'overview'
+  const [tab, setTab] = useState(defaultTab)
+  
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => { if (!getToken()) navigate('/login') }, [navigate])
 
@@ -143,7 +153,7 @@ export default function AdminDashboard() {
           {SIDEBAR.map(group => (
             <div key={group.group}>
               {!collapsed && <p className="text-[9px] text-white/30 uppercase tracking-widest px-3 pb-1">{group.group}</p>}
-              {group.items.filter(item => !item.adminOnly || user.role === 'admin').map(item => (
+              {group.items.filter(item => !item.roles || item.roles.includes(user.role)).map(item => (
                 <button key={item.id} onClick={() => setTab(item.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all mb-0.5
                     ${tab === item.id ? 'bg-dourado/90 text-[#0f2027]' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
@@ -845,7 +855,12 @@ function UsersTab() {
               <div><label className="label-dash">Senha *</label><input required type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} className="input-field" /></div>
               <div><label className="label-dash">Perfil</label>
                 <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="input-field">
-                  <option value="user">Editor</option><option value="admin">Administrador</option>
+                  <option value="admin">Administrador (Controle Total)</option>
+                  <option value="aluno">Aluno (Passaporte, Aulas)</option>
+                  <option value="responsavel">Responsável (Eventos, Autorizações)</option>
+                  <option value="oficineiro">Oficineiro (Gestão de turmas)</option>
+                  <option value="coordenacao">Coordenação (Indicadores, Projetos)</option>
+                  <option value="diretoria">Diretoria (Financeiro, Compliance)</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
