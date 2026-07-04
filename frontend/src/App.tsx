@@ -16,7 +16,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/quem-somos" element={<QuemSomos />} />
-          <Route path="/projetos" element={<ProjectsPage />} />
+          <Route path="/projetos" element={<ProjectsPage />} /> {/* Placeholder until details page is created */}
+          <Route path="/banco-de-projetos" element={<ProjectsPage />} />
           <Route path="/transparencia" element={<TransparencyPage />} />
           <Route path="/compliance" element={<CompliancePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />

@@ -7,6 +7,7 @@ const links = [
   { label: 'PROJETOS', to: '/projetos' },
   { label: 'TRANSPARÊNCIA', to: '/transparencia' },
   { label: 'COMPLIANCE', to: '/compliance' },
+  { label: 'BANCO DE PROJETOS', to: '/banco-de-projetos' },
   { label: 'NOTÍCIAS', to: '/noticias' },
   { label: 'PARCEIROS', to: '/parceiros' },
   { label: 'CONTATO', to: '/contato' }
