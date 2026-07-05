@@ -84,7 +84,7 @@ router.get('/:id', authMiddleware, (req, res) => {
 router.post('/', authMiddleware, (req, res) => {
   const tenant_id = (req as any).user.tenant_id
   const user = (req as any).user
-  const { title, description, date, time, type, target_type, target_ids, max_score, questions, is_gamified } = req.body
+  const { title, description, date, time, type, target_type, target_ids, max_score, questions, is_gamified, journey_order } = req.body
 
   if (!['admin', 'diretoria', 'oficineiro'].includes(user.role)) {
     return res.status(403).json({ error: 'Acesso negado' })
@@ -93,10 +93,10 @@ router.post('/', authMiddleware, (req, res) => {
   try {
     db.exec('BEGIN TRANSACTION')
     const stmt = db.prepare(`
-      INSERT INTO assessments (tenant_id, title, description, date, time, type, target_type, target_ids, max_score, is_gamified, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO assessments (tenant_id, title, description, date, time, type, target_type, target_ids, max_score, is_gamified, journey_order, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
-    const info = stmt.run(tenant_id, title, description, date || null, time || null, type, target_type, JSON.stringify(target_ids || []), max_score || null, is_gamified ? 1 : 0, user.id)
+    const info = stmt.run(tenant_id, title, description, date || null, time || null, type, target_type, JSON.stringify(target_ids || []), max_score || null, is_gamified ? 1 : 0, journey_order || 0, user.id)
     const assessmentId = info.lastInsertRowid
 
     if (type === 'questionario' && Array.isArray(questions)) {
@@ -167,13 +167,39 @@ router.post('/:id/deliver', authMiddleware, (req, res) => {
   }
 
   try {
+    db.exec('BEGIN TRANSACTION')
     const stmt = db.prepare(`
       INSERT INTO assessment_deliveries (assessment_id, student_id, answers_json, signed, delivered_at, status)
       VALUES (?, ?, ?, 1, CURRENT_TIMESTAMP, 'delivered')
     `)
     stmt.run(id, user.id, JSON.stringify(answers || {}))
+    
+    const assessment = db.prepare('SELECT is_gamified FROM assessments WHERE id = ?').get(id) as any
+    if (assessment && assessment.is_gamified) {
+      const student = db.prepare('SELECT streak, last_activity, coins FROM users WHERE id = ?').get(user.id) as any
+      let newStreak = student?.streak || 0
+      const today = new Date().toISOString().split('T')[0]
+      const lastAct = student?.last_activity ? student.last_activity.split('T')[0] : null
+      
+      if (lastAct !== today) {
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+        if (lastAct === yesterday) {
+          newStreak++
+        } else {
+          newStreak = 1
+        }
+      }
+      
+      const newCoins = (student?.coins || 0) + 50
+      
+      db.prepare('UPDATE users SET streak = ?, coins = ?, last_activity = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(newStreak, newCoins, user.id)
+    }
+    
+    db.exec('COMMIT')
     res.json({ success: true })
   } catch (error: any) {
+    db.exec('ROLLBACK')
     res.status(500).json({ error: error.message })
   }
 })

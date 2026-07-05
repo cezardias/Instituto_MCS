@@ -55,7 +55,10 @@ router.post('/login', async (req, res) => {
       email: user.email,
       role: user.role,
       tenant_id: user.tenant_id,
-      must_change_password: !!user.must_change_password
+      must_change_password: !!user.must_change_password,
+      streak: user.streak || 0,
+      coins: user.coins || 0,
+      league: user.league || 'Bronze'
     }
   })
 })

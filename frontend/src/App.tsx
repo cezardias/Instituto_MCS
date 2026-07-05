@@ -7,6 +7,7 @@ import ProjectsPage from './pages/ProjectsPage'
 import TransparencyPage from './pages/TransparencyPage'
 import CompliancePage from './pages/CompliancePage'
 import AdminDashboard from './pages/AdminDashboard'
+import StudentApp from './pages/StudentApp'
 import LoginPage from './pages/LoginPage'
 import NoticiasPage from './pages/NoticiasPage'
 import ParceirosPage from './pages/ParceirosPage'
@@ -29,6 +30,7 @@ function App() {
       {/* Rotas do painel administrativo (sem NavBar/Footer) */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<AdminDashboard />} />
+      <Route path="/jornada" element={<StudentApp />} />
 
       {/* Rotas públicas (com NavBar + Footer) */}
       <Route path="/" element={<PublicLayout><HomePage /></PublicLayout>} />

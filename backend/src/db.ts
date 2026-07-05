@@ -23,6 +23,10 @@ const createUsers = `CREATE TABLE IF NOT EXISTS users (
   photo_url TEXT,
   must_change_password BOOLEAN DEFAULT 0,
   parent_id INTEGER,
+  streak INTEGER DEFAULT 0,
+  coins INTEGER DEFAULT 0,
+  league TEXT DEFAULT 'Bronze',
+  last_activity TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
@@ -246,6 +250,7 @@ const createAssessments = `CREATE TABLE IF NOT EXISTS assessments (
   target_ids TEXT,
   max_score REAL,
   is_gamified INTEGER DEFAULT 0,
+  journey_order INTEGER DEFAULT 0,
   created_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
@@ -314,8 +319,17 @@ db.exec(createAssessmentDeliveries)
 // Ensure is_gamified column exists if migrating
 try {
   db.exec(`ALTER TABLE assessments ADD COLUMN is_gamified INTEGER DEFAULT 0`)
-} catch (err) {
-  // Ignore error if column already exists
-}
+} catch (err) {}
+
+try {
+  db.exec(`ALTER TABLE assessments ADD COLUMN journey_order INTEGER DEFAULT 0`)
+} catch (err) {}
+
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN streak INTEGER DEFAULT 0`)
+  db.exec(`ALTER TABLE users ADD COLUMN coins INTEGER DEFAULT 0`)
+  db.exec(`ALTER TABLE users ADD COLUMN league TEXT DEFAULT 'Bronze'`)
+  db.exec(`ALTER TABLE users ADD COLUMN last_activity TEXT`)
+} catch (err) {}
 
 export default db

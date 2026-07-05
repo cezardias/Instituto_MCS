@@ -32,7 +32,7 @@ export default function LoginPage() {
         if (data.user?.must_change_password) {
           setMustChangePassword(true)
         } else {
-          navigate('/dashboard')
+          navigate(data.user?.role === 'aluno' ? '/jornada' : '/dashboard')
         }
       }
     } catch {
@@ -49,6 +49,7 @@ export default function LoginPage() {
 
     try {
       const token = localStorage.getItem('mcs_token')
+      const user = JSON.parse(localStorage.getItem('mcs_user') || '{}')
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -59,7 +60,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.error || 'Erro ao alterar senha')
       } else {
-        navigate('/dashboard')
+        navigate(user.role === 'aluno' ? '/jornada' : '/dashboard')
       }
     } catch {
       setError('Erro de conexão com o servidor.')
