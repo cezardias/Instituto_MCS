@@ -85,7 +85,7 @@ export default function StudentApp() {
       </main>
 
       {/* Bottom Nav Bar */}
-      <nav className="fixed bottom-0 w-full bg-white border-t border-gray-100 flex items-center justify-around h-16 z-50 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <nav className="fixed bottom-0 w-full bg-white border-t border-gray-100 flex items-center justify-around h-[72px] sm:h-20 z-50 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <NavItem icon="🗺️" label="Jornada" active={activeTab === 'jornada'} onClick={() => setActiveTab('jornada')} />
         <NavItem icon="🏅" label="Passaporte" active={activeTab === 'passaporte'} onClick={() => setActiveTab('passaporte')} />
         <NavItem icon="📅" label="Eventos" active={activeTab === 'eventos'} onClick={() => setActiveTab('eventos')} />
@@ -139,31 +139,30 @@ function JornadaTab() {
           const isCurrent = mission.status === 'current'
           const isLocked = mission.status === 'locked'
           
-          // Zigue-zague (esquerda, centro, direita, centro)
-          const offset = [0, 40, 0, -40][idx % 4]
-          
           return (
-            <div key={mission.id} className="relative flex flex-col items-center w-full" style={{ paddingLeft: `${offset > 0 ? offset : 0}px`, paddingRight: `${offset < 0 ? -offset : 0}px` }}>
-              {/* Linha conectora (menos no último) */}
-              {idx < missions.length - 1 && (
-                <div className={`absolute top-16 w-2 h-16 -z-10 ${isCompleted ? 'bg-dourado' : 'bg-gray-300'}`} />
-              )}
-              
-              <button 
-                onClick={() => (isCurrent || isCompleted) && setActiveLesson(mission)}
-                disabled={isLocked}
-                className={`w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-xl transition-all
-                  ${isCompleted ? 'bg-dourado border-yellow-300 text-carbono' : 
-                    isCurrent ? 'bg-orange-500 border-orange-300 text-white scale-110 animate-pulse' : 
-                    'bg-gray-300 border-gray-200 text-gray-500 grayscale opacity-60'}
-                `}
-              >
-                <span className="text-3xl">{mission.type === 'questionario' ? '❓' : mission.type === 'atividade_pratica' ? '🎤' : '🌟'}</span>
-              </button>
-              
-              <div className="mt-3 text-center w-40">
-                <p className={`font-bold text-sm leading-tight ${isCurrent ? 'text-carbono' : 'text-gray-500'}`}>{mission.title}</p>
+            <div key={mission.id} className="flex flex-col items-center w-full">
+              <div className="flex flex-col items-center">
+                <button 
+                  onClick={() => (isCurrent || isCompleted) && setActiveLesson(mission)}
+                  disabled={isLocked}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-xl transition-all
+                    ${isCompleted ? 'bg-dourado border-yellow-300 text-carbono' : 
+                      isCurrent ? 'bg-orange-500 border-orange-300 text-white scale-110 animate-pulse' : 
+                      'bg-gray-300 border-gray-200 text-gray-500 grayscale opacity-60'}
+                  `}
+                >
+                  <span className="text-3xl">{mission.type === 'questionario' ? '❓' : mission.type === 'atividade_pratica' ? '🎤' : '🌟'}</span>
+                </button>
+                
+                <div className="mt-3 text-center w-48">
+                  <p className={`font-bold text-sm leading-tight ${isCurrent ? 'text-carbono' : 'text-gray-500'}`}>{mission.title}</p>
+                </div>
               </div>
+              
+              {/* Linha conectora simples e centralizada (menos no último) */}
+              {idx < missions.length - 1 && (
+                <div className={`w-2 h-12 my-2 rounded-full ${isCompleted ? 'bg-dourado' : 'bg-gray-300'}`} />
+              )}
             </div>
           )
         })}
