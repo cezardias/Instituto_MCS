@@ -201,23 +201,23 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
   const progress = ((step) / questions.length) * 100
 
   return (
-    <div className="flex flex-col h-full bg-white absolute inset-0 z-50">
+    <div className="fixed inset-0 z-[60] bg-white flex flex-col h-[100dvh]">
       {/* Top Bar Progress */}
-      <div className="flex items-center gap-4 p-4 border-b border-gray-100">
-        <button onClick={onBack} className="text-gray-400 text-2xl px-2">×</button>
+      <div className="flex items-center gap-4 p-4 border-b border-gray-100 shrink-0">
+        <button onClick={onBack} className="text-gray-400 text-3xl px-2 leading-none pb-1 hover:text-gray-600 transition-colors">×</button>
         <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden">
           <div className="bg-green-500 h-full transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col justify-center">
-        <h3 className="font-bold text-2xl text-carbono mb-8">{currentQ.question_text}</h3>
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col max-w-3xl mx-auto w-full mt-8 md:mt-16">
+        <h3 className="font-bold text-2xl md:text-3xl text-carbono mb-10 leading-snug">{currentQ.question_text}</h3>
         
         {currentQ.type === 'multiple_choice' && currentQ.options?.map((opt: string, i: number) => (
           <button 
             key={i}
             onClick={() => setAnswers({...answers, [currentQ.id]: opt})}
-            className={`w-full text-left p-4 mb-3 rounded-2xl border-2 transition-all font-bold ${
+            className={`w-full text-left p-4 md:p-5 mb-3 rounded-2xl border-2 transition-all font-bold text-lg ${
               answers[currentQ.id] === opt ? 'bg-blue-50 border-blue-400 text-blue-700' : 'bg-white border-gray-200 text-carbono hover:bg-gray-50'
             }`}
           >
@@ -226,9 +226,7 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
         ))}
 
         {currentQ.type === 'dissertacao' && (
-          <textarea
-            rows={5}
-            className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-blue-400 resize-none font-medium"
+          <textarea rows={6} className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-dourado resize-none font-medium text-lg text-carbono shadow-sm"
             placeholder="Sua resposta..."
             value={answers[currentQ.id] || ''}
             onChange={(e) => setAnswers({...answers, [currentQ.id]: e.target.value})}
@@ -237,7 +235,7 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
       </div>
 
       {/* Bottom Bar Action */}
-      <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-white">
+      <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-white shrink-0 max-w-3xl mx-auto w-full">
         <button 
           onClick={handleNext}
           disabled={!answers[currentQ.id] || submitting}
