@@ -95,6 +95,71 @@ async function seedAdmin() {
   }
 }
 
-seedAdmin().catch(console.error)
+async function seedMCMission() {
+  const TENANT_ID = 'instituto-mcs'
+  const ADMIN_EMAIL = 'admin@institutomcs.org.br'
+  
+  const admin = db.prepare('SELECT id FROM users WHERE email = ?').get(ADMIN_EMAIL) as any
+  if (!admin) return
+
+  const missionTitle = 'O que é ser um MC na vida?'
+  const existingMission = db.prepare('SELECT id FROM assessments WHERE title = ?').get(missionTitle)
+  
+  if (!existingMission) {
+    console.log('🌱 Criando Missão Gamificada: O que é ser um MC na vida?')
+    
+    // Create the assessment
+    const stmt = db.prepare(`
+      INSERT INTO assessments (tenant_id, title, description, type, target_type, target_ids, max_score, is_gamified, journey_order, created_by)
+      VALUES (?, ?, ?, 'questionario', 'all', '[]', 100, 1, 1, ?)
+    `)
+    
+    const info = stmt.run(
+      TENANT_ID, 
+      missionTitle, 
+      'Nesta missão, vamos explorar a essência de ser um Mestre de Cerimônias (MC) não apenas nos palcos, mas na atitude, no estilo e na posição social dentro da comunidade.',
+      admin.id
+    )
+    
+    const assessmentId = info.lastInsertRowid
+    
+    // Create Questions
+    const qStmt = db.prepare(`INSERT INTO assessment_questions (assessment_id, type, question_text, options_json) VALUES (?, ?, ?, ?)`)
+    
+    // Q1
+    qStmt.run(assessmentId, 'multiple_choice', "O que significa a sigla 'MC' originalmente na cultura Hip-Hop e como isso se traduz para a vida cotidiana?", JSON.stringify([
+      "A) 'Mestre de Cerimônias' - Significa ser o protagonista da própria história e ter a responsabilidade de passar uma mensagem e liderar.",
+      "B) 'Músico Cantor' - Significa apenas fazer rimas em batalhas de rap de forma técnica.",
+      "C) 'Menino Criativo' - É apenas uma gíria moderna para jovens artistas.",
+      "D) 'Mundo da Cultura' - Representa apenas o gosto musical e roupas de marca."
+    ]))
+    
+    // Q2
+    qStmt.run(assessmentId, 'multiple_choice', "O estilo de roupas e a estética visual de um MC e da cultura urbana refletem principalmente:", JSON.stringify([
+      "A) Apenas a vontade de usar as marcas de luxo mais caras e ostentar dinheiro.",
+      "B) Uma obrigação de usar sempre calças muito largas e correntes de ouro.",
+      "C) Identidade cultural, resistência, pertencimento e o orgulho das próprias raízes.",
+      "D) O desejo de se vestir igual a todo mundo para não ser notado."
+    ]))
+    
+    // Q3
+    qStmt.run(assessmentId, 'dissertation', "Na sua opinião, qual é a responsabilidade e a posição social de um verdadeiro MC dentro da sua comunidade (quebrada/bairro)?", '[]')
+    
+    // Q4
+    qStmt.run(assessmentId, 'multiple_choice', "Ser um 'MC' na vida real, mesmo sem cantar ou rimar, significa ter a atitude de:", JSON.stringify([
+      "A) Ter coragem para falar suas verdades, lutar pelo que é certo e inspirar os outros ao redor.",
+      "B) Focar inteiramente no sucesso financeiro e ignorar os problemas coletivos.",
+      "C) Competir com todos ao seu redor para provar quem é o melhor.",
+      "D) Falar usando rimas e gírias o tempo todo em qualquer conversa."
+    ]))
+    
+    // Q5
+    qStmt.run(assessmentId, 'dissertation', "Descreva o SEU próprio estilo (roupas, jeito de falar, atitude) e o que você acha que esse seu estilo comunica para o mundo sobre quem você é.", '[]')
+    
+    console.log('✅ Missão Gamificada criada com sucesso!')
+  }
+}
+
+seedAdmin().then(() => seedMCMission()).catch(console.error)
 
 export default app
