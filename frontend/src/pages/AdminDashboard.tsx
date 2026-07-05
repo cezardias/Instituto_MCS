@@ -129,6 +129,7 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState(defaultTab)
   
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => { if (!getToken()) navigate('/login') }, [navigate])
 
@@ -140,7 +141,8 @@ export default function AdminDashboard() {
     <div className="flex h-screen bg-[#f5f5f0] font-sans overflow-hidden">
 
       {/* ── Sidebar ────────────────────────────────────────────── */}
-      <aside className={`${collapsed ? 'w-16' : 'w-60'} bg-[#0f2027] text-white flex flex-col transition-all duration-300 shrink-0 overflow-hidden`}>
+      {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
+      <aside className={`fixed inset-y-0 left-0 z-50 transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 ${collapsed ? 'md:w-16' : 'md:w-60'} w-64 bg-[#0f2027] text-white flex flex-col transition-all duration-300 shrink-0 overflow-hidden`}>
         {/* Logo */}
         <div className={`flex items-center gap-3 px-4 py-4 border-b border-white/10 ${collapsed ? 'justify-center' : ''}`}>
           <img src="/logo.png" alt="MCS" className="h-9 w-9 object-contain rounded-lg bg-white p-1 shrink-0" />
@@ -158,7 +160,7 @@ export default function AdminDashboard() {
             <div key={group.group}>
               {!collapsed && <p className="text-[9px] text-white/30 uppercase tracking-widest px-3 pb-1">{group.group}</p>}
               {group.items.filter(item => !item.roles || item.roles.includes(user.role)).map(item => (
-                <button key={item.id} onClick={() => setTab(item.id)}
+                <button key={item.id} onClick={() => { setTab(item.id); setMobileMenuOpen(false) }}
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all mb-0.5
                     ${tab === item.id ? 'bg-dourado/90 text-[#0f2027]' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
                   title={collapsed ? item.label : undefined}
@@ -199,24 +201,29 @@ export default function AdminDashboard() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Topbar */}
         <header className="bg-white border-b border-gray-100 px-6 h-14 flex items-center justify-between shrink-0">
-          <div>
-            <h1 className="font-bold text-sm text-carbono">{currentLabel}</h1>
-            <p className="text-[10px] text-gray-400">Painel administrativo do Instituto MCS</p>
+          <div className="flex items-center gap-3">
+            <button className="md:hidden text-xl text-gray-600 focus:outline-none" onClick={() => setMobileMenuOpen(true)}>
+              ☰
+            </button>
+            <div>
+              <h1 className="font-bold text-sm text-carbono">{currentLabel}</h1>
+              <p className="text-[10px] text-gray-400 hidden sm:block">Painel administrativo do Instituto MCS</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">🗓 Jan–Mai / 2025</span>
+            <span className="text-xs text-gray-400 hidden md:inline-block">🗓 Jan–Mai / 2025</span>
             <button className="relative p-2 hover:bg-gray-100 rounded-lg">
               <span>🔔</span>
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
             <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
               <div className="w-6 h-6 rounded-full bg-dourado flex items-center justify-center text-carbono text-xs font-bold">{user.name?.[0]||'A'}</div>
-              <div>
+              <div className="hidden sm:block">
                 <p className="text-[11px] font-bold text-carbono">{user.name||'Admin'}</p>
                 <p className="text-[9px] text-gray-400">{user.role==='admin'?'Diretor Executivo':'Editor'}</p>
               </div>
             </div>
-            <a href="/" target="_blank" className="text-[10px] font-bold border border-dourado text-dourado px-3 py-1.5 rounded-full hover:bg-dourado hover:text-carbono transition-colors">VER SITE →</a>
+            <a href="/" target="_blank" className="hidden sm:inline-block text-[10px] font-bold border border-dourado text-dourado px-3 py-1.5 rounded-full hover:bg-dourado hover:text-carbono transition-colors">VER SITE →</a>
           </div>
         </header>
 
