@@ -2592,12 +2592,15 @@ function AvaliacoesTab() {
           )}
           
           {activeAssessment.type === 'pratica' && (
-            <div className="text-center py-10">
-              <p className="text-gray-500 mb-4">Esta é uma atividade prática. Confirme abaixo quando tiver concluído.</p>
-              <label className="flex items-center justify-center gap-3 cursor-pointer">
-                <input type="checkbox" checked={answers['pratica']===true} onChange={e=>setAnswers({...answers, pratica: e.target.checked})} className="w-6 h-6 rounded text-dourado focus:ring-dourado" />
-                <span className="font-bold text-carbono">Eu realizei esta atividade prática.</span>
-              </label>
+            <div className="py-6">
+              <p className="text-gray-500 mb-4 font-bold text-center">Esta é uma atividade prática. Descreva abaixo o que foi realizado:</p>
+              <textarea rows={4} value={answers['pratica_desc']||''} onChange={e=>setAnswers({...answers, pratica_desc: e.target.value})} className="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-sm outline-none focus:border-dourado resize-none mb-6" placeholder="Descreva sua experiência ou o que foi feito na atividade..."></textarea>
+              <div className="text-center">
+                <label className="flex items-center justify-center gap-3 cursor-pointer">
+                  <input type="checkbox" checked={answers['pratica']===true} onChange={e=>setAnswers({...answers, pratica: e.target.checked})} className="w-6 h-6 rounded text-dourado focus:ring-dourado" />
+                  <span className="font-bold text-carbono">Eu realizei esta atividade prática.</span>
+                </label>
+              </div>
             </div>
           )}
 
@@ -2664,8 +2667,16 @@ function AvaliacoesTab() {
                   <h3 className="font-bold text-lg text-carbono mb-4">Respostas de {activeDelivery.student_name}</h3>
                   
                   {activeAssessment.type === 'pratica' && (
-                    <div className="p-4 bg-green-50 text-green-700 font-bold rounded-xl border border-green-200">
-                      ✅ O aluno assinou a conclusão desta atividade prática.
+                    <div className="space-y-4">
+                      <div className="p-4 bg-green-50 text-green-700 font-bold rounded-xl border border-green-200">
+                        ✅ O aluno assinou a conclusão desta atividade prática.
+                      </div>
+                      {JSON.parse(activeDelivery.answers_json || '{}').pratica_desc && (
+                        <div className="p-6 bg-gray-50 rounded-xl border border-gray-200 text-sm whitespace-pre-wrap">
+                          <p className="font-bold text-carbono text-xs mb-2 uppercase">Relato do Aluno:</p>
+                          {JSON.parse(activeDelivery.answers_json || '{}').pratica_desc}
+                        </div>
+                      )}
                     </div>
                   )}
 
