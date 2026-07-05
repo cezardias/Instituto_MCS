@@ -324,7 +324,7 @@ function OverviewTab() {
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Resumo Financeiro */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1">
             <h3 className="font-bold text-sm text-carbono">Resumo Financeiro</h3>
             <span className="text-[10px] text-gray-400">ⓘ</span>
           </div>
@@ -340,7 +340,7 @@ function OverviewTab() {
 
         {/* Distribuição Recursos */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <h3 className="font-bold text-sm text-carbono">Distribuição dos Recursos</h3>
           </div>
           <div className="flex items-center gap-6">
@@ -410,7 +410,7 @@ function OverviewTab() {
 
         {/* Alertas */}
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
             <h3 className="font-bold text-sm text-carbono">Alertas e Pendências</h3>
             <span className="text-[10px] text-dourado font-bold cursor-pointer hover:underline">VER TODOS</span>
           </div>
@@ -482,7 +482,7 @@ function ProjetosTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <h2 className="font-serif text-2xl text-carbono">Projetos</h2>
         <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Projeto</button>
       </div>
@@ -490,7 +490,7 @@ function ProjetosTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Projeto' : 'Novo Projeto'}</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -548,7 +548,7 @@ function ProjetosTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
               <th className="th-cell">Título</th><th className="th-cell">Área</th><th className="th-cell">Status</th>
@@ -622,12 +622,12 @@ function AlunosTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-2xl text-carbono">Alunos</h2>
           <p className="text-sm text-gray-400">{items.length} alunos cadastrados</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar aluno..." className="border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-dourado w-48" />
           {canEdit && <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Aluno</button>}
         </div>
@@ -636,7 +636,7 @@ function AlunosTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-lg p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Aluno' : 'Novo Aluno'}</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -684,7 +684,7 @@ function AlunosTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
               <th className="th-cell">Nome</th><th className="th-cell">E-mail</th><th className="th-cell">Área</th>
@@ -767,7 +767,7 @@ function NewsTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Notícias</h2><p className="text-sm text-gray-400">{news.length} publicadas</p></div>
         <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Nova Notícia</button>
       </div>
@@ -775,7 +775,7 @@ function NewsTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Notícia' : 'Nova Notícia'}</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -891,7 +891,7 @@ function UsersTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2><p className="text-sm text-gray-400">{users.length} usuários cadastrados no ecossistema</p></div>
         <button onClick={() => { setShowForm(true); setError('') }} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
       </div>
@@ -1047,7 +1047,7 @@ function FinanceiroTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Recursos Recebidos</h2><p className="text-sm text-gray-400">Entradas financeiras (Receitas)</p></div>
         <button onClick={() => setShowForm(true)} className="bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-700 flex items-center gap-2">+ Nova Receita</button>
       </div>
@@ -1055,7 +1055,7 @@ function FinanceiroTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">Registrar Receita</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -1077,7 +1077,7 @@ function FinanceiroTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
               <th className="th-cell">Data</th><th className="th-cell">Descrição</th><th className="th-cell">Categoria</th><th className="th-cell text-right">Valor</th><th className="th-cell" />
@@ -1131,7 +1131,7 @@ function DespesasTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Despesas</h2><p className="text-sm text-gray-400">Saídas financeiras (Custos e Pagamentos)</p></div>
         <button onClick={() => setShowForm(true)} className="bg-red-500 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-red-600 flex items-center gap-2">+ Nova Despesa</button>
       </div>
@@ -1139,7 +1139,7 @@ function DespesasTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">Registrar Despesa</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -1161,7 +1161,7 @@ function DespesasTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
               <th className="th-cell">Data</th><th className="th-cell">Descrição</th><th className="th-cell">Categoria</th><th className="th-cell text-right">Valor</th><th className="th-cell" />
@@ -1222,7 +1222,7 @@ function AccountabilityTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Prestação de Contas</h2><p className="text-sm text-gray-400">Relatórios vinculados a Projetos</p></div>
         <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Relatório</button>
       </div>
@@ -1230,7 +1230,7 @@ function AccountabilityTab() {
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md p-8">
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
               <h3 className="font-serif text-xl text-carbono">Vincular Relatório</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
@@ -1263,7 +1263,7 @@ function AccountabilityTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
               <th className="th-cell">Projeto</th><th className="th-cell">Relatório</th><th className="th-cell">Status</th><th className="th-cell">Documento</th><th className="th-cell" />
@@ -1357,7 +1357,7 @@ function RelatoriosTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Relatórios Gerenciais</h2><p className="text-sm text-gray-400">Atividades, Operações e Auditorias</p></div>
         <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800">+ Novo Relatório</button>
       </div>
@@ -1379,7 +1379,7 @@ function RelatoriosTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100"><th className="th-cell">Título</th><th className="th-cell">Data</th><th className="th-cell">Arquivo</th><th className="th-cell" /></tr></thead>
             <tbody>
@@ -1461,7 +1461,7 @@ function DocumentosTab() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Documentos Institucionais</h2><p className="text-sm text-gray-400">Estatuto, CNPJ, Certidões</p></div>
         <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800">+ Novo Documento</button>
       </div>
@@ -1483,7 +1483,7 @@ function DocumentosTab() {
       )}
 
       {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100"><th className="th-cell">Título do Documento</th><th className="th-cell">Data de Inserção</th><th className="th-cell">Acesso</th><th className="th-cell" /></tr></thead>
             <tbody>
@@ -1661,7 +1661,7 @@ function GestaoEadTab() {
       </div>
 
       {loading ? <div className="text-center py-10">Carregando...</div> : (
-        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+        <div className="bg-white rounded-3xl border border-gray-100 overflow-x-auto shadow-sm">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase font-bold">
               <tr><th className="px-6 py-4">Vídeo</th><th className="px-6 py-4">Categoria</th><th className="px-6 py-4 text-right">Ações</th></tr>
@@ -1884,7 +1884,7 @@ function ComunicadosTab() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-xl bg-dourado/20 text-dourado flex items-center justify-center text-2xl">📢</div>
           <div>
@@ -1999,7 +1999,7 @@ function PassaporteTab() {
       {/* HEADER BANNER */}
       <div className="bg-gradient-to-r from-carbono to-gray-800 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-dourado/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-        <div className="relative z-10 flex items-start justify-between">
+        <div className="relative z-10 flex flex-col md:flex-row items-start justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="text-3xl">🏅</span>
@@ -2093,8 +2093,8 @@ function PassaporteTab() {
           )}
 
           {view === 'ranking' && (
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-              <table className="w-full text-left">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left">
                 <thead className="bg-gray-50 border-b border-gray-100">
                   <tr>
                     <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Posição</th>
@@ -2223,7 +2223,7 @@ function AutorizacoesTab() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="font-serif text-3xl text-carbono">Autorizações Digitais</h2>
           <p className="text-sm text-gray-500">Gestão de saídas, eventos e autorizações parentais.</p>
@@ -2647,7 +2647,7 @@ function AvaliacoesTab() {
                   ))}
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3 w-full md:w-auto">
                   <button type="button" onClick={()=>addQuestion('multiple_choice')} className="text-xs font-bold bg-white border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50">+ Múltipla Escolha</button>
                   <button type="button" onClick={()=>addQuestion('dissertation')} className="text-xs font-bold bg-white border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50">+ Dissertativa</button>
                 </div>
@@ -2825,7 +2825,7 @@ function AvaliacoesTab() {
   // --- Main List View ---
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="font-serif text-3xl text-carbono">Avaliações e Atividades</h2>
           <p className="text-sm text-gray-500">Questionários, Redações e Exercícios práticos.</p>
@@ -3166,7 +3166,7 @@ function TurmasTab() {
             <p className="text-[10px] uppercase font-bold text-gray-400">Presença</p>
           </div>
         </div>
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
               <tr><th className="px-6 py-4">Aula</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Detalhes</th></tr>
@@ -3283,7 +3283,7 @@ function TurmasTab() {
           </button>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
               <tr><th className="px-6 py-4">Aluno</th><th className="px-6 py-4">Frequência</th><th className="px-6 py-4">Justificativa (Se houver)</th></tr>
@@ -3329,7 +3329,7 @@ function TurmasTab() {
   // View: Main Class List
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="font-serif text-3xl text-carbono">Gestão de Turmas e Frequência</h2>
           <p className="text-sm text-gray-500">Turmas, Oficineiros e Diário de Classe.</p>
