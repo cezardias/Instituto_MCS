@@ -2406,9 +2406,14 @@ function TurmasTab() {
     fd.append('image', file)
     try {
       const r = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: fd })
+      if (!r.ok) {
+        const text = await r.text()
+        alert('Falha no upload: ' + text)
+        return
+      }
       const d = await r.json()
       if (d.url) handleAttChange(student_id, 'justification_file_url', d.url)
-    } catch { alert('Erro no upload') }
+    } catch (e: any) { alert('Erro na conexão do upload: ' + e.message) }
   }
 
   const saveAttendance = async () => {
