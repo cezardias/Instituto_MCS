@@ -167,6 +167,27 @@ const createPassaporteItems = `CREATE TABLE IF NOT EXISTS passaporte_items (
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 )`
 
+const createAuthorizations = `CREATE TABLE IF NOT EXISTS authorizations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  event_date TEXT,
+  event_time TEXT,
+  location TEXT,
+  created_by INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createAuthorizationSignatures = `CREATE TABLE IF NOT EXISTS authorization_signatures (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  authorization_id INTEGER NOT NULL,
+  parent_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
+  signed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(authorization_id, parent_id, student_id)
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 
@@ -191,5 +212,7 @@ db.exec(createVideoLikes)
 db.exec(createVideoComments)
 db.exec(createComunicados)
 db.exec(createPassaporteItems)
+db.exec(createAuthorizations)
+db.exec(createAuthorizationSignatures)
 
 export default db

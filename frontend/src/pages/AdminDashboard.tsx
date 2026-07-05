@@ -54,7 +54,7 @@ const SIDEBAR = [
     { id:'gestao_ead', label:'Gestão de Aulas', icon:'🎬', roles:['admin'] },
   ]},
   { group: 'PORTAL DOS PAIS', items: [
-    { id:'autorizacoes', label:'Autorizações Digitais', icon:'✍️', roles:['admin', 'responsavel'] },
+    { id:'autorizacoes', label:'Autorizações Digitais', icon:'✍️', roles:['admin', 'diretoria', 'responsavel'] },
   ]},
   { group: 'ADMIN', items: [
     { id:'users', label:'Usuários e Perfis', icon:'👥', roles:['admin'] },
@@ -238,7 +238,8 @@ export default function AdminDashboard() {
           {tab === 'gestao_ead'  && <GestaoEadTab />}
           {tab === 'comunicados' && <ComunicadosTab />}
           {tab === 'passaporte'  && <PassaporteTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'autorizacoes' && <AutorizacoesTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -2051,6 +2052,193 @@ function PassaporteTab() {
           ))}
           {items.length === 0 && (
             <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma conquista registrada ainda.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTORIZACOES DIGITAIS TAB
+// ═══════════════════════════════════════════════════════════════════
+function AutorizacoesTab() {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [showSignatures, setShowSignatures] = useState<any>(null)
+  const [signatures, setSignatures] = useState<any[]>([])
+  const blank = { title:'', description:'', event_date:'', event_time:'', location:'' }
+  const [form, setForm] = useState(blank)
+  const [saving, setSaving] = useState(false)
+  const user = getUser()
+  const canEdit = ['admin', 'diretoria'].includes(user.role)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/authorizations', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true)
+    try {
+      await fetch('/api/authorizations', {method:'POST', headers:authH(), body:JSON.stringify(form)})
+      setShowForm(false); setForm(blank); load()
+    } catch {}
+    setSaving(false)
+  }
+
+  const del = async (id: number) => {
+    if(!confirm('Excluir esta autorização?')) return
+    await fetch(`/api/authorizations/${id}`, {method:'DELETE', headers:authH()})
+    load()
+  }
+
+  const sign = async (id: number) => {
+    if(!confirm('Deseja assinar esta autorização para seus alunos?')) return
+    try {
+      const r = await fetch(`/api/authorizations/${id}/sign`, {method:'POST', headers:authH()})
+      if (!r.ok) {
+        const d = await r.json()
+        alert(d.error || 'Erro ao assinar')
+      }
+      load()
+    } catch { alert('Erro de conexão') }
+  }
+
+  const loadSignatures = async (auth: any) => {
+    setShowSignatures(auth)
+    setSignatures([])
+    try {
+      const r = await fetch(`/api/authorizations/${auth.id}/signatures`, {headers:authH()})
+      setSignatures(await r.json())
+    } catch {}
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="font-serif text-3xl text-carbono">Autorizações Digitais</h2>
+          <p className="text-sm text-gray-500">Gestão de saídas, eventos e autorizações parentais.</p>
+        </div>
+        {canEdit && (
+          <button onClick={() => setShowForm(true)} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Nova Autorização</button>
+        )}
+      </div>
+
+      {showForm && canEdit && (
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
+          <h3 className="font-bold text-lg text-carbono mb-6">Criar Solicitação de Autorização</h3>
+          <form onSubmit={save} className="grid grid-cols-2 gap-5">
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Título / Motivo *</label>
+              <input required placeholder="Ex: Visita ao Museu Nacional" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Data *</label>
+              <input required type="date" value={form.event_date} onChange={e=>setForm({...form,event_date:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Horário</label>
+              <input type="time" value={form.event_time} onChange={e=>setForm({...form,event_time:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Local / Endereço</label>
+              <input placeholder="Ex: Setor Cultural Sul..." value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+            </div>
+            <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Descrição e Detalhes</label>
+              <textarea rows={3} placeholder="Instruções, o que levar, etc..." value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado resize-none" />
+            </div>
+            <div className="flex items-end justify-end gap-3 col-span-2">
+              <button type="button" onClick={()=>setShowForm(false)} className="px-6 py-3 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-100">Cancelar</button>
+              <button type="submit" disabled={saving} className="bg-carbono text-marfim px-8 py-3 rounded-full text-xs font-bold hover:bg-gray-800 disabled:opacity-50">Enviar Solicitação</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {showSignatures && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] w-full max-w-2xl p-8 max-h-[80vh] flex flex-col">
+            <div className="flex justify-between mb-6 shrink-0">
+              <h3 className="font-serif text-2xl text-carbono">Assinaturas: {showSignatures.title}</h3>
+              <button onClick={() => setShowSignatures(null)} className="text-gray-400 text-2xl hover:text-carbono">×</button>
+            </div>
+            <div className="overflow-y-auto flex-1 pr-2">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3 rounded-l-lg">Responsável</th>
+                    <th className="px-4 py-3">Aluno</th>
+                    <th className="px-4 py-3 rounded-r-lg">Data/Hora</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {signatures.length === 0 && <tr><td colSpan={3} className="text-center py-8 text-gray-400">Nenhuma assinatura ainda.</td></tr>}
+                  {signatures.map(s => (
+                    <tr key={s.id}>
+                      <td className="px-4 py-3 font-semibold text-carbono">{s.parent_name}</td>
+                      <td className="px-4 py-3 text-gray-600">{s.student_name}</td>
+                      <td className="px-4 py-3 text-gray-400 text-xs">{new Date(s.signed_at).toLocaleString('pt-BR')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando autorizações...</div> : (
+        <div className="space-y-4">
+          {items.map(i => (
+            <div key={i.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="font-bold text-xl text-carbono">{i.title}</h3>
+                  {user.role === 'responsavel' && i.signed && (
+                    <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Autorizado</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-500 mb-3">
+                  <span className="flex items-center gap-1">📅 {new Date(i.event_date+'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                  {i.event_time && <span className="flex items-center gap-1">⏰ {i.event_time}</span>}
+                  {i.location && <span className="flex items-center gap-1">📍 {i.location}</span>}
+                </div>
+                {i.description && <p className="text-sm text-gray-600 mb-3 whitespace-pre-wrap">{i.description}</p>}
+                <p className="text-xs text-gray-400">Criado em {new Date(i.created_at).toLocaleDateString('pt-BR')}</p>
+              </div>
+              
+              <div className="flex flex-col items-end gap-3 shrink-0 w-full md:w-auto">
+                {canEdit ? (
+                  <>
+                    <button onClick={() => loadSignatures(i)} className="bg-gray-50 text-carbono px-5 py-2.5 rounded-xl text-sm font-bold border border-gray-200 hover:bg-gray-100 transition-colors w-full md:w-auto text-center">
+                      Ver Assinaturas ({i.signatures_count})
+                    </button>
+                    <button onClick={() => del(i.id)} className="text-red-400 hover:text-red-600 text-xs font-bold px-2">EXCLUIR</button>
+                  </>
+                ) : (
+                  user.role === 'responsavel' && !i.signed && (
+                    <button onClick={() => sign(i.id)} className="bg-green-500 text-white px-8 py-3 rounded-full text-sm font-bold shadow-lg hover:bg-green-600 transition-colors w-full md:w-auto">
+                      Assinar Digitalmente
+                    </button>
+                  )
+                )}
+                {user.role === 'responsavel' && i.signed && (
+                  <div className="text-right">
+                    <p className="text-xs text-green-600 font-bold border border-green-200 bg-green-50 px-3 py-1.5 rounded-full inline-block">✓ Assinado</p>
+                    <p className="text-[10px] text-gray-400 mt-1">{new Date(i.signed_at).toLocaleString('pt-BR')}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && (
+            <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma solicitação de autorização no momento.</div>
           )}
         </div>
       )}
