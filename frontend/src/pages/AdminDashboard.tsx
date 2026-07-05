@@ -572,6 +572,9 @@ function ProjetosTab() {
 // ALUNOS TAB
 // ═══════════════════════════════════════════════════════════════════
 function AlunosTab() {
+  const user = getUser()
+  const canEdit = user?.role === 'admin' || user?.role === 'diretoria'
+  
   const [items, setItems] = useState<Aluno[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -614,7 +617,7 @@ function AlunosTab() {
         </div>
         <div className="flex gap-3">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar aluno..." className="border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-dourado w-48" />
-          <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Aluno</button>
+          {canEdit && <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Aluno</button>}
         </div>
       </div>
 
@@ -694,10 +697,12 @@ function AlunosTab() {
                   </td>
                   <td className="td-cell text-gray-500">{a.birth_date ? new Date(a.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
                   <td className="td-cell">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(a)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
-                      <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
-                    </div>
+                    {canEdit && (
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(a)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
+                        <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}
