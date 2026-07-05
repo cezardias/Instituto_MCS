@@ -68,8 +68,8 @@ export default function StudentApp() {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
         {activeTab === 'jornada' && <JornadaTab />}
-        {activeTab === 'passaporte' && <div className="p-6 text-center text-gray-500 mt-10">Passaporte em breve</div>}
-        {activeTab === 'eventos' && <div className="p-6 text-center text-gray-500 mt-10">Eventos em breve</div>}
+        {activeTab === 'passaporte' && <PassaporteTab user={user} />}
+        {activeTab === 'eventos' && <EventosTab />}
         {activeTab === 'loja' && <div className="p-6 text-center text-gray-500 mt-10">Loja em breve</div>}
       </main>
 
@@ -164,7 +164,7 @@ function JornadaTab() {
 
 function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () => void, onComplete: () => void }) {
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, any>>({})
+  const [answers, setAnswers] = useState<Record<string | number, any>>({})
   const [submitting, setSubmitting] = useState(false)
   const questions = mission.questions || []
   
@@ -186,14 +186,37 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
   }
 
   if (questions.length === 0) {
+    const isPracticalOrWriting = mission.type === 'pratica' || mission.type === 'redacao'
     return (
-      <div className="p-6 text-center">
-        <button onClick={onBack} className="text-gray-400 mb-4">← Voltar</button>
-        <h2 className="text-xl font-bold mb-2">{mission.title}</h2>
-        <p className="mb-6">{mission.description}</p>
-        <button onClick={handleNext} className="w-full bg-dourado text-carbono font-bold py-4 rounded-2xl">
-          Marcar como Concluída
-        </button>
+      <div className="fixed inset-0 z-[60] bg-white flex flex-col h-[100dvh]">
+        <div className="flex items-center p-4 border-b border-gray-100 shrink-0">
+          <button onClick={onBack} className="text-gray-400 text-3xl px-2 leading-none pb-1 hover:text-gray-600 transition-colors">×</button>
+          <div className="flex-1" />
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 flex flex-col max-w-3xl mx-auto w-full mt-8 md:mt-16 text-center">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4">{mission.title}</h2>
+          <p className="mb-8 text-gray-600">{mission.description}</p>
+          
+          {isPracticalOrWriting && (
+            <textarea
+              rows={8}
+              className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-dourado resize-none font-medium text-lg text-carbono shadow-sm mb-6 text-left"
+              placeholder={mission.type === 'redacao' ? 'Escreva sua redação aqui...' : 'Descreva o que foi feito na atividade prática...'}
+              value={answers['main'] || ''}
+              onChange={(e) => setAnswers({...answers, main: e.target.value})}
+            />
+          )}
+        </div>
+        <div className="p-4 border-t border-gray-100 bg-white shrink-0 w-full">
+           <div className="max-w-3xl mx-auto w-full flex justify-between items-center">
+             <button 
+                onClick={handleNext} 
+                disabled={submitting || (isPracticalOrWriting && !answers['main'])}
+                className="w-full bg-green-500 disabled:bg-gray-300 text-white font-bold py-4 rounded-2xl text-lg uppercase tracking-wider transition-colors">
+                {submitting ? 'Enviando...' : 'Finalizar Missão'}
+             </button>
+           </div>
+        </div>
       </div>
     )
   }
@@ -225,7 +248,7 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
           </button>
         ))}
 
-        {currentQ.type === 'dissertacao' && (
+        {currentQ.type === 'dissertation' && (
           <textarea rows={6} className="w-full border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-dourado resize-none font-medium text-lg text-carbono shadow-sm"
             placeholder="Sua resposta..."
             value={answers[currentQ.id] || ''}
@@ -243,6 +266,41 @@ function LessonView({ mission, onBack, onComplete }: { mission: any, onBack: () 
         >
           {submitting ? 'Enviando...' : (step === questions.length - 1 ? 'Finalizar Missão' : 'Verificar')}
         </button>
+      </div>
+    </div>
+  )
+}
+
+function PassaporteTab({ user }: { user: any }) {
+  return (
+    <div className="p-6 pb-24 max-w-3xl mx-auto w-full">
+      <h2 className="text-2xl font-black text-center text-carbono mb-8 font-serif">Passaporte Cultural</h2>
+      
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden mb-8">
+        <div className="absolute top-0 right-0 opacity-10 text-9xl">🏅</div>
+        <div className="relative z-10 flex flex-col items-center">
+          <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-4xl mb-4 backdrop-blur-sm border-2 border-white/30">
+            {user.name?.[0] || 'A'}
+          </div>
+          <h3 className="font-bold text-xl">{user.name}</h3>
+          <p className="text-dourado font-bold mt-1 uppercase tracking-widest text-sm">Liga {user.league || 'Bronze'}</p>
+        </div>
+      </div>
+
+      <h3 className="font-bold text-lg text-carbono mb-4">Seus Selos</h3>
+      <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 text-center">
+        <p className="text-gray-400 text-sm">Você ainda não conquistou nenhum selo. Complete missões para ganhar!</p>
+      </div>
+    </div>
+  )
+}
+
+function EventosTab() {
+  return (
+    <div className="p-6 pb-24 max-w-3xl mx-auto w-full">
+      <h2 className="text-2xl font-black text-center text-carbono mb-8 font-serif">Próximos Eventos</h2>
+      <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 text-center">
+        <p className="text-gray-400 text-sm">Nenhum evento programado no momento.</p>
       </div>
     </div>
   )
