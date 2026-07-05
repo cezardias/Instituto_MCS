@@ -28,7 +28,6 @@ const SIDEBAR = [
     { id:'overview', label:'Dashboard Executivo', icon:'⊞', roles:['admin', 'diretoria'] },
     { id:'projetos', label:'Projetos', icon:'🚀', roles:['admin', 'coordenacao', 'oficineiro'] },
     { id:'alunos', label:'Alunos', icon:'🎓', roles:['admin', 'coordenacao', 'oficineiro', 'responsavel'] },
-    { id:'frequencia', label:'Frequência', icon:'📅', roles:['admin', 'responsavel'] },
     { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
     { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
     { id:'parceiros', label:'Parceiros', icon:'🤝', roles:['admin'] },
