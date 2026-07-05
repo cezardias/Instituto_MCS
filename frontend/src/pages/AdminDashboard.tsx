@@ -27,7 +27,9 @@ const SIDEBAR = [
   { group: 'GESTÃO', items: [
     { id:'overview', label:'Dashboard Executivo', icon:'⊞', roles:['admin', 'diretoria'] },
     { id:'projetos', label:'Projetos', icon:'🚀', roles:['admin', 'coordenacao', 'oficineiro'] },
+    { id:'turmas', label:'Turmas e Frequência', icon:'🏫', roles:['admin', 'diretoria', 'coordenacao', 'oficineiro', 'aluno', 'responsavel'] },
     { id:'alunos', label:'Alunos', icon:'🎓', roles:['admin', 'coordenacao', 'oficineiro', 'responsavel'] },
+    { id:'avaliacoes', label:'Avaliações e Atividades', icon:'📝', roles:['admin', 'coordenacao', 'oficineiro', 'diretoria', 'aluno', 'responsavel'] },
     { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
     { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
     { id:'parceiros', label:'Parceiros', icon:'🤝', roles:['admin'] },
@@ -240,7 +242,8 @@ export default function AdminDashboard() {
           {tab === 'passaporte'  && <PassaporteTab />}
           {tab === 'autorizacoes' && <AutorizacoesTab />}
           {tab === 'turmas'      && <TurmasTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'avaliacoes'  && <AvaliacoesTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -2280,6 +2283,502 @@ function AutorizacoesTab() {
           ))}
           {items.length === 0 && (
             <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma solicitação de autorização no momento.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// AVALIAÇÕES TAB
+// ═══════════════════════════════════════════════════════════════════
+function AvaliacoesTab() {
+  const user = getUser()
+  const canEdit = ['admin', 'diretoria', 'oficineiro'].includes(user.role)
+
+  const [assessments, setAssessments] = useState<any[]>([])
+  const [classes, setClasses] = useState<any[]>([])
+  const [students, setStudents] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Views: list, create, answer, grade
+  const [view, setView] = useState<'list' | 'create' | 'answer' | 'grade'>('list')
+
+  // Create Form State
+  const blankForm = { title:'', description:'', date:'', time:'', type:'questionario', target_type:'all', target_ids:[] as string[], max_score: 10 }
+  const [form, setForm] = useState(blankForm)
+  const [questions, setQuestions] = useState<any[]>([]) // for type='questionario'
+  const [saving, setSaving] = useState(false)
+
+  // Answer State (for students)
+  const [activeAssessment, setActiveAssessment] = useState<any>(null)
+  const [answers, setAnswers] = useState<any>({})
+
+  // Grade State (for teachers)
+  const [deliveries, setDeliveries] = useState<any[]>([])
+  const [activeDelivery, setActiveDelivery] = useState<any>(null)
+  const [gradeForm, setGradeForm] = useState({ teacher_grade: '', teacher_comment: '' })
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [rAss, rCls, rStu] = await Promise.all([
+        fetch('/api/assessments', {headers:authH()}),
+        canEdit ? fetch('/api/classes', {headers:authH()}) : Promise.resolve(null),
+        canEdit ? fetch('/api/users', {headers:authH()}) : Promise.resolve(null)
+      ])
+      setAssessments(await rAss.json())
+      if (rCls) setClasses(await rCls.json())
+      if (rStu) setStudents((await rStu.json()).filter((u:any)=>u.role==='aluno'))
+    } catch {}
+    setLoading(false)
+  }, [canEdit])
+  useEffect(() => { loadData() }, [loadData])
+
+  // --- Handlers for Create ---
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      await fetch('/api/assessments', {
+        method: 'POST', headers: authH(),
+        body: JSON.stringify({ ...form, questions })
+      })
+      setView('list')
+      loadData()
+      setForm(blankForm)
+      setQuestions([])
+    } catch {
+      alert('Erro ao criar avaliação')
+    }
+    setSaving(false)
+  }
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Deseja excluir esta avaliação?')) return
+    await fetch(`/api/assessments/${id}`, { method:'DELETE', headers:authH() })
+    loadData()
+  }
+
+  const addQuestion = (type: string) => {
+    setQuestions([...questions, { type, question_text: '', options: type === 'multiple_choice' ? [''] : [] }])
+  }
+
+  const updateQuestion = (index: number, field: string, value: any) => {
+    const newQ = [...questions]
+    newQ[index][field] = value
+    setQuestions(newQ)
+  }
+
+  const removeQuestion = (index: number) => {
+    setQuestions(questions.filter((_, i) => i !== index))
+  }
+
+  const addOption = (qIndex: number) => {
+    const newQ = [...questions]
+    newQ[qIndex].options.push('')
+    setQuestions(newQ)
+  }
+
+  const updateOption = (qIndex: number, oIndex: number, value: string) => {
+    const newQ = [...questions]
+    newQ[qIndex].options[oIndex] = value
+    setQuestions(newQ)
+  }
+
+  const toggleTarget = (id: string) => {
+    setForm(f => ({
+      ...f, 
+      target_ids: f.target_ids.includes(id) ? f.target_ids.filter(x=>x!==id) : [...f.target_ids, id]
+    }))
+  }
+
+  // --- Handlers for Answer ---
+  const openAnswer = async (a: any) => {
+    if (a.my_delivery) return alert('Você já entregou esta avaliação.')
+    try {
+      const r = await fetch(`/api/assessments/${a.id}`, { headers:authH() })
+      const data = await r.json()
+      setActiveAssessment(data)
+      setAnswers({})
+      setView('answer')
+    } catch { alert('Erro ao carregar avaliação') }
+  }
+
+  const submitAnswer = async () => {
+    if (!confirm('Confirmar entrega e assinar digitalmente?')) return
+    setSaving(true)
+    try {
+      await fetch(`/api/assessments/${activeAssessment.id}/deliver`, {
+        method: 'POST', headers: authH(),
+        body: JSON.stringify({ answers })
+      })
+      alert('Avaliação entregue e assinada com sucesso!')
+      setView('list')
+      loadData()
+    } catch {
+      alert('Erro ao enviar')
+    }
+    setSaving(false)
+  }
+
+  // --- Handlers for Grading ---
+  const openGrade = async (a: any) => {
+    try {
+      const rAss = await fetch(`/api/assessments/${a.id}`, { headers:authH() })
+      const dataAss = await rAss.json()
+      setActiveAssessment(dataAss)
+      
+      const rDel = await fetch(`/api/assessments/${a.id}/deliveries`, { headers:authH() })
+      setDeliveries(await rDel.json())
+      
+      setView('grade')
+      setActiveDelivery(null)
+    } catch { alert('Erro ao carregar entregas') }
+  }
+
+  const saveGrade = async () => {
+    setSaving(true)
+    try {
+      await fetch(`/api/assessments/deliveries/${activeDelivery.id}/grade`, {
+        method: 'POST', headers: authH(),
+        body: JSON.stringify(gradeForm)
+      })
+      alert('Nota salva!')
+      // Refresh deliveries
+      const rDel = await fetch(`/api/assessments/${activeAssessment.id}/deliveries`, { headers:authH() })
+      setDeliveries(await rDel.json())
+      setActiveDelivery(null)
+    } catch {
+      alert('Erro ao salvar nota')
+    }
+    setSaving(false)
+  }
+
+  // ======= RENDER VIEWS =======
+
+  if (view === 'create') {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6">
+        <button onClick={() => setView('list')} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar</button>
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
+          <h2 className="font-serif text-2xl text-carbono mb-6">Criar Avaliação</h2>
+          <form onSubmit={handleCreate} className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Título *</label>
+                <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Descrição / Instruções</label>
+                <textarea rows={3} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Data Limite (Opcional)</label>
+                <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Horário Limite (Opcional)</label>
+                <input type="time" value={form.time} onChange={e=>setForm({...form,time:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Tipo de Avaliação *</label>
+                <select value={form.type} onChange={e=>setForm({...form,type:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado font-bold text-sm">
+                  <option value="questionario">Questionário / Formulário</option>
+                  <option value="redacao">Redação</option>
+                  <option value="pratica">Atividade Prática</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Nota Máxima (Opcional)</label>
+                <input type="number" min="0" step="0.1" value={form.max_score} onChange={e=>setForm({...form,max_score:parseFloat(e.target.value)})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              
+              {/* TARGETS */}
+              <div className="col-span-2 mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <label className="block text-xs font-bold text-carbono mb-3 uppercase">Público Alvo *</label>
+                <select value={form.target_type} onChange={e=>setForm({...form, target_type:e.target.value, target_ids:[]})} className="w-full bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm font-bold outline-none focus:border-dourado mb-4">
+                  <option value="all">Todos os Alunos</option>
+                  <option value="class">Turmas Específicas</option>
+                  <option value="student">Alunos Específicos</option>
+                </select>
+                {form.target_type === 'class' && (
+                  <div className="max-h-40 overflow-y-auto space-y-1 bg-white p-2 border border-gray-200 rounded-lg">
+                    {classes.map(c => (
+                      <label key={c.id} className="flex items-center gap-2 text-sm p-1 hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" checked={form.target_ids.includes(c.id.toString())} onChange={()=>toggleTarget(c.id.toString())} className="rounded text-dourado focus:ring-dourado" />
+                        {c.name}
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {form.target_type === 'student' && (
+                  <div className="max-h-40 overflow-y-auto space-y-1 bg-white p-2 border border-gray-200 rounded-lg">
+                    {students.map(s => (
+                      <label key={s.id} className="flex items-center gap-2 text-sm p-1 hover:bg-gray-50 cursor-pointer">
+                        <input type="checkbox" checked={form.target_ids.includes(s.id.toString())} onChange={()=>toggleTarget(s.id.toString())} className="rounded text-dourado focus:ring-dourado" />
+                        {s.name} - {s.email}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* QUESTIONS BUILDER */}
+            {form.type === 'questionario' && (
+              <div className="mt-8 border-t border-gray-100 pt-6">
+                <h3 className="font-bold text-carbono mb-4">Questões do Formulário</h3>
+                
+                <div className="space-y-6 mb-6">
+                  {questions.map((q, qIndex) => (
+                    <div key={qIndex} className="p-4 bg-gray-50 rounded-2xl border border-gray-200 relative">
+                      <button type="button" onClick={()=>removeQuestion(qIndex)} className="absolute top-4 right-4 text-xs font-bold text-red-500 hover:text-red-700">Remover</button>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2 block">
+                        {q.type === 'multiple_choice' ? 'Múltipla Escolha' : q.type === 'dissertation' ? 'Dissertativa' : 'Associação'}
+                      </span>
+                      <input required placeholder="Digite a pergunta..." value={q.question_text} onChange={e=>updateQuestion(qIndex, 'question_text', e.target.value)} className="w-full bg-white border border-gray-300 px-3 py-2 rounded-lg text-sm mb-3 outline-none" />
+                      
+                      {q.type === 'multiple_choice' && (
+                        <div className="space-y-2 pl-4 border-l-2 border-gray-200">
+                          {q.options.map((opt: string, oIndex: number) => (
+                            <div key={oIndex} className="flex gap-2">
+                              <input placeholder={`Opção ${oIndex+1}`} value={opt} onChange={e=>updateOption(qIndex, oIndex, e.target.value)} className="flex-1 bg-white border border-gray-200 px-3 py-1.5 rounded-md text-xs outline-none" />
+                            </div>
+                          ))}
+                          <button type="button" onClick={()=>addOption(qIndex)} className="text-xs font-bold text-blue-500 hover:underline">+ Adicionar Opção</button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex gap-3">
+                  <button type="button" onClick={()=>addQuestion('multiple_choice')} className="text-xs font-bold bg-white border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50">+ Múltipla Escolha</button>
+                  <button type="button" onClick={()=>addQuestion('dissertation')} className="text-xs font-bold bg-white border border-gray-300 px-4 py-2 rounded-xl hover:bg-gray-50">+ Dissertativa</button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-6">
+              <button disabled={saving} type="submit" className="bg-carbono text-marfim px-8 py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-50">
+                {saving ? 'Salvando...' : 'Publicar Avaliação'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'answer' && activeAssessment) {
+    return (
+      <div className="max-w-4xl mx-auto space-y-6 pb-20">
+        <button onClick={() => setView('list')} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar</button>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase tracking-wider">{activeAssessment.type}</span>
+          <h2 className="font-serif text-3xl text-carbono mt-3 mb-2">{activeAssessment.title}</h2>
+          {activeAssessment.date && <p className="text-xs font-bold text-gray-500 mb-4">Prazo: {new Date(activeAssessment.date+'T00:00:00').toLocaleDateString('pt-BR')} {activeAssessment.time && `às ${activeAssessment.time}`}</p>}
+          <p className="text-sm text-gray-600">{activeAssessment.description}</p>
+        </div>
+
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 space-y-8">
+          {activeAssessment.type === 'redacao' && (
+            <div>
+              <label className="block font-bold text-carbono mb-2">Escreva sua redação aqui:</label>
+              <textarea rows={15} value={answers['redacao']||''} onChange={e=>setAnswers({...answers, redacao: e.target.value})} className="w-full bg-gray-50 border border-gray-200 p-4 rounded-2xl text-sm outline-none focus:border-dourado resize-none" placeholder="Comece a digitar..."></textarea>
+            </div>
+          )}
+          
+          {activeAssessment.type === 'pratica' && (
+            <div className="text-center py-10">
+              <p className="text-gray-500 mb-4">Esta é uma atividade prática. Confirme abaixo quando tiver concluído.</p>
+              <label className="flex items-center justify-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={answers['pratica']===true} onChange={e=>setAnswers({...answers, pratica: e.target.checked})} className="w-6 h-6 rounded text-dourado focus:ring-dourado" />
+                <span className="font-bold text-carbono">Eu realizei esta atividade prática.</span>
+              </label>
+            </div>
+          )}
+
+          {activeAssessment.type === 'questionario' && activeAssessment.questions?.map((q:any, i:number) => (
+            <div key={q.id} className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+              <p className="font-bold text-carbono mb-4"><span className="text-dourado mr-2">{i+1}.</span>{q.question_text}</p>
+              
+              {q.type === 'multiple_choice' && (
+                <div className="space-y-2 pl-6">
+                  {JSON.parse(q.options_json||'[]').map((opt:string, optIdx:number) => (
+                    <label key={optIdx} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded-lg">
+                      <input type="radio" name={`q_${q.id}`} value={opt} checked={answers[q.id]===opt} onChange={e=>setAnswers({...answers, [q.id]: e.target.value})} className="text-dourado focus:ring-dourado" />
+                      <span className="text-sm">{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              
+              {q.type === 'dissertation' && (
+                <textarea rows={4} value={answers[q.id]||''} onChange={e=>setAnswers({...answers, [q.id]: e.target.value})} className="w-full bg-white border border-gray-200 p-3 rounded-xl text-sm outline-none focus:border-dourado resize-none" placeholder="Sua resposta..."></textarea>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button onClick={submitAnswer} disabled={saving} className="bg-carbono text-marfim px-8 py-4 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-50 shadow-xl flex items-center gap-2">
+            <span>✍️</span> Entregar e Assinar Digitalmente
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (view === 'grade' && activeAssessment) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <button onClick={() => setView('list')} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar para Avaliações</button>
+        
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <h2 className="font-serif text-2xl text-carbono mb-1">{activeAssessment.title}</h2>
+          <p className="text-sm text-gray-500">Painel de Correção - {deliveries.length} entregas recebidas.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="col-span-1 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400 p-4 border-b border-gray-100 bg-gray-50">Alunos</h3>
+            <div className="divide-y divide-gray-50 max-h-[600px] overflow-y-auto">
+              {deliveries.map(d => (
+                <button key={d.id} onClick={() => { setActiveDelivery(d); setGradeForm({ teacher_grade: d.teacher_grade||'', teacher_comment: d.teacher_comment||'' }) }} className={`w-full text-left p-4 hover:bg-gray-50 transition-colors ${activeDelivery?.id === d.id ? 'bg-blue-50/50' : ''}`}>
+                  <p className="font-bold text-carbono text-sm mb-1">{d.student_name}</p>
+                  <p className="text-[10px] text-gray-400">Entregue: {new Date(d.delivered_at).toLocaleString('pt-BR')}</p>
+                  {d.status === 'graded' ? <span className="inline-block mt-2 text-[10px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded">Corrigido: {d.teacher_grade}</span> : <span className="inline-block mt-2 text-[10px] font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded">Pendente de Nota</span>}
+                </button>
+              ))}
+              {deliveries.length === 0 && <p className="p-4 text-sm text-gray-400 text-center">Nenhuma entrega ainda.</p>}
+            </div>
+          </div>
+
+          <div className="col-span-2">
+            {activeDelivery ? (
+              <div className="space-y-4">
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                  <h3 className="font-bold text-lg text-carbono mb-4">Respostas de {activeDelivery.student_name}</h3>
+                  
+                  {activeAssessment.type === 'pratica' && (
+                    <div className="p-4 bg-green-50 text-green-700 font-bold rounded-xl border border-green-200">
+                      ✅ O aluno assinou a conclusão desta atividade prática.
+                    </div>
+                  )}
+
+                  {activeAssessment.type === 'redacao' && (
+                    <div className="p-6 bg-gray-50 rounded-xl border border-gray-200 text-sm whitespace-pre-wrap">
+                      {JSON.parse(activeDelivery.answers_json || '{}').redacao || <span className="text-gray-400 italic">Em branco</span>}
+                    </div>
+                  )}
+
+                  {activeAssessment.type === 'questionario' && activeAssessment.questions?.map((q:any, i:number) => {
+                    const ans = JSON.parse(activeDelivery.answers_json || '{}')[q.id]
+                    return (
+                      <div key={q.id} className="mb-6 last:mb-0">
+                        <p className="font-bold text-carbono text-sm mb-2">{i+1}. {q.question_text}</p>
+                        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200 text-sm">
+                          {ans ? <span className="text-gray-700">{ans}</span> : <span className="text-gray-400 italic">Não respondido</span>}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                  <h3 className="font-bold text-lg text-carbono mb-4">Avaliação do Oficineiro</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div className="md:col-span-1">
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Nota (0 a {activeAssessment.max_score||10})</label>
+                      <input type="number" step="0.1" value={gradeForm.teacher_grade} onChange={e=>setGradeForm({...gradeForm, teacher_grade:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado font-bold text-lg" />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Comentário / Feedback</label>
+                      <textarea rows={3} value={gradeForm.teacher_comment} onChange={e=>setGradeForm({...gradeForm, teacher_comment:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado resize-none" />
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <button onClick={saveGrade} disabled={saving} className="bg-dourado text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-yellow-600 disabled:opacity-50">
+                      {saving ? 'Salvando...' : 'Salvar Correção'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50/50 border border-gray-100 rounded-3xl h-full flex items-center justify-center text-gray-400 p-8 text-center">
+                Selecione um aluno na lista ao lado para corrigir a avaliação e lançar a nota.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Main List View ---
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="font-serif text-3xl text-carbono">Avaliações e Atividades</h2>
+          <p className="text-sm text-gray-500">Questionários, Redações e Exercícios práticos.</p>
+        </div>
+        {canEdit && (
+          <button onClick={() => { setView('create'); setForm(blankForm); setQuestions([]) }} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Nova Avaliação</button>
+        )}
+      </div>
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando avaliações...</div> : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {assessments.map(a => (
+            <div key={a.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative group flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-[10px] font-bold text-dourado bg-yellow-50 px-2 py-1 rounded-md uppercase tracking-wider">{a.type}</span>
+                  {a.date && <span className="text-[10px] font-bold text-gray-400">{new Date(a.date+'T00:00:00').toLocaleDateString('pt-BR')}</span>}
+                </div>
+                <h3 className="font-bold text-lg text-carbono mb-2 leading-tight">{a.title}</h3>
+                {a.description && <p className="text-xs text-gray-500 mb-4 line-clamp-2">{a.description}</p>}
+                
+                {user.role === 'aluno' && a.my_delivery && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                    <p className="text-xs font-bold text-green-600 mb-1">✅ Entregue</p>
+                    {a.my_delivery.status === 'graded' ? (
+                      <p className="text-xs text-carbono">Nota: <strong className="text-lg">{a.my_delivery.teacher_grade}</strong> / {a.max_score||10}</p>
+                    ) : (
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wider">Aguardando correção</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
+                {user.role === 'aluno' ? (
+                  !a.my_delivery ? (
+                    <button onClick={() => openAnswer(a)} className="flex-1 bg-carbono text-marfim py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors">
+                      ✍️ Realizar Atividade
+                    </button>
+                  ) : (
+                    <button disabled className="flex-1 bg-gray-100 text-gray-400 py-2 rounded-xl text-xs font-bold">Assinada</button>
+                  )
+                ) : user.role === 'responsavel' ? (
+                  <button className="flex-1 bg-gray-50 text-gray-400 py-2 rounded-xl text-xs font-bold border border-gray-100">Ver Resultado</button> // future enhancement
+                ) : (
+                  <>
+                    <button onClick={() => openGrade(a)} className="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors">
+                      Corrigir ({a.deliveries_count})
+                    </button>
+                    {canEdit && <button onClick={() => handleDelete(a.id)} className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl text-xs font-bold hover:bg-red-100 transition-colors">🗑</button>}
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+          {assessments.length === 0 && (
+            <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma avaliação encontrada.</div>
           )}
         </div>
       )}

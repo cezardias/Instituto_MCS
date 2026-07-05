@@ -234,6 +234,43 @@ const createAttendance = `CREATE TABLE IF NOT EXISTS attendance (
   UNIQUE(lesson_id, student_id)
 )`
 
+const createAssessments = `CREATE TABLE IF NOT EXISTS assessments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  date TEXT,
+  time TEXT,
+  type TEXT NOT NULL,
+  target_type TEXT DEFAULT 'all',
+  target_ids TEXT,
+  max_score REAL,
+  created_by INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createAssessmentQuestions = `CREATE TABLE IF NOT EXISTS assessment_questions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  assessment_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  question_text TEXT NOT NULL,
+  options_json TEXT,
+  FOREIGN KEY(assessment_id) REFERENCES assessments(id) ON DELETE CASCADE
+)`
+
+const createAssessmentDeliveries = `CREATE TABLE IF NOT EXISTS assessment_deliveries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  assessment_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
+  answers_json TEXT,
+  signed BOOLEAN DEFAULT 0,
+  delivered_at DATETIME,
+  teacher_grade REAL,
+  teacher_comment TEXT,
+  status TEXT DEFAULT 'pending',
+  FOREIGN KEY(assessment_id) REFERENCES assessments(id) ON DELETE CASCADE
+)`
+
 db.exec(createTenants)
 db.exec(createUsers)
 
@@ -269,5 +306,8 @@ db.exec(createClassLessons)
 // Gracefully migrate attendance table
 try { db.exec('ALTER TABLE attendance RENAME TO old_attendance_v1') } catch(e) {}
 db.exec(createAttendance)
+db.exec(createAssessments)
+db.exec(createAssessmentQuestions)
+db.exec(createAssessmentDeliveries)
 
 export default db
