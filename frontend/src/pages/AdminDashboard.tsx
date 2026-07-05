@@ -2403,7 +2403,7 @@ function TurmasTab() {
     const file = e.target.files?.[0]
     if (!file) return
     const fd = new FormData()
-    fd.append('file', file)
+    fd.append('image', file)
     try {
       const r = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: fd })
       const d = await r.json()
