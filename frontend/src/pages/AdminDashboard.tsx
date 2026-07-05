@@ -2379,6 +2379,8 @@ function TurmasTab() {
         `
       })
       
+      const teachersStr = (c.teachers || []).map((t: any) => t.name).join(', ') || 'Nenhum oficineiro alocado'
+      
       const html = `
         <!DOCTYPE html>
         <html>
@@ -2409,6 +2411,7 @@ function TurmasTab() {
               <div class="header-text">
                 <h1>Instituto MCS</h1>
                 <p>Relatório Oficial de Frequência - Turma: <strong>${c.name}</strong></p>
+                <p>Oficineiro(s): <strong>${teachersStr}</strong></p>
                 <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} por ${user.name}</p>
               </div>
             </div>
