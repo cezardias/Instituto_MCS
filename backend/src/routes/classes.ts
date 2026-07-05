@@ -132,69 +132,80 @@ router.delete('/:id', authMiddleware, (req, res) => {
   }
 })
 
-// GET /api/classes/:id/attendance?date=YYYY-MM-DD
-router.get('/:id/attendance', authMiddleware, (req, res) => {
+// GET /api/classes/:id/lessons
+router.get('/:id/lessons', authMiddleware, (req, res) => {
   const { id } = req.params
-  const { date } = req.query
-  const user = (req as any).user
-
   try {
-    if (date) {
-      const records = db.prepare('SELECT * FROM attendance WHERE class_id = ? AND date = ?').all(id, date)
-      return res.json(records)
-    } else {
-      // If student/parent, return only their attendance
-      if (user.role === 'aluno') {
-        const records = db.prepare('SELECT * FROM attendance WHERE class_id = ? AND student_id = ? ORDER BY date DESC').all(id, user.id)
-        return res.json(records)
-      } else if (user.role === 'responsavel') {
-        const children = db.prepare('SELECT id FROM users WHERE parent_id = ?').all(user.id).map((r:any) => r.id)
-        if (children.length > 0) {
-          const placeholders = children.map(()=>'?').join(',')
-          const records = db.prepare(`SELECT * FROM attendance WHERE class_id = ? AND student_id IN (${placeholders}) ORDER BY date DESC`).all(id, ...children)
-          return res.json(records)
-        }
-        return res.json([])
-      }
-      
-      const records = db.prepare('SELECT * FROM attendance WHERE class_id = ? ORDER BY date DESC').all(id)
-      return res.json(records)
-    }
+    const lessons = db.prepare('SELECT * FROM class_lessons WHERE class_id = ? ORDER BY date DESC, start_time DESC').all(id)
+    res.json(lessons)
   } catch (error: any) {
     res.status(500).json({ error: error.message })
   }
 })
 
-// POST /api/classes/:id/attendance (Save batch attendance for a date)
-// Body: { date: 'YYYY-MM-DD', records: [{ student_id, status, justification_text, justification_file_url }] }
-router.post('/:id/attendance', authMiddleware, (req, res) => {
+// POST /api/classes/:id/lessons
+router.post('/:id/lessons', authMiddleware, (req, res) => {
   const { id } = req.params
-  const { date, records } = req.body
+  const { title, date, start_time, end_time, description } = req.body
   const user = (req as any).user
 
-  // Check if user is teacher of this class or admin/diretoria
   let allowed = false
-  if (user.role === 'admin' || user.role === 'diretoria') {
-    allowed = true
-  } else if (user.role === 'oficineiro') {
+  if (user.role === 'admin' || user.role === 'diretoria') allowed = true
+  else if (user.role === 'oficineiro') {
     const isTeacher = db.prepare('SELECT 1 FROM class_teachers WHERE class_id = ? AND teacher_id = ?').get(id, user.id)
     if (isTeacher) allowed = true
   }
 
-  if (!allowed) {
-    return res.status(403).json({ error: 'Acesso negado' })
+  if (!allowed) return res.status(403).json({ error: 'Acesso negado' })
+
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO class_lessons (class_id, title, date, start_time, end_time, description, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `)
+    const info = stmt.run(id, title, date, start_time || null, end_time || null, description || null, user.id)
+    res.status(201).json({ id: info.lastInsertRowid })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// GET /api/classes/lessons/:lessonId/attendance
+router.get('/lessons/:lessonId/attendance', authMiddleware, (req, res) => {
+  const { lessonId } = req.params
+  try {
+    const records = db.prepare('SELECT * FROM attendance WHERE lesson_id = ?').all(lessonId)
+    res.json(records)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// POST /api/classes/lessons/:lessonId/attendance
+router.post('/lessons/:lessonId/attendance', authMiddleware, (req, res) => {
+  const { lessonId } = req.params
+  const { records } = req.body
+  const user = (req as any).user
+
+  // verify permission (needs to check which class this lesson belongs to)
+  const lesson = db.prepare('SELECT class_id FROM class_lessons WHERE id = ?').get(lessonId) as any
+  if (!lesson) return res.status(404).json({ error: 'Aula não encontrada' })
+
+  let allowed = false
+  if (user.role === 'admin' || user.role === 'diretoria') allowed = true
+  else if (user.role === 'oficineiro') {
+    const isTeacher = db.prepare('SELECT 1 FROM class_teachers WHERE class_id = ? AND teacher_id = ?').get(lesson.class_id, user.id)
+    if (isTeacher) allowed = true
   }
 
-  if (!date || !Array.isArray(records)) {
-    return res.status(400).json({ error: 'Data e registros inválidos' })
-  }
+  if (!allowed) return res.status(403).json({ error: 'Acesso negado' })
 
   try {
     db.exec('BEGIN TRANSACTION')
     const insertStmt = db.prepare(`
-      INSERT INTO attendance (class_id, student_id, date, status, justification_text, justification_file_url, recorded_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(class_id, student_id, date) DO UPDATE SET
+      INSERT INTO attendance (lesson_id, student_id, status, justification_text, justification_file_url, recorded_by)
+      VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(lesson_id, student_id) DO UPDATE SET
         status = excluded.status,
         justification_text = excluded.justification_text,
         justification_file_url = excluded.justification_file_url,
@@ -203,9 +214,8 @@ router.post('/:id/attendance', authMiddleware, (req, res) => {
 
     for (const rec of records) {
       insertStmt.run(
-        id, 
+        lessonId, 
         rec.student_id, 
-        date, 
         rec.status, 
         rec.justification_text || null, 
         rec.justification_file_url || null, 
@@ -217,6 +227,37 @@ router.post('/:id/attendance', authMiddleware, (req, res) => {
     res.json({ success: true })
   } catch (error: any) {
     db.exec('ROLLBACK')
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// GET /api/classes/:id/student-attendance (For students and parents)
+router.get('/:id/student-attendance', authMiddleware, (req, res) => {
+  const { id } = req.params
+  const user = (req as any).user
+
+  try {
+    let studentIds: number[] = []
+    if (user.role === 'aluno') studentIds = [user.id]
+    else if (user.role === 'responsavel') {
+      const children = db.prepare('SELECT id FROM users WHERE parent_id = ?').all(user.id).map((r:any) => r.id)
+      studentIds = children
+    }
+    
+    if (studentIds.length === 0) return res.json([])
+
+    const placeholders = studentIds.map(()=>'?').join(',')
+    const query = `
+      SELECT cl.date, cl.title, cl.description, a.* 
+      FROM class_lessons cl
+      LEFT JOIN attendance a ON cl.id = a.lesson_id AND a.student_id IN (${placeholders})
+      WHERE cl.class_id = ?
+      ORDER BY cl.date DESC, cl.start_time DESC
+    `
+    // pass the array of studentIds and then the class id
+    const records = db.prepare(query).all(...studentIds, id)
+    res.json(records)
+  } catch (error: any) {
     res.status(500).json({ error: error.message })
   }
 })

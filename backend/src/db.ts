@@ -210,17 +210,28 @@ const createClassStudents = `CREATE TABLE IF NOT EXISTS class_students (
   PRIMARY KEY(class_id, student_id)
 )`
 
-const createAttendance = `CREATE TABLE IF NOT EXISTS attendance (
+const createClassLessons = `CREATE TABLE IF NOT EXISTS class_lessons (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   class_id INTEGER NOT NULL,
-  student_id INTEGER NOT NULL,
+  title TEXT NOT NULL,
   date TEXT NOT NULL,
+  start_time TEXT,
+  end_time TEXT,
+  description TEXT,
+  created_by INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createAttendance = `CREATE TABLE IF NOT EXISTS attendance (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  lesson_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
   status TEXT NOT NULL,
   justification_text TEXT,
   justification_file_url TEXT,
   recorded_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(class_id, student_id, date)
+  UNIQUE(lesson_id, student_id)
 )`
 
 db.exec(createTenants)
@@ -254,6 +265,9 @@ db.exec(createAuthorizationSignatures)
 db.exec(createClasses)
 db.exec(createClassTeachers)
 db.exec(createClassStudents)
+db.exec(createClassLessons)
+// Gracefully migrate attendance table
+try { db.exec('ALTER TABLE attendance RENAME TO old_attendance_v1') } catch(e) {}
 db.exec(createAttendance)
 
 export default db

@@ -2303,10 +2303,22 @@ function TurmasTab() {
   const [editingClass, setEditingClass] = useState<any>(null)
   const [form, setForm] = useState({ name: '', description: '', teacher_ids: [] as number[], student_ids: [] as number[] })
   
+  // Navigation states
   const [activeClass, setActiveClass] = useState<any>(null)
-  const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0])
+  const [view, setView] = useState<'list' | 'lessons' | 'attendance' | 'student_attendance'>('list')
+  
+  // Lessons state
+  const [lessons, setLessons] = useState<any[]>([])
+  const [showLessonForm, setShowLessonForm] = useState(false)
+  const [lessonForm, setLessonForm] = useState({ title: '', date: new Date().toISOString().split('T')[0], start_time: '', end_time: '', description: '' })
+  const [activeLesson, setActiveLesson] = useState<any>(null)
+
+  // Attendance state
   const [attendance, setAttendance] = useState<any[]>([])
   const [savingAtt, setSavingAtt] = useState(false)
+
+  // Student Attendance (Parents/Students view)
+  const [studentHistory, setStudentHistory] = useState<any[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -2322,9 +2334,12 @@ function TurmasTab() {
   }, [canEditClasses])
   useEffect(() => { load() }, [load])
 
+  // Class Form handlers
   const openNew = () => { setEditingClass(null); setForm({ name:'', description:'', teacher_ids:[], student_ids:[] }); setShowForm(true) }
   const openEdit = (c: any) => { setEditingClass(c); setForm({ name:c.name, description:c.description||'', teacher_ids:c.teachers.map((t:any)=>t.id), student_ids:c.students.map((s:any)=>s.id) }); setShowForm(true) }
-  
+  const toggleTeacher = (id: number) => setForm(f => ({ ...f, teacher_ids: f.teacher_ids.includes(id) ? f.teacher_ids.filter(x=>x!==id) : [...f.teacher_ids, id] }))
+  const toggleStudent = (id: number) => setForm(f => ({ ...f, student_ids: f.student_ids.includes(id) ? f.student_ids.filter(x=>x!==id) : [...f.student_ids, id] }))
+
   const saveClass = async (e: React.FormEvent) => {
     e.preventDefault()
     const method = editingClass ? 'PUT' : 'POST'
@@ -2339,21 +2354,41 @@ function TurmasTab() {
     load()
   }
 
-  const openAttendance = async (c: any) => {
+  // --- Lessons Logic ---
+  const openLessons = async (c: any) => {
     setActiveClass(c)
-    await loadAttendance(c.id, attDate)
+    setView('lessons')
+    await loadLessons(c.id)
   }
 
-  const loadAttendance = async (cid: number, date: string) => {
+  const loadLessons = async (cid: number) => {
     try {
-      const r = await fetch(`/api/classes/${cid}/attendance?date=${date}`, {headers:authH()})
-      setAttendance(await r.json())
+      const r = await fetch(`/api/classes/${cid}/lessons`, {headers:authH()})
+      setLessons(await r.json())
     } catch {}
   }
 
-  useEffect(() => {
-    if (activeClass && canTakeAttendance) loadAttendance(activeClass.id, attDate)
-  }, [attDate, activeClass, canTakeAttendance])
+  const saveLesson = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await fetch(`/api/classes/${activeClass.id}/lessons`, {
+        method: 'POST', headers: authH(), body: JSON.stringify(lessonForm)
+      })
+      setShowLessonForm(false)
+      loadLessons(activeClass.id)
+      setLessonForm({ title: '', date: new Date().toISOString().split('T')[0], start_time: '', end_time: '', description: '' })
+    } catch { alert('Erro ao salvar aula') }
+  }
+
+  // --- Attendance Logic ---
+  const openAttendance = async (lesson: any) => {
+    setActiveLesson(lesson)
+    setView('attendance')
+    try {
+      const r = await fetch(`/api/classes/lessons/${lesson.id}/attendance`, {headers:authH()})
+      setAttendance(await r.json())
+    } catch {}
+  }
 
   const handleAttChange = (student_id: number, field: string, value: any) => {
     const existing = attendance.find(a => a.student_id === student_id)
@@ -2388,37 +2423,36 @@ function TurmasTab() {
       }
     })
     
-    await fetch(`/api/classes/${activeClass.id}/attendance`, {
-      method: 'POST', headers: authH(), body: JSON.stringify({ date: attDate, records })
+    await fetch(`/api/classes/lessons/${activeLesson.id}/attendance`, {
+      method: 'POST', headers: authH(), body: JSON.stringify({ records })
     })
     setSavingAtt(false)
     alert('Chamada salva com sucesso!')
   }
 
-  const [studentHistory, setStudentHistory] = useState<any[]>([])
+  // --- Student History (Parents/Students) ---
   const loadStudentHistory = async (c: any) => {
     setActiveClass(c)
+    setView('student_attendance')
     try {
-      const r = await fetch(`/api/classes/${c.id}/attendance`, {headers:authH()})
+      const r = await fetch(`/api/classes/${c.id}/student-attendance`, {headers:authH()})
       setStudentHistory(await r.json())
     } catch {}
   }
 
-  const toggleTeacher = (id: number) => setForm(f => ({ ...f, teacher_ids: f.teacher_ids.includes(id) ? f.teacher_ids.filter(x=>x!==id) : [...f.teacher_ids, id] }))
-  const toggleStudent = (id: number) => setForm(f => ({ ...f, student_ids: f.student_ids.includes(id) ? f.student_ids.filter(x=>x!==id) : [...f.student_ids, id] }))
-
-  if (activeClass && !canTakeAttendance) {
+  // View: Student/Parent Attendance History
+  if (view === 'student_attendance' && activeClass) {
     const total = studentHistory.length
     const presents = studentHistory.filter(h => h.status === 'present').length
     const pct = total === 0 ? 100 : Math.round((presents / total) * 100)
     
     return (
       <div className="max-w-5xl mx-auto space-y-6">
-        <button onClick={() => setActiveClass(null)} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
+        <button onClick={() => { setActiveClass(null); setView('list') }} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
           <div>
             <h2 className="font-serif text-2xl text-carbono">{activeClass.name}</h2>
-            <p className="text-gray-500 text-sm">Histórico de Frequência</p>
+            <p className="text-gray-500 text-sm">Boletim de Frequência</p>
           </div>
           <div className="text-right">
             <p className="text-3xl font-bold font-serif text-carbono">{pct}%</p>
@@ -2428,24 +2462,30 @@ function TurmasTab() {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
-              <tr><th className="px-6 py-4">Data</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Detalhes</th></tr>
+              <tr><th className="px-6 py-4">Aula</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Detalhes</th></tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {studentHistory.map(h => (
-                <tr key={h.id}>
-                  <td className="px-6 py-4">{new Date(h.date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+              {studentHistory.map((h, i) => (
+                <tr key={i}>
                   <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase ${h.status==='present'?'bg-green-100 text-green-700':h.status==='absent'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}`}>
-                      {h.status==='present' ? 'Presente' : h.status==='absent' ? 'Falta' : 'Justificado'}
-                    </span>
+                    <p className="font-bold text-carbono">{h.title}</p>
+                    <p className="text-xs text-gray-500">{new Date(h.date+'T00:00:00').toLocaleDateString('pt-BR')} {h.start_time && `- ${h.start_time}`}</p>
+                    {h.description && <p className="text-xs text-gray-400 mt-1">{h.description}</p>}
+                  </td>
+                  <td className="px-6 py-4">
+                    {h.status ? (
+                      <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase ${h.status==='present'?'bg-green-100 text-green-700':h.status==='absent'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}`}>
+                        {h.status==='present' ? 'Presente' : h.status==='absent' ? 'Falta' : 'Justificado'}
+                      </span>
+                    ) : <span className="text-gray-400 text-xs italic">Sem registro</span>}
                   </td>
                   <td className="px-6 py-4 text-gray-500 text-xs">
                     {h.justification_text && <p>{h.justification_text}</p>}
-                    {h.justification_file_url && <a href={h.justification_file_url} target="_blank" className="text-blue-500 hover:underline mt-1 inline-block">Ver Atestado</a>}
+                    {h.justification_file_url && <a href={h.justification_file_url} target="_blank" className="text-blue-500 hover:underline mt-1 inline-block font-bold">📎 Ver Atestado</a>}
                   </td>
                 </tr>
               ))}
-              {studentHistory.length === 0 && <tr><td colSpan={3} className="text-center py-8 text-gray-400">Nenhum registro de frequência.</td></tr>}
+              {studentHistory.length === 0 && <tr><td colSpan={3} className="text-center py-8 text-gray-400">Nenhuma aula registrada ainda.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -2453,21 +2493,87 @@ function TurmasTab() {
     )
   }
 
-  if (activeClass && canTakeAttendance) {
+  // View: Lessons List (Oficineiro / Admin)
+  if (view === 'lessons' && activeClass) {
     return (
       <div className="max-w-5xl mx-auto space-y-6">
-        <button onClick={() => setActiveClass(null)} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <button onClick={() => { setActiveClass(null); setView('list') }} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
           <div>
             <h2 className="font-serif text-2xl text-carbono">{activeClass.name}</h2>
-            <p className="text-gray-500 text-sm">Lista de Chamada</p>
+            <p className="text-gray-500 text-sm">Diário de Classe - Aulas</p>
           </div>
-          <div className="flex items-center gap-4">
-            <input type="date" value={attDate} onChange={e=>setAttDate(e.target.value)} className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-carbono outline-none" />
-            <button onClick={saveAttendance} disabled={savingAtt} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-50">
-              {savingAtt ? 'Salvando...' : 'Salvar Chamada'}
-            </button>
+          <button onClick={() => setShowLessonForm(true)} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Registrar Nova Aula</button>
+        </div>
+
+        {showLessonForm && (
+          <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 mb-6 relative">
+            <h3 className="font-bold text-carbono mb-4">Dados da Aula</h3>
+            <form onSubmit={saveLesson} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="col-span-2 md:col-span-4">
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Título / Assunto *</label>
+                <input required placeholder="Ex: Aula Inaugural, Teoria Musical..." value={lessonForm.title} onChange={e=>setLessonForm({...lessonForm,title:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-dourado" />
+              </div>
+              <div className="col-span-2 md:col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Data *</label>
+                <input required type="date" value={lessonForm.date} onChange={e=>setLessonForm({...lessonForm,date:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-dourado" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Início</label>
+                <input type="time" value={lessonForm.start_time} onChange={e=>setLessonForm({...lessonForm,start_time:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-dourado" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Término</label>
+                <input type="time" value={lessonForm.end_time} onChange={e=>setLessonForm({...lessonForm,end_time:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-dourado" />
+              </div>
+              <div className="col-span-2 md:col-span-4">
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Conteúdo Lecionado / Descrição</label>
+                <textarea rows={2} value={lessonForm.description} onChange={e=>setLessonForm({...lessonForm,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm outline-none focus:border-dourado resize-none" />
+              </div>
+              <div className="col-span-2 md:col-span-4 flex justify-end gap-3 mt-2">
+                <button type="button" onClick={()=>setShowLessonForm(false)} className="px-4 py-2 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-100">Cancelar</button>
+                <button type="submit" className="bg-dourado text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-yellow-600">Salvar Aula</button>
+              </div>
+            </form>
           </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {lessons.map(l => (
+            <div key={l.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-gray-200 transition-colors flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-bold text-carbono">{l.title}</h4>
+                  <span className="text-[10px] font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{new Date(l.date+'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                </div>
+                {l.start_time && <p className="text-xs text-gray-500 mb-2">⏰ {l.start_time} {l.end_time && `às ${l.end_time}`}</p>}
+                {l.description && <p className="text-xs text-gray-600 line-clamp-2 mb-4">{l.description}</p>}
+              </div>
+              <button onClick={() => openAttendance(l)} className="mt-4 w-full bg-gray-50 text-carbono py-2 rounded-xl text-xs font-bold hover:bg-gray-100 border border-gray-100">
+                📝 Fazer Chamada
+              </button>
+            </div>
+          ))}
+          {lessons.length === 0 && <div className="col-span-full text-center py-12 text-gray-400 bg-white rounded-3xl border border-gray-100">Nenhuma aula registrada.</div>}
+        </div>
+      </div>
+    )
+  }
+
+  // View: Attendance List for a specific lesson
+  if (view === 'attendance' && activeLesson && activeClass) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <button onClick={() => { setActiveLesson(null); setView('lessons') }} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Aulas</button>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">{activeClass.name}</p>
+            <h2 className="font-serif text-2xl text-carbono">{activeLesson.title}</h2>
+            <p className="text-gray-500 text-sm">Chamada do dia {new Date(activeLesson.date+'T00:00:00').toLocaleDateString('pt-BR')}</p>
+          </div>
+          <button onClick={saveAttendance} disabled={savingAtt} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-50">
+            {savingAtt ? 'Salvando...' : 'Salvar Chamada'}
+          </button>
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -2513,6 +2619,7 @@ function TurmasTab() {
     )
   }
 
+  // View: Main Class List
   return (
     <div className="max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -2584,8 +2691,8 @@ function TurmasTab() {
                 <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase">{c.teachers?.length||0} Oficineiros</span>
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                <button onClick={() => canTakeAttendance ? openAttendance(c) : loadStudentHistory(c)} className="bg-gray-50 text-carbono px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors">
-                  {canTakeAttendance ? '📝 Fazer Chamada' : '📊 Ver Frequência'}
+                <button onClick={() => canTakeAttendance ? openLessons(c) : loadStudentHistory(c)} className="bg-gray-50 text-carbono px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors">
+                  {canTakeAttendance ? '📓 Diário de Classe' : '📊 Ver Frequência'}
                 </button>
                 {canEditClasses && (
                   <div className="flex gap-2">
