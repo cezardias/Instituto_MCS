@@ -245,6 +245,7 @@ const createAssessments = `CREATE TABLE IF NOT EXISTS assessments (
   target_type TEXT DEFAULT 'all',
   target_ids TEXT,
   max_score REAL,
+  is_gamified INTEGER DEFAULT 0,
   created_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
@@ -309,5 +310,12 @@ db.exec(createAttendance)
 db.exec(createAssessments)
 db.exec(createAssessmentQuestions)
 db.exec(createAssessmentDeliveries)
+
+// Ensure is_gamified column exists if migrating
+try {
+  db.exec(`ALTER TABLE assessments ADD COLUMN is_gamified INTEGER DEFAULT 0`)
+} catch (err) {
+  // Ignore error if column already exists
+}
 
 export default db

@@ -55,4 +55,28 @@ router.delete('/:id', authMiddleware, (req, res) => {
   res.json({ success: true })
 })
 
+router.get('/ranking', authMiddleware, (req, res) => {
+  const user = (req as any).user
+  // Calculate total points for all students
+  const users = db.prepare(`
+    SELECT u.id, u.name, u.email,
+      COALESCE((SELECT SUM(points) FROM passaporte_items WHERE user_id = u.id), 0) as badges_points,
+      COALESCE((
+        SELECT SUM(d.teacher_grade) 
+        FROM assessment_deliveries d 
+        JOIN assessments a ON d.assessment_id = a.id 
+        WHERE d.student_id = u.id AND d.status = 'graded' AND a.is_gamified = 1
+      ), 0) as games_points
+    FROM users u
+    WHERE u.tenant_id = ? AND u.role = 'aluno'
+  `).all(user.tenant_id)
+  
+  const ranking = users.map((u: any) => ({
+    ...u,
+    total_points: u.badges_points + u.games_points
+  })).sort((a: any, b: any) => b.total_points - a.total_points)
+
+  res.json(ranking)
+})
+
 export default router

@@ -1936,21 +1936,28 @@ function ComunicadosTab() {
 // ═══════════════════════════════════════════════════════════════════
 function PassaporteTab() {
   const [items, setItems] = useState<PassaporteItem[]>([])
+  const [ranking, setRanking] = useState<any[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ user_id:'', badge_name:'', description:'', points:'' })
+  
+  // view mode: 'passaporte' or 'ranking'
+  const [view, setView] = useState<'passaporte'|'ranking'>('passaporte')
+  
   const user = getUser()
-  const canEdit = ['admin', 'oficineiro', 'coordenacao'].includes(user.role)
+  const canEdit = ['admin', 'oficineiro', 'coordenacao', 'diretoria'].includes(user.role)
 
   const load = useCallback(async () => {
     setLoading(true)
     try { 
-      const [rItems, rUsers] = await Promise.all([
+      const [rItems, rUsers, rRanking] = await Promise.all([
         fetch('/api/passaporte', {headers:authH()}),
-        canEdit ? fetch('/api/users', {headers:authH()}) : Promise.resolve(null)
+        canEdit ? fetch('/api/users', {headers:authH()}) : Promise.resolve(null),
+        fetch('/api/passaporte/ranking', {headers:authH()})
       ])
       setItems(await rItems.json())
+      setRanking(await rRanking.json())
       if (rUsers) {
         const u = await rUsers.json()
         setUsers(Array.isArray(u) ? u : [])
@@ -1976,52 +1983,68 @@ function PassaporteTab() {
     }
   }
 
-  const totalPoints = items.reduce((acc, cur) => acc + (cur.points || 0), 0)
+  // Calculate my total points if I'm a student (from the ranking array)
+  const myRankInfo = ranking.find(r => r.id === user.id)
+  const myTotalPoints = myRankInfo ? myRankInfo.total_points : 0
 
-  // Para visualização de alunos (agrupado por nome se for admin, ou listado direto se for aluno)
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-8 bg-gradient-to-r from-carbono to-gray-800 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* HEADER BANNER */}
+      <div className="bg-gradient-to-r from-carbono to-gray-800 p-8 rounded-3xl shadow-xl text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-dourado/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-3xl">🏅</span>
-            <h2 className="font-serif text-3xl font-bold tracking-wide">Passaporte Cultural</h2>
+        <div className="relative z-10 flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-3xl">🏅</span>
+              <h2 className="font-serif text-3xl font-bold tracking-wide">Passaporte Cultural</h2>
+            </div>
+            <p className="text-gray-300 text-sm max-w-md">Portfólio verificado de conquistas, habilidades e participação no ecossistema de cultura urbana.</p>
+            
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setView('passaporte')} className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${view==='passaporte' ? 'bg-white text-carbono' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+                Passaporte & Selos
+              </button>
+              <button onClick={() => setView('ranking')} className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${view==='ranking' ? 'bg-white text-carbono' : 'bg-white/10 text-white hover:bg-white/20'}`}>
+                🏆 Ranking Geral
+              </button>
+            </div>
           </div>
-          <p className="text-gray-300 text-sm max-w-md">Portfólio verificado de conquistas, habilidades e participação no ecossistema de cultura urbana.</p>
+          
+          {user.role === 'aluno' && (
+            <div className="bg-white/10 backdrop-blur-md px-8 py-4 rounded-2xl border border-white/20 text-center">
+              <p className="text-[10px] text-dourado font-bold uppercase tracking-widest mb-1">XP Total (Selos + Games)</p>
+              <p className="text-5xl font-bold font-serif">{myTotalPoints}</p>
+            </div>
+          )}
+          {canEdit && (
+            <button onClick={() => setShowForm(true)} className="bg-dourado text-carbono px-6 py-3 rounded-full text-sm font-bold hover:bg-yellow-500 shadow-lg">
+              + Conceder Selo
+            </button>
+          )}
         </div>
-        {!canEdit && (
-          <div className="relative z-10 bg-white/10 backdrop-blur-md px-8 py-4 rounded-2xl border border-white/20 text-center">
-            <p className="text-[10px] text-dourado font-bold uppercase tracking-widest mb-1">Meus Pontos</p>
-            <p className="text-5xl font-bold font-serif">{totalPoints}</p>
-          </div>
-        )}
-        {canEdit && (
-          <button onClick={() => setShowForm(true)} className="relative z-10 bg-dourado text-carbono px-6 py-3 rounded-full text-sm font-bold hover:bg-yellow-500 shadow-lg">+ Conceder Selo</button>
-        )}
       </div>
 
       {showForm && canEdit && (
         <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
-          <h3 className="font-bold text-lg text-carbono mb-6">Conceder Nova Conquista</h3>
+          <h3 className="font-bold text-lg text-carbono mb-6">Conceder Nova Conquista Especial</h3>
           <form onSubmit={save} className="grid grid-cols-2 gap-5">
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Aluno</label>
               <select required value={form.user_id} onChange={e=>setForm({...form,user_id:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado">
                 <option value="">Selecione o aluno...</option>
-                {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                {users.filter(u=>u.role==='aluno').map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Selo / Medalha</label>
-              <input required placeholder="Ex: Líder de Turma, Oficina Concluída" value={form.badge_name} onChange={e=>setForm({...form,badge_name:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+              <input required placeholder="Ex: Líder de Turma, Destaque do Mês" value={form.badge_name} onChange={e=>setForm({...form,badge_name:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
             </div>
             <div className="col-span-2">
               <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Descrição (O que o aluno fez?)</label>
               <input required placeholder="Descreva a atividade ou conquista" value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">PontosXP</label>
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Pontos XP Extras</label>
               <input required type="number" placeholder="Ex: 50" value={form.points} onChange={e=>setForm({...form,points:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
             </div>
             <div className="flex items-end justify-end gap-3">
@@ -2032,36 +2055,90 @@ function PassaporteTab() {
         </div>
       )}
 
-      {loading ? <div className="text-center py-20 text-gray-400">Carregando passaporte...</div> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map(i => (
-            <div key={i.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative">
-              {canEdit && (
-                <button onClick={()=>del(i.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando dados...</div> : (
+        <>
+          {view === 'passaporte' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {items.map(i => (
+                <div key={i.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative">
+                  {canEdit && (
+                    <button onClick={()=>del(i.id)} className="absolute top-4 right-4 text-gray-300 hover:text-red-500">✕</button>
+                  )}
+                  <div className="w-14 h-14 bg-gradient-to-br from-yellow-100 to-yellow-300 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm">🌟</div>
+                  <h4 className="font-bold text-lg text-carbono mb-1">{i.badge_name}</h4>
+                  <p className="text-sm text-gray-500 mb-4 line-clamp-2" title={i.description}>{i.description}</p>
+                  
+                  <div className="flex justify-between items-end border-t border-gray-100 pt-4 mt-auto">
+                    <div>
+                      {canEdit && <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Aluno: {i.user_name}</p>}
+                      <p className="text-[10px] font-bold text-gray-400 uppercase">{new Date(i.created_at).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div className="bg-gray-50 text-carbono px-3 py-1.5 rounded-lg text-xs font-bold shadow-inner">
+                      +{i.points} XP
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {items.length === 0 && (
+                <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma conquista registrada ainda.</div>
               )}
-              <div className="w-14 h-14 bg-gradient-to-br from-yellow-100 to-yellow-300 rounded-2xl flex items-center justify-center text-2xl mb-4 shadow-sm">🌟</div>
-              <h4 className="font-bold text-lg text-carbono mb-1">{i.badge_name}</h4>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2" title={i.description}>{i.description}</p>
-              
-              <div className="flex justify-between items-end border-t border-gray-100 pt-4 mt-auto">
-                <div>
-                  {canEdit && <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Aluno: {i.user_name}</p>}
-                  <p className="text-[10px] font-bold text-gray-400 uppercase">{new Date(i.created_at).toLocaleDateString('pt-BR')}</p>
-                </div>
-                <div className="bg-gray-50 text-carbono px-3 py-1.5 rounded-lg text-xs font-bold shadow-inner">
-                  +{i.points} XP
-                </div>
-              </div>
             </div>
-          ))}
-          {items.length === 0 && (
-            <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma conquista registrada ainda.</div>
           )}
-        </div>
+
+          {view === 'ranking' && (
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Posição</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Aluno</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">GAMES</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Selos Extra</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">XP Total</th>
+                    {canEdit && <th className="px-6 py-4"></th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {ranking.map((r, index) => (
+                    <tr key={r.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        {index === 0 && <span className="text-2xl" title="1º Lugar">🥇</span>}
+                        {index === 1 && <span className="text-2xl" title="2º Lugar">🥈</span>}
+                        {index === 2 && <span className="text-2xl" title="3º Lugar">🥉</span>}
+                        {index > 2 && <span className="font-bold text-gray-400 ml-2">{index + 1}º</span>}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-carbono">{r.name}</td>
+                      <td className="px-6 py-4 text-sm text-blue-600 font-bold">+{r.games_points} XP</td>
+                      <td className="px-6 py-4 text-sm text-yellow-600 font-bold">+{r.badges_points} XP</td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="bg-carbono text-marfim px-3 py-1.5 rounded-lg text-sm font-bold shadow-sm">
+                          {r.total_points} XP
+                        </span>
+                      </td>
+                      {canEdit && (
+                        <td className="px-6 py-4 text-right">
+                          <button onClick={() => { setForm({...form, user_id: r.id.toString()}); setShowForm(true); window.scrollTo(0,0); }} className="text-xs font-bold text-dourado hover:text-yellow-600 bg-yellow-50 px-3 py-1.5 rounded-lg">
+                            + Dar Selo
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                  {ranking.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-8 text-center text-gray-400">Nenhum aluno no ranking ainda.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
 }
+
 
 // ═══════════════════════════════════════════════════════════════════
 // AUTORIZACOES DIGITAIS TAB
@@ -2306,7 +2383,7 @@ function AvaliacoesTab() {
   const [view, setView] = useState<'list' | 'create' | 'answer' | 'grade'>('list')
 
   // Create Form State
-  const blankForm = { title:'', description:'', date:'', time:'', type:'questionario', target_type:'all', target_ids:[] as string[], max_score: 10 }
+  const blankForm = { title:'', description:'', date:'', time:'', type:'questionario', target_type:'all', target_ids:[] as string[], max_score: 10, is_gamified: false }
   const [form, setForm] = useState(blankForm)
   const [questions, setQuestions] = useState<any[]>([]) // for type='questionario'
   const [saving, setSaving] = useState(false)
@@ -2493,6 +2570,15 @@ function AvaliacoesTab() {
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Nota Máxima (Opcional)</label>
                 <input type="number" min="0" step="0.1" value={form.max_score} onChange={e=>setForm({...form,max_score:parseFloat(e.target.value)})} className="w-full bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg outline-none focus:border-dourado" />
+              </div>
+              <div className="col-span-2 mt-2">
+                <label className="flex items-center gap-3 cursor-pointer p-4 bg-purple-50 border border-purple-100 rounded-xl hover:bg-purple-100 transition-colors">
+                  <input type="checkbox" checked={form.is_gamified} onChange={e=>setForm({...form, is_gamified: e.target.checked})} className="w-5 h-5 rounded text-purple-600 focus:ring-purple-600" />
+                  <div>
+                    <span className="font-bold text-purple-900 block">🎮 É uma Atividade Gamificada (Game/Missão)?</span>
+                    <span className="text-xs text-purple-700">Se marcado, a nota desta atividade valerá XP e somará no Ranking do Passaporte Cultural do aluno.</span>
+                  </div>
+                </label>
               </div>
               
               {/* TARGETS */}
@@ -2751,7 +2837,10 @@ function AvaliacoesTab() {
                   <span className="text-[10px] font-bold text-dourado bg-yellow-50 px-2 py-1 rounded-md uppercase tracking-wider">{a.type}</span>
                   {a.date && <span className="text-[10px] font-bold text-gray-400">{new Date(a.date+'T00:00:00').toLocaleDateString('pt-BR')}</span>}
                 </div>
-                <h3 className="font-bold text-lg text-carbono mb-2 leading-tight">{a.title}</h3>
+                <h3 className="font-bold text-lg text-carbono mb-2 leading-tight">
+                  {a.is_gamified === 1 && <span className="inline-block mr-2" title="Atividade Gamificada (Vale XP no Passaporte)">🎮</span>}
+                  {a.title}
+                </h3>
                 {a.description && <p className="text-xs text-gray-500 mb-4 line-clamp-2">{a.description}</p>}
                 
                 {user.role === 'aluno' && a.my_delivery && (

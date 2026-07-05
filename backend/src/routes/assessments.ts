@@ -84,7 +84,7 @@ router.get('/:id', authMiddleware, (req, res) => {
 router.post('/', authMiddleware, (req, res) => {
   const tenant_id = (req as any).user.tenant_id
   const user = (req as any).user
-  const { title, description, date, time, type, target_type, target_ids, max_score, questions } = req.body
+  const { title, description, date, time, type, target_type, target_ids, max_score, questions, is_gamified } = req.body
 
   if (!['admin', 'diretoria', 'oficineiro'].includes(user.role)) {
     return res.status(403).json({ error: 'Acesso negado' })
@@ -93,10 +93,10 @@ router.post('/', authMiddleware, (req, res) => {
   try {
     db.exec('BEGIN TRANSACTION')
     const stmt = db.prepare(`
-      INSERT INTO assessments (tenant_id, title, description, date, time, type, target_type, target_ids, max_score, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO assessments (tenant_id, title, description, date, time, type, target_type, target_ids, max_score, is_gamified, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
-    const info = stmt.run(tenant_id, title, description, date || null, time || null, type, target_type, JSON.stringify(target_ids || []), max_score || null, user.id)
+    const info = stmt.run(tenant_id, title, description, date || null, time || null, type, target_type, JSON.stringify(target_ids || []), max_score || null, is_gamified ? 1 : 0, user.id)
     const assessmentId = info.lastInsertRowid
 
     if (type === 'questionario' && Array.isArray(questions)) {
