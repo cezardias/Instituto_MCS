@@ -262,4 +262,35 @@ router.get('/:id/student-attendance', authMiddleware, (req, res) => {
   }
 })
 
+// GET /api/classes/:id/report
+router.get('/:id/report', authMiddleware, (req, res) => {
+  const { id } = req.params
+  const user = (req as any).user
+
+  if (user.role !== 'admin' && user.role !== 'diretoria') {
+    return res.status(403).json({ error: 'Acesso negado' })
+  }
+
+  try {
+    const query = `
+      SELECT 
+        u.name as student_name,
+        cl.date as lesson_date,
+        cl.title as lesson_title,
+        a.status,
+        a.justification_text
+      FROM users u
+      JOIN class_students cs ON u.id = cs.student_id
+      JOIN class_lessons cl ON cs.class_id = cl.class_id
+      LEFT JOIN attendance a ON a.lesson_id = cl.id AND a.student_id = u.id
+      WHERE cs.class_id = ?
+      ORDER BY u.name ASC, cl.date ASC, cl.start_time ASC
+    `
+    const records = db.prepare(query).all(id)
+    res.json(records)
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 export default router

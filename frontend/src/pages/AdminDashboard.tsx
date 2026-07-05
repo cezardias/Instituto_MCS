@@ -2354,6 +2354,33 @@ function TurmasTab() {
     load()
   }
 
+  const downloadReport = async (c: any) => {
+    try {
+      const r = await fetch(`/api/classes/${c.id}/report`, {headers:authH()})
+      const data = await r.json()
+      if (data.error) return alert(data.error)
+      if (data.length === 0) return alert('Nenhum dado de frequência encontrado.')
+      
+      let csv = 'Aluno,Data da Aula,Aula,Status,Justificativa\\n'
+      data.forEach((row: any) => {
+        const statusStr = row.status === 'present' ? 'Presente' : row.status === 'absent' ? 'Falta' : row.status === 'justified' ? 'Falta Justificada' : 'Sem Registro'
+        csv += `"${row.student_name}","${new Date(row.lesson_date+'T00:00:00').toLocaleDateString('pt-BR')}","${row.lesson_title}","${statusStr}","${row.justification_text || ''}"\\n`
+      })
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.setAttribute('href', url)
+      link.setAttribute('download', `relatorio_frequencia_${c.name.replace(/\\s+/g, '_')}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch {
+      alert('Erro ao gerar relatório')
+    }
+  }
+
   // --- Lessons Logic ---
   const openLessons = async (c: any) => {
     setActiveClass(c)
@@ -2696,9 +2723,16 @@ function TurmasTab() {
                 <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase">{c.teachers?.length||0} Oficineiros</span>
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                <button onClick={() => canTakeAttendance ? openLessons(c) : loadStudentHistory(c)} className="bg-gray-50 text-carbono px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors">
-                  {canTakeAttendance ? '📓 Diário de Classe' : '📊 Ver Frequência'}
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => canTakeAttendance ? openLessons(c) : loadStudentHistory(c)} className="bg-gray-50 text-carbono px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors border border-gray-100">
+                    {canTakeAttendance ? '📓 Diário de Classe' : '📊 Ver Frequência'}
+                  </button>
+                  {canEditClasses && (
+                    <button onClick={() => downloadReport(c)} className="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">
+                      📄 Relatório
+                    </button>
+                  )}
+                </div>
                 {canEditClasses && (
                   <div className="flex gap-2">
                     <button onClick={() => openEdit(c)} className="text-xs font-bold text-gray-400 hover:text-carbono">EDITAR</button>
