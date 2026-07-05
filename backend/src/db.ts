@@ -175,6 +175,8 @@ const createAuthorizations = `CREATE TABLE IF NOT EXISTS authorizations (
   event_date TEXT,
   event_time TEXT,
   location TEXT,
+  target_type TEXT DEFAULT 'all',
+  target_id INTEGER,
   created_by INTEGER NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
@@ -186,6 +188,39 @@ const createAuthorizationSignatures = `CREATE TABLE IF NOT EXISTS authorization_
   student_id INTEGER NOT NULL,
   signed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(authorization_id, parent_id, student_id)
+)`
+
+const createClasses = `CREATE TABLE IF NOT EXISTS classes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
+const createClassTeachers = `CREATE TABLE IF NOT EXISTS class_teachers (
+  class_id INTEGER NOT NULL,
+  teacher_id INTEGER NOT NULL,
+  PRIMARY KEY(class_id, teacher_id)
+)`
+
+const createClassStudents = `CREATE TABLE IF NOT EXISTS class_students (
+  class_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
+  PRIMARY KEY(class_id, student_id)
+)`
+
+const createAttendance = `CREATE TABLE IF NOT EXISTS attendance (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  class_id INTEGER NOT NULL,
+  student_id INTEGER NOT NULL,
+  date TEXT NOT NULL,
+  status TEXT NOT NULL,
+  justification_text TEXT,
+  justification_file_url TEXT,
+  recorded_by INTEGER NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(class_id, student_id, date)
 )`
 
 db.exec(createTenants)
@@ -200,6 +235,8 @@ try { db.exec("ALTER TABLE users ADD COLUMN address TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN photo_url TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN parent_id INTEGER") } catch(e) {}
+try { db.exec("ALTER TABLE authorizations ADD COLUMN target_type TEXT DEFAULT 'all'") } catch(e) {}
+try { db.exec("ALTER TABLE authorizations ADD COLUMN target_id INTEGER") } catch(e) {}
 db.exec(createProjects)
 db.exec(createAlunos)
 db.exec(createNews)
@@ -214,5 +251,9 @@ db.exec(createComunicados)
 db.exec(createPassaporteItems)
 db.exec(createAuthorizations)
 db.exec(createAuthorizationSignatures)
+db.exec(createClasses)
+db.exec(createClassTeachers)
+db.exec(createClassStudents)
+db.exec(createAttendance)
 
 export default db

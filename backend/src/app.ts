@@ -20,6 +20,7 @@ import videosRoutes from './routes/videos'
 import comunicadosRoutes from './routes/comunicados'
 import passaporteRoutes from './routes/passaporte'
 import authorizationsRoutes from './routes/authorizations'
+import classesRoutes from './routes/classes'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -55,6 +56,7 @@ app.use('/api/videos', videosRoutes)
 app.use('/api/comunicados', comunicadosRoutes)
 app.use('/api/passaporte', passaporteRoutes)
 app.use('/api/authorizations', authorizationsRoutes)
+app.use('/api/classes', classesRoutes)
 app.use('/graphql', graphqlHTTP({ schema, rootValue, graphiql: true }))
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 

@@ -26,16 +26,36 @@ router.get('/', authMiddleware, (req, res) => {
       // Find students belonging to this parent
       const students = db.prepare('SELECT id, name FROM users WHERE tenant_id = ? AND parent_id = ? AND role = ?').all(tenant_id, user.id, 'aluno') as any[]
       
-      const authsWithSignatures = auths.map(auth => {
-        // Check if parent signed for their students
+      const childrenIds = students.map(s => s.id)
+      let myStudentsClasses: any[] = []
+      if (childrenIds.length > 0) {
+        const placeholders = childrenIds.map(()=>'?').join(',')
+        myStudentsClasses = db.prepare(`SELECT class_id FROM class_students WHERE student_id IN (${placeholders})`).all(...childrenIds).map((r:any)=>r.class_id)
+      }
+
+      const filteredAuths = auths.filter(auth => {
+        if (!auth.target_type || auth.target_type === 'all') return true
+        if (auth.target_type === 'student') return childrenIds.includes(auth.target_id)
+        if (auth.target_type === 'class') return myStudentsClasses.includes(auth.target_id)
+        return false
+      })
+
+      const authsWithSignatures = filteredAuths.map(auth => {
+        let relevantStudents = students
+        if (auth.target_type === 'student') relevantStudents = students.filter(s => s.id === auth.target_id)
+        else if (auth.target_type === 'class') {
+          const classSt = db.prepare('SELECT student_id FROM class_students WHERE class_id = ?').all(auth.target_id).map((r:any)=>r.student_id)
+          relevantStudents = students.filter(s => classSt.includes(s.id))
+        }
+
         const signs = db.prepare('SELECT student_id, signed_at FROM authorization_signatures WHERE authorization_id = ? AND parent_id = ?').all(auth.id, user.id) as any[]
         const signedStudentIds = signs.map(s => s.student_id)
         
         return {
           ...auth,
-          signed: students.length > 0 && signedStudentIds.length === students.length, // signed if signed for all children
+          signed: relevantStudents.length > 0 && relevantStudents.every(s => signedStudentIds.includes(s.id)),
           signed_at: signs.length > 0 ? signs[0].signed_at : null,
-          students: students.map(s => ({
+          students: relevantStudents.map(s => ({
             id: s.id,
             name: s.name,
             signed: signedStudentIds.includes(s.id)
@@ -53,7 +73,7 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Create authorization (admin/diretoria)
 router.post('/', authMiddleware, (req, res) => {
-  const { title, description, event_date, event_time, location } = req.body
+  const { title, description, event_date, event_time, location, target_type, target_id } = req.body
   const tenant_id = (req as any).user.tenant_id
   const user = (req as any).user
 
@@ -67,10 +87,10 @@ router.post('/', authMiddleware, (req, res) => {
 
   try {
     const stmt = db.prepare(`
-      INSERT INTO authorizations (tenant_id, title, description, event_date, event_time, location, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO authorizations (tenant_id, title, description, event_date, event_time, location, target_type, target_id, created_by)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
-    const info = stmt.run(tenant_id, title, description || null, event_date, event_time || null, location || null, user.id)
+    const info = stmt.run(tenant_id, title, description || null, event_date, event_time || null, location || null, target_type || 'all', target_id || null, user.id)
     res.status(201).json({ id: info.lastInsertRowid })
   } catch (error: any) {
     res.status(500).json({ error: error.message })
@@ -88,7 +108,7 @@ router.post('/:id/sign', authMiddleware, (req, res) => {
   }
 
   try {
-    const auth = db.prepare('SELECT * FROM authorizations WHERE id = ? AND tenant_id = ?').get(id, tenant_id)
+    const auth = db.prepare('SELECT * FROM authorizations WHERE id = ? AND tenant_id = ?').get(id, tenant_id) as any
     if (!auth) {
       return res.status(404).json({ error: 'Autorização não encontrada' })
     }
@@ -96,8 +116,16 @@ router.post('/:id/sign', authMiddleware, (req, res) => {
     // Get all students for this parent
     const students = db.prepare('SELECT id FROM users WHERE tenant_id = ? AND parent_id = ? AND role = ?').all(tenant_id, user.id, 'aluno') as any[]
     
-    if (students.length === 0) {
-      return res.status(400).json({ error: 'Você não tem alunos vinculados' })
+    let studentsToSign = students
+    if (auth.target_type === 'student') {
+      studentsToSign = students.filter(s => s.id === auth.target_id)
+    } else if (auth.target_type === 'class') {
+      const classSt = db.prepare('SELECT student_id FROM class_students WHERE class_id = ?').all(auth.target_id).map((r:any)=>r.student_id)
+      studentsToSign = students.filter(s => classSt.includes(s.id))
+    }
+
+    if (studentsToSign.length === 0) {
+      return res.status(400).json({ error: 'Você não tem alunos vinculados a esta autorização' })
     }
 
     db.exec('BEGIN TRANSACTION')
@@ -107,7 +135,7 @@ router.post('/:id/sign', authMiddleware, (req, res) => {
         VALUES (?, ?, ?)
       `)
       
-      for (const student of students) {
+      for (const student of studentsToSign) {
         stmt.run(id, user.id, student.id)
       }
       db.exec('COMMIT')

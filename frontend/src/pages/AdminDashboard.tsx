@@ -49,6 +49,7 @@ const SIDEBAR = [
     { id:'canal', label:'Canal de Denúncias', icon:'🔔', roles:['admin', 'diretoria'] },
   ]},
   { group: 'EAD & ALUNOS', items: [
+    { id:'turmas', label:'Turmas e Frequência', icon:'📅', roles:['admin', 'diretoria', 'oficineiro', 'aluno', 'responsavel'] },
     { id:'ead', label:'Plataforma de Aulas', icon:'▶️', roles:['admin', 'aluno', 'oficineiro', 'coordenacao', 'diretoria', 'responsavel'] },
     { id:'passaporte', label:'Passaporte Cultural', icon:'🏅', roles:['admin', 'aluno'] },
     { id:'gestao_ead', label:'Gestão de Aulas', icon:'🎬', roles:['admin'] },
@@ -239,7 +240,8 @@ export default function AdminDashboard() {
           {tab === 'comunicados' && <ComunicadosTab />}
           {tab === 'passaporte'  && <PassaporteTab />}
           {tab === 'autorizacoes' && <AutorizacoesTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'turmas'      && <TurmasTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -2068,18 +2070,34 @@ function AutorizacoesTab() {
   const [showForm, setShowForm] = useState(false)
   const [showSignatures, setShowSignatures] = useState<any>(null)
   const [signatures, setSignatures] = useState<any[]>([])
-  const blank = { title:'', description:'', event_date:'', event_time:'', location:'' }
+  const [classes, setClasses] = useState<any[]>([])
+  const [students, setStudents] = useState<any[]>([])
+
+  const blank = { title:'', description:'', event_date:'', event_time:'', location:'', target_type: 'all', target_id: '' }
   const [form, setForm] = useState(blank)
   const [saving, setSaving] = useState(false)
   const user = getUser()
   const canEdit = ['admin', 'diretoria'].includes(user.role)
+
+  const loadOptions = useCallback(async () => {
+    if (!canEdit) return
+    try {
+      const [rCls, rUsr] = await Promise.all([
+        fetch('/api/classes', {headers:authH()}),
+        fetch('/api/users', {headers:authH()})
+      ])
+      setClasses(await rCls.json())
+      const allUsers = await rUsr.json()
+      setStudents(allUsers.filter((u:any) => u.role === 'aluno'))
+    } catch {}
+  }, [canEdit])
 
   const load = useCallback(async () => {
     setLoading(true)
     try { const r = await fetch('/api/authorizations', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
     setLoading(false)
   }, [])
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); loadOptions() }, [load, loadOptions])
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true)
@@ -2150,6 +2168,28 @@ function AutorizacoesTab() {
               <input placeholder="Ex: Setor Cultural Sul..." value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
             </div>
             <div className="col-span-2">
+              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Destinatários / Público Alvo *</label>
+              <div className="flex gap-4">
+                <select value={form.target_type} onChange={e=>setForm({...form,target_type:e.target.value, target_id:''})} className="w-1/3 bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado font-bold">
+                  <option value="all">Todos os Alunos</option>
+                  <option value="class">Uma Turma Específica</option>
+                  <option value="student">Um Aluno Específico</option>
+                </select>
+                {form.target_type === 'class' && (
+                  <select required value={form.target_id} onChange={e=>setForm({...form,target_id:e.target.value})} className="w-2/3 bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado">
+                    <option value="">Selecione a turma...</option>
+                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                )}
+                {form.target_type === 'student' && (
+                  <select required value={form.target_id} onChange={e=>setForm({...form,target_id:e.target.value})} className="w-2/3 bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado">
+                    <option value="">Selecione o aluno...</option>
+                    {students.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                )}
+              </div>
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Descrição e Detalhes</label>
               <textarea rows={3} placeholder="Instruções, o que levar, etc..." value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado resize-none" />
             </div>
@@ -2200,6 +2240,8 @@ function AutorizacoesTab() {
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h3 className="font-bold text-xl text-carbono">{i.title}</h3>
+                  {i.target_type === 'class' && <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Turma Específica</span>}
+                  {i.target_type === 'student' && <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Aluno Específico</span>}
                   {user.role === 'responsavel' && i.signed && (
                     <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded-md uppercase">Autorizado</span>
                   )}
@@ -2239,6 +2281,324 @@ function AutorizacoesTab() {
           ))}
           {items.length === 0 && (
             <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma solicitação de autorização no momento.</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TURMAS E FREQUÊNCIA TAB
+// ═══════════════════════════════════════════════════════════════════
+function TurmasTab() {
+  const user = getUser()
+  const canEditClasses = ['admin', 'diretoria'].includes(user.role)
+  const canTakeAttendance = ['admin', 'diretoria', 'oficineiro'].includes(user.role)
+
+  const [classes, setClasses] = useState<any[]>([])
+  const [users, setUsers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  
+  const [showForm, setShowForm] = useState(false)
+  const [editingClass, setEditingClass] = useState<any>(null)
+  const [form, setForm] = useState({ name: '', description: '', teacher_ids: [] as number[], student_ids: [] as number[] })
+  
+  const [activeClass, setActiveClass] = useState<any>(null)
+  const [attDate, setAttDate] = useState(new Date().toISOString().split('T')[0])
+  const [attendance, setAttendance] = useState<any[]>([])
+  const [savingAtt, setSavingAtt] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [rCls, rUsr] = await Promise.all([
+        fetch('/api/classes', {headers:authH()}),
+        canEditClasses ? fetch('/api/users', {headers:authH()}) : Promise.resolve(null)
+      ])
+      setClasses(await rCls.json())
+      if (rUsr) setUsers(await rUsr.json())
+    } catch {}
+    setLoading(false)
+  }, [canEditClasses])
+  useEffect(() => { load() }, [load])
+
+  const openNew = () => { setEditingClass(null); setForm({ name:'', description:'', teacher_ids:[], student_ids:[] }); setShowForm(true) }
+  const openEdit = (c: any) => { setEditingClass(c); setForm({ name:c.name, description:c.description||'', teacher_ids:c.teachers.map((t:any)=>t.id), student_ids:c.students.map((s:any)=>s.id) }); setShowForm(true) }
+  
+  const saveClass = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const method = editingClass ? 'PUT' : 'POST'
+    const url = editingClass ? `/api/classes/${editingClass.id}` : '/api/classes'
+    await fetch(url, {method, headers:authH(), body:JSON.stringify(form)})
+    setShowForm(false); load()
+  }
+  
+  const deleteClass = async (id: number) => {
+    if(!confirm('Excluir turma?')) return
+    await fetch(`/api/classes/${id}`, {method:'DELETE', headers:authH()})
+    load()
+  }
+
+  const openAttendance = async (c: any) => {
+    setActiveClass(c)
+    await loadAttendance(c.id, attDate)
+  }
+
+  const loadAttendance = async (cid: number, date: string) => {
+    try {
+      const r = await fetch(`/api/classes/${cid}/attendance?date=${date}`, {headers:authH()})
+      setAttendance(await r.json())
+    } catch {}
+  }
+
+  useEffect(() => {
+    if (activeClass && canTakeAttendance) loadAttendance(activeClass.id, attDate)
+  }, [attDate, activeClass, canTakeAttendance])
+
+  const handleAttChange = (student_id: number, field: string, value: any) => {
+    const existing = attendance.find(a => a.student_id === student_id)
+    if (existing) {
+      setAttendance(attendance.map(a => a.student_id === student_id ? { ...a, [field]: value } : a))
+    } else {
+      setAttendance([...attendance, { student_id, status: 'present', [field]: value }])
+    }
+  }
+
+  const handleFileUpload = async (student_id: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('file', file)
+    try {
+      const r = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: fd })
+      const d = await r.json()
+      if (d.url) handleAttChange(student_id, 'justification_file_url', d.url)
+    } catch { alert('Erro no upload') }
+  }
+
+  const saveAttendance = async () => {
+    setSavingAtt(true)
+    const records = activeClass.students.map((s:any) => {
+      const a = attendance.find(x => x.student_id === s.id)
+      return {
+        student_id: s.id,
+        status: a?.status || 'present',
+        justification_text: a?.justification_text || '',
+        justification_file_url: a?.justification_file_url || ''
+      }
+    })
+    
+    await fetch(`/api/classes/${activeClass.id}/attendance`, {
+      method: 'POST', headers: authH(), body: JSON.stringify({ date: attDate, records })
+    })
+    setSavingAtt(false)
+    alert('Chamada salva com sucesso!')
+  }
+
+  const [studentHistory, setStudentHistory] = useState<any[]>([])
+  const loadStudentHistory = async (c: any) => {
+    setActiveClass(c)
+    try {
+      const r = await fetch(`/api/classes/${c.id}/attendance`, {headers:authH()})
+      setStudentHistory(await r.json())
+    } catch {}
+  }
+
+  const toggleTeacher = (id: number) => setForm(f => ({ ...f, teacher_ids: f.teacher_ids.includes(id) ? f.teacher_ids.filter(x=>x!==id) : [...f.teacher_ids, id] }))
+  const toggleStudent = (id: number) => setForm(f => ({ ...f, student_ids: f.student_ids.includes(id) ? f.student_ids.filter(x=>x!==id) : [...f.student_ids, id] }))
+
+  if (activeClass && !canTakeAttendance) {
+    const total = studentHistory.length
+    const presents = studentHistory.filter(h => h.status === 'present').length
+    const pct = total === 0 ? 100 : Math.round((presents / total) * 100)
+    
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <button onClick={() => setActiveClass(null)} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex items-center justify-between">
+          <div>
+            <h2 className="font-serif text-2xl text-carbono">{activeClass.name}</h2>
+            <p className="text-gray-500 text-sm">Histórico de Frequência</p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold font-serif text-carbono">{pct}%</p>
+            <p className="text-[10px] uppercase font-bold text-gray-400">Presença</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
+              <tr><th className="px-6 py-4">Data</th><th className="px-6 py-4">Status</th><th className="px-6 py-4">Detalhes</th></tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {studentHistory.map(h => (
+                <tr key={h.id}>
+                  <td className="px-6 py-4">{new Date(h.date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase ${h.status==='present'?'bg-green-100 text-green-700':h.status==='absent'?'bg-red-100 text-red-700':'bg-yellow-100 text-yellow-700'}`}>
+                      {h.status==='present' ? 'Presente' : h.status==='absent' ? 'Falta' : 'Justificado'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 text-xs">
+                    {h.justification_text && <p>{h.justification_text}</p>}
+                    {h.justification_file_url && <a href={h.justification_file_url} target="_blank" className="text-blue-500 hover:underline mt-1 inline-block">Ver Atestado</a>}
+                  </td>
+                </tr>
+              ))}
+              {studentHistory.length === 0 && <tr><td colSpan={3} className="text-center py-8 text-gray-400">Nenhum registro de frequência.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  if (activeClass && canTakeAttendance) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-6">
+        <button onClick={() => setActiveClass(null)} className="text-gray-500 font-bold text-sm hover:text-carbono">← Voltar às Turmas</button>
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="font-serif text-2xl text-carbono">{activeClass.name}</h2>
+            <p className="text-gray-500 text-sm">Lista de Chamada</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <input type="date" value={attDate} onChange={e=>setAttDate(e.target.value)} className="bg-gray-50 border border-gray-200 px-4 py-2 rounded-xl text-sm font-bold text-carbono outline-none" />
+            <button onClick={saveAttendance} disabled={savingAtt} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-50">
+              {savingAtt ? 'Salvando...' : 'Salvar Chamada'}
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-500 font-bold text-xs uppercase">
+              <tr><th className="px-6 py-4">Aluno</th><th className="px-6 py-4">Frequência</th><th className="px-6 py-4">Justificativa (Se houver)</th></tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {activeClass.students.map((s:any) => {
+                const att = attendance.find(a => a.student_id === s.id) || { status: 'present' }
+                return (
+                  <tr key={s.id} className="hover:bg-gray-50/50">
+                    <td className="px-6 py-4 font-semibold text-carbono">{s.name}</td>
+                    <td className="px-6 py-4">
+                      <select value={att.status} onChange={e=>handleAttChange(s.id, 'status', e.target.value)} className={`text-xs font-bold px-3 py-1.5 rounded-lg border outline-none ${att.status==='present'?'bg-green-50 border-green-200 text-green-700':att.status==='absent'?'bg-red-50 border-red-200 text-red-700':'bg-yellow-50 border-yellow-200 text-yellow-700'}`}>
+                        <option value="present">Presente</option>
+                        <option value="absent">Falta</option>
+                        <option value="justified">Falta Justificada</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      {att.status === 'justified' ? (
+                        <div className="flex flex-col gap-2">
+                          <input placeholder="Motivo da falta..." value={att.justification_text||''} onChange={e=>handleAttChange(s.id, 'justification_text', e.target.value)} className="w-full bg-white border border-gray-200 px-3 py-1.5 rounded-md text-xs" />
+                          <div className="flex items-center gap-2">
+                            <label className="cursor-pointer bg-gray-100 px-3 py-1.5 rounded-md text-xs font-bold text-gray-600 hover:bg-gray-200 shrink-0">
+                              📎 Atestado
+                              <input type="file" className="hidden" accept="image/*,.pdf" onChange={e=>handleFileUpload(s.id, e)} />
+                            </label>
+                            {att.justification_file_url && <a href={att.justification_file_url} target="_blank" className="text-[10px] text-blue-500 underline truncate max-w-[100px]">Ver anexo</a>}
+                          </div>
+                        </div>
+                      ) : <span className="text-gray-300 text-xs">—</span>}
+                    </td>
+                  </tr>
+                )
+              })}
+              {activeClass.students.length === 0 && <tr><td colSpan={3} className="text-center py-8 text-gray-400">Nenhum aluno nesta turma.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="font-serif text-3xl text-carbono">Gestão de Turmas e Frequência</h2>
+          <p className="text-sm text-gray-500">Turmas, Oficineiros e Diário de Classe.</p>
+        </div>
+        {canEditClasses && (
+          <button onClick={openNew} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Nova Turma</button>
+        )}
+      </div>
+
+      {showForm && canEditClasses && (
+        <div className="bg-white p-8 rounded-3xl shadow-lg border border-gray-100 mb-8">
+          <h3 className="font-bold text-lg text-carbono mb-6">{editingClass ? 'Editar Turma' : 'Criar Turma'}</h3>
+          <form onSubmit={saveClass} className="space-y-6">
+            <div className="grid grid-cols-2 gap-5">
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Nome da Turma *</label>
+                <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado" />
+              </div>
+              <div className="col-span-2">
+                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Descrição</label>
+                <textarea rows={2} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm outline-none focus:border-dourado resize-none" />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Oficineiros / Professores</label>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl max-h-48 overflow-y-auto p-2 space-y-1">
+                  {users.filter(u => u.role === 'oficineiro').map(u => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm p-2 hover:bg-white rounded cursor-pointer">
+                      <input type="checkbox" checked={form.teacher_ids.includes(u.id)} onChange={()=>toggleTeacher(u.id)} className="rounded text-dourado focus:ring-dourado" />
+                      {u.name}
+                    </label>
+                  ))}
+                  {users.filter(u => u.role === 'oficineiro').length === 0 && <p className="text-xs text-gray-400 p-2">Nenhum oficineiro cadastrado.</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Alunos Matriculados</label>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl max-h-48 overflow-y-auto p-2 space-y-1">
+                  {users.filter(u => u.role === 'aluno').map(u => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm p-2 hover:bg-white rounded cursor-pointer">
+                      <input type="checkbox" checked={form.student_ids.includes(u.id)} onChange={()=>toggleStudent(u.id)} className="rounded text-dourado focus:ring-dourado" />
+                      {u.name}
+                    </label>
+                  ))}
+                  {users.filter(u => u.role === 'aluno').length === 0 && <p className="text-xs text-gray-400 p-2">Nenhum aluno cadastrado.</p>}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-end justify-end gap-3 pt-4 border-t border-gray-50">
+              <button type="button" onClick={()=>setShowForm(false)} className="px-6 py-3 rounded-full text-xs font-bold text-gray-500 hover:bg-gray-100">Cancelar</button>
+              <button type="submit" className="bg-carbono text-marfim px-8 py-3 rounded-full text-xs font-bold hover:bg-gray-800">Salvar Turma</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando turmas...</div> : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {classes.map(c => (
+            <div key={c.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative group">
+              <h3 className="font-bold text-xl text-carbono mb-2">{c.name}</h3>
+              {c.description && <p className="text-sm text-gray-500 mb-4 line-clamp-2">{c.description}</p>}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-md uppercase">{c.students?.length||0} Alunos</span>
+                <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase">{c.teachers?.length||0} Oficineiros</span>
+              </div>
+              <div className="flex justify-between items-center pt-4 border-t border-gray-50">
+                <button onClick={() => canTakeAttendance ? openAttendance(c) : loadStudentHistory(c)} className="bg-gray-50 text-carbono px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 transition-colors">
+                  {canTakeAttendance ? '📝 Fazer Chamada' : '📊 Ver Frequência'}
+                </button>
+                {canEditClasses && (
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(c)} className="text-xs font-bold text-gray-400 hover:text-carbono">EDITAR</button>
+                    <button onClick={() => deleteClass(c.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+          {classes.length === 0 && (
+            <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma turma encontrada para o seu perfil.</div>
           )}
         </div>
       )}
