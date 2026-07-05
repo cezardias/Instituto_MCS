@@ -2361,21 +2361,87 @@ function TurmasTab() {
       if (data.error) return alert(data.error)
       if (data.length === 0) return alert('Nenhum dado de frequência encontrado.')
       
-      let csv = 'Aluno,Data da Aula,Aula,Status,Justificativa\\n'
+      const win = window.open('', '_blank')
+      if (!win) return alert('Por favor, permita pop-ups no seu navegador para gerar o relatório.')
+      
+      let rows = ''
       data.forEach((row: any) => {
         const statusStr = row.status === 'present' ? 'Presente' : row.status === 'absent' ? 'Falta' : row.status === 'justified' ? 'Falta Justificada' : 'Sem Registro'
-        csv += `"${row.student_name}","${new Date(row.lesson_date+'T00:00:00').toLocaleDateString('pt-BR')}","${row.lesson_title}","${statusStr}","${row.justification_text || ''}"\\n`
+        const color = row.status === 'present' ? '#15803d' : row.status === 'absent' ? '#b91c1c' : '#b45309'
+        rows += `
+          <tr>
+            <td>${row.student_name}</td>
+            <td>${new Date(row.lesson_date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+            <td>${row.lesson_title}</td>
+            <td style="font-weight:bold; color:${color};">${statusStr}</td>
+            <td style="color:#666;">${row.justification_text || '-'}</td>
+          </tr>
+        `
       })
       
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.setAttribute('href', url)
-      link.setAttribute('download', `relatorio_frequencia_${c.name.replace(/\\s+/g, '_')}.csv`)
-      link.style.visibility = 'hidden'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Relatório de Frequência - ${c.name}</title>
+            <style>
+              @page { size: A4; margin: 20mm; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; padding: 20px; font-size: 12px; }
+              .header { display: flex; align-items: center; border-bottom: 3px solid #D4AF37; padding-bottom: 20px; margin-bottom: 30px; }
+              .header img { height: 70px; margin-right: 20px; object-fit: contain; }
+              .header-text h1 { margin: 0; font-size: 24px; color: #1a1a1a; text-transform: uppercase; letter-spacing: 1px; }
+              .header-text p { margin: 5px 0 0; font-size: 13px; color: #666; }
+              table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+              th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+              th { background-color: #f9fafb; color: #4b5563; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
+              tr:nth-child(even) { background-color: #fcfcfc; }
+              .footer { text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 40px; }
+              @media print {
+                body { padding: 0; }
+                .header, table, .footer { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <img src="/logo.png" alt="Instituto MCS" />
+              <div class="header-text">
+                <h1>Instituto MCS</h1>
+                <p>Relatório Oficial de Frequência - Turma: <strong>${c.name}</strong></p>
+                <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} por ${user.name}</p>
+              </div>
+            </div>
+            
+            <table>
+              <thead>
+                <tr>
+                  <th>Aluno</th>
+                  <th>Data da Aula</th>
+                  <th>Aula / Assunto</th>
+                  <th>Status</th>
+                  <th>Justificativa</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rows}
+              </tbody>
+            </table>
+            
+            <div class="footer">
+              Instituto de Missões, Cultura e Sociedade - Relatório gerado eletronicamente.
+            </div>
+            
+            <script>
+              window.onload = function() {
+                setTimeout(function() { window.print(); }, 500);
+              }
+            </script>
+          </body>
+        </html>
+      `
+      win.document.write(html)
+      win.document.close()
     } catch {
       alert('Erro ao gerar relatório')
     }
