@@ -21,7 +21,7 @@ router.get('/', authMiddleware, (req, res) => {
 })
 
 router.post('/', authMiddleware, (req, res) => {
-  const { type, category, description, amount, date, status } = req.body
+  const { type, category, description, amount, date, status, receipt_url, expected_date } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if (!type || !category || !description || amount === undefined || !date) {
@@ -30,8 +30,8 @@ router.post('/', authMiddleware, (req, res) => {
 
   try {
     const info = db.prepare(
-      'INSERT INTO transactions (tenant_id, type, category, description, amount, date, status) VALUES (?,?,?,?,?,?,?)'
-    ).run(tenant_id, type, category, description, amount, date, status || 'pago')
+      'INSERT INTO transactions (tenant_id, type, category, description, amount, date, status, receipt_url, expected_date) VALUES (?,?,?,?,?,?,?,?,?)'
+    ).run(tenant_id, type, category, description, amount, date, status || 'pago', receipt_url || null, expected_date || null)
     res.status(201).json({ id: info.lastInsertRowid })
   } catch (e: any) {
     res.status(500).json({ error: e.message })
@@ -39,14 +39,18 @@ router.post('/', authMiddleware, (req, res) => {
 })
 
 router.put('/:id', authMiddleware, (req, res) => {
+  if ((req as any).user.role !== 'admin') {
+    return res.status(403).json({ error: 'Apenas administradores podem editar registros financeiros.' })
+  }
+
   const { id } = req.params
   const tenant_id = (req as any).user.tenant_id
-  const { category, description, amount, date, status } = req.body
+  const { category, description, amount, date, status, receipt_url, expected_date } = req.body
 
   try {
     const info = db.prepare(
-      'UPDATE transactions SET category=?, description=?, amount=?, date=?, status=? WHERE id=? AND tenant_id=?'
-    ).run(category, description, amount, date, status, id, tenant_id)
+      'UPDATE transactions SET category=?, description=?, amount=?, date=?, status=?, receipt_url=?, expected_date=? WHERE id=? AND tenant_id=?'
+    ).run(category, description, amount, date, status, receipt_url || null, expected_date || null, id, tenant_id)
     if (info.changes === 0) return res.status(404).json({ error: 'Not found' })
     res.json({ success: true })
   } catch (e: any) {
@@ -55,6 +59,10 @@ router.put('/:id', authMiddleware, (req, res) => {
 })
 
 router.delete('/:id', authMiddleware, (req, res) => {
+  if ((req as any).user.role !== 'admin') {
+    return res.status(403).json({ error: 'Apenas administradores podem excluir registros financeiros.' })
+  }
+
   const { id } = req.params
   const tenant_id = (req as any).user.tenant_id
   const info = db.prepare('DELETE FROM transactions WHERE id=? AND tenant_id=?').run(id, tenant_id)

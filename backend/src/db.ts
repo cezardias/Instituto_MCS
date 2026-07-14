@@ -302,6 +302,22 @@ db.exec(createAlunos)
 db.exec(createNews)
 db.exec(createTransactions)
 db.exec(createAccountability)
+
+// Migrations
+try {
+  db.exec('ALTER TABLE transactions ADD COLUMN receipt_url TEXT;');
+} catch (e: any) {
+  if (!e.message.includes('duplicate column name')) {
+    console.error('Migration error:', e.message);
+  }
+}
+try {
+  db.exec('ALTER TABLE transactions ADD COLUMN expected_date TEXT;');
+} catch (e: any) {
+  if (!e.message.includes('duplicate column name')) {
+    console.error('Migration error:', e.message);
+  }
+}
 db.exec(createDocuments)
 db.exec(createDenuncias)
 db.exec(createVideos)

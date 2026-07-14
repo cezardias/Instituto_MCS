@@ -14,7 +14,7 @@ interface News { id:number; title:string; category:string; content:string; image
 interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; created_at:string }
 interface Aluno { id:number; name:string; email:string; phone:string; area:string; status:string; birth_date:string; created_at:string }
 interface User { id:number; name:string; email:string; role:string; created_at:string }
-interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; created_at:string }
+interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; receipt_url?:string; expected_date?:string; created_at:string }
 interface AccountabilityReport { id:number; tenant_id:string; project_id:number; project_name?:string; title:string; document_url:string; status:string; created_at:string }
 interface DocumentItem { id:number; title:string; type:string; document_url:string; created_at:string }
 interface Denuncia { id:number; name:string|null; email:string|null; subject:string; message:string; status:string; created_at:string }
@@ -37,7 +37,7 @@ const SIDEBAR = [
   ]},
   { group: 'FINANCEIRO', items: [
     { id:'financeiro', label:'Recursos Recebidos', icon:'💰', roles:['admin', 'diretoria'] },
-    { id:'despesas', label:'Despesas', icon:'📉', roles:['admin', 'diretoria'] },
+    { id:'despesas', label:'Despesas', icon:'📉', roles:['admin', 'diretoria', 'oficineiro'] },
     { id:'prestacao', label:'Prestação de Contas', icon:'📋', roles:['admin', 'diretoria'] },
   ]},
   { group: 'MONITORAMENTO', items: [
@@ -1080,12 +1080,14 @@ function UsersTab() {
 // RECURSOS RECEBIDOS TAB (FINANCEIRO)
 // ═══════════════════════════════════════════════════════════════════
 function FinanceiroTab() {
+  const user = getUser()
   const [items, setItems] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ category:'Doação', description:'', amount:'', date:'', status:'pago' })
+  const [form, setForm] = useState({ category:'Doação', description:'', amount:'', date:'', status:'pago', expected_date: '' })
+  const [receipt, setReceipt] = useState<File | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -1097,8 +1099,16 @@ function FinanceiroTab() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
     try {
-      const r = await fetch('/api/finance', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'receita', amount: Number(form.amount)}) })
-      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({ category:'Doação', description:'', amount:'', date:'', status:'pago' }); load() }
+      let receipt_url = ''
+      if (receipt) {
+        const fd = new FormData()
+        fd.append('image', receipt)
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (uploadRes.ok) { const ud = await uploadRes.json(); receipt_url = ud.url }
+      }
+
+      const r = await fetch('/api/finance', { method:'POST', headers:authH(), body:JSON.stringify({...form, type:'receita', amount: Number(form.amount), receipt_url}) })
+      if (!r.ok) { const d = await r.json(); setError(d.error||'Erro') } else { setShowForm(false); setForm({ category:'Doação', description:'', amount:'', date:'', status:'pago', expected_date: '' }); setReceipt(null); load() }
     } catch { setError('Erro de conexão') }
     setSaving(false)
   }
@@ -1123,9 +1133,17 @@ function FinanceiroTab() {
               <div><label className="label-dash">Categoria</label><select value={form.category} onChange={e=>setForm({...form,category:e.target.value})} className="input-field"><option>Doação</option><option>Patrocínio</option><option>Edital Governamental</option><option>Convênio</option><option>Eventos</option></select></div>
               <div><label className="label-dash">Descrição *</label><input required value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="input-field" placeholder="Origem do recurso" /></div>
               <div className="grid grid-cols-2 gap-4">
+                <div><label className="label-dash">Status</label><select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="input-field"><option value="pago">Já foi pago</option><option value="a_receber">A receber</option></select></div>
                 <div><label className="label-dash">Valor (R$) *</label><input required type="number" step="0.01" value={form.amount} onChange={e=>setForm({...form,amount:e.target.value})} className="input-field" placeholder="0.00" /></div>
-                <div><label className="label-dash">Data *</label><input required type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} className="input-field" /></div>
               </div>
+              {form.status === 'pago' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="label-dash">Data do Pagamento *</label><input required type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} className="input-field" /></div>
+                  <div><label className="label-dash">Comprovante (Opcional)</label><input type="file" accept=".pdf,image/*" onChange={e=>setReceipt(e.target.files?.[0] || null)} className="w-full text-sm mt-2" /></div>
+                </div>
+              ) : (
+                <div><label className="label-dash">Data a Receber *</label><input required type="date" value={form.expected_date} onChange={e=>{setForm({...form,expected_date:e.target.value,date:e.target.value})}} className="input-field" /></div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold">Cancelar</button>
                 <button type="submit" disabled={saving} className="flex-1 bg-emerald-600 text-white py-3 rounded-full text-sm font-bold disabled:opacity-60">{saving ? 'Salvando...' : 'Registrar'}</button>
@@ -1145,11 +1163,26 @@ function FinanceiroTab() {
               {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum registro encontrado</td></tr>}
               {items.map(t => (
                 <tr key={t.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                  <td className="td-cell text-gray-500">{new Date(t.date+'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                  <td className="td-cell font-semibold text-carbono">{t.description}</td>
-                  <td className="td-cell text-gray-500">{t.category}</td>
+                  <td className="td-cell text-gray-500">
+                    {t.status === 'a_receber' && t.expected_date ? (
+                      <span className="block text-orange-500 font-bold" title="Data a receber">Prev: {new Date(t.expected_date+'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                    ) : (
+                      <span className="block" title="Data paga">{new Date(t.date+'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                    )}
+                  </td>
+                  <td className="td-cell font-semibold text-carbono">
+                    {t.description}
+                    {t.status === 'a_receber' && <span className="ml-2 text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold">A RECEBER</span>}
+                    {t.status === 'pago' && <span className="ml-2 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">PAGO</span>}
+                  </td>
+                  <td className="td-cell text-gray-500">
+                    {t.category}
+                    {t.receipt_url && <a href={t.receipt_url} target="_blank" rel="noreferrer" className="block mt-1 text-[11px] text-blue-500 hover:underline">📄 Ver Comprovante</a>}
+                  </td>
                   <td className="td-cell font-bold text-emerald-600 text-right">R$ {t.amount.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                  <td className="td-cell text-right">
+                    {user.role === 'admin' && <button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button>}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -1164,6 +1197,7 @@ function FinanceiroTab() {
 // DESPESAS TAB
 // ═══════════════════════════════════════════════════════════════════
 function DespesasTab() {
+  const user = getUser()
   const [items, setItems] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -1233,7 +1267,9 @@ function DespesasTab() {
                   <td className="td-cell font-semibold text-carbono">{t.description}</td>
                   <td className="td-cell text-gray-500">{t.category}</td>
                   <td className="td-cell font-bold text-red-500 text-right">- R$ {t.amount.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                  <td className="td-cell text-right"><button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button></td>
+                  <td className="td-cell text-right">
+                    {user.role === 'admin' && <button onClick={() => del(t.id)} className="text-xs font-bold text-red-400 hover:text-red-600">Excluir</button>}
+                  </td>
                 </tr>
               ))}
             </tbody>
