@@ -321,8 +321,23 @@ try {
 try {
   db.exec("ALTER TABLE projects ADD COLUMN area TEXT NOT NULL DEFAULT 'Educação';");
 } catch (e: any) {
-  if (!e.message.includes('duplicate column name')) {
-    console.error('Migration error (projects.area):', e.message);
+  if (!e.message.includes('duplicate column name')) console.error('Migration error (projects.area):', e.message);
+}
+
+const projectColumns = [
+  "ADD COLUMN location TEXT NOT NULL DEFAULT ''",
+  "ADD COLUMN beneficiados INTEGER DEFAULT 0",
+  "ADD COLUMN budget REAL DEFAULT 0",
+  "ADD COLUMN start_date TEXT",
+  "ADD COLUMN end_date TEXT",
+  "ADD COLUMN description TEXT"
+];
+
+for (const col of projectColumns) {
+  try {
+    db.exec(`ALTER TABLE projects ${col};`);
+  } catch (e: any) {
+    if (!e.message.includes('duplicate column name')) console.error(`Migration error (projects ${col}):`, e.message);
   }
 }
 db.exec(createDocuments)
