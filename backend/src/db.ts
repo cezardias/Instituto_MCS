@@ -330,7 +330,8 @@ const projectColumns = [
   "ADD COLUMN budget REAL DEFAULT 0",
   "ADD COLUMN start_date TEXT",
   "ADD COLUMN end_date TEXT",
-  "ADD COLUMN description TEXT"
+  "ADD COLUMN description TEXT",
+  "ADD COLUMN impact TEXT DEFAULT ''"
 ];
 
 for (const col of projectColumns) {
