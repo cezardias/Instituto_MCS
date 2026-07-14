@@ -24,7 +24,7 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Create user (admin only)
 router.post('/', authMiddleware, async (req, res) => {
-  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent, birth_date, medical_report_url, anamnesis_url, family_income, parents_profession } = req.body
+  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if ((req as any).user.role !== 'admin') {
@@ -82,8 +82,8 @@ router.post('/', authMiddleware, async (req, res) => {
         parent_id = pInfo.lastInsertRowid
       }
 
-      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id, birth_date, medical_report_url, anamnesis_url, family_income, parents_profession) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id, birth_date || null, medical_report_url || null, anamnesis_url || null, family_income || null, parents_profession || null)
+      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id, birth_date || null, medical_report_url || null, anamnesis_url || null, anamnesis_data ? JSON.stringify(anamnesis_data) : null, family_income || null, parents_profession || null)
       
       finalId = Number(info.lastInsertRowid)
       db.exec('COMMIT')

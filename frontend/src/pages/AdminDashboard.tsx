@@ -838,10 +838,10 @@ function UsersTab() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<any>({
     name: '', email: '', password: '', role: 'aluno',
     personal_email: '', cpf: '', rg: '', phone: '', address: '',
-    birth_date: '', family_income: '', parents_profession: ''
+    birth_date: '', family_income: '', parents_profession: '', anamnesis_data: null
   })
   const [parentForm, setParentForm] = useState({
     name: '', email: '', personal_email: '', cpf: '', rg: '', phone: '', birth_date: ''
@@ -849,6 +849,7 @@ function UsersTab() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [medicalReport, setMedicalReport] = useState<File | null>(null)
   const [anamnesisUser, setAnamnesisUser] = useState<any>(null)
+  const [showAnamnesisForm, setShowAnamnesisForm] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -891,7 +892,7 @@ function UsersTab() {
         const d = await r.json(); setError(d.error||'Erro ao criar usuário') 
       } else { 
         setShowForm(false)
-        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:''})
+        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null})
         setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
         setPhoto(null)
         setMedicalReport(null)
@@ -968,7 +969,12 @@ function UsersTab() {
                       </select>
                     </div>
                     <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Profissão dos Pais</label><input value={form.parents_profession} onChange={e=>setForm({...form,parents_profession:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
-                    <div className="col-span-2"><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Laudo Médico (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setMedicalReport(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
+                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Laudo Médico (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setMedicalReport(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
+                    <div className="col-span-2 mt-2">
+                      <button type="button" onClick={() => setShowAnamnesisForm(true)} className={`w-full border py-3 rounded-xl text-sm font-bold transition-colors ${form.anamnesis_data ? 'border-dourado bg-yellow-50 text-dourado' : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'}`}>
+                        {form.anamnesis_data ? '✓ Anamnese Preenchida (Clique para editar)' : '+ Preencher Anamnese Clínica (Opcional)'}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
@@ -1054,6 +1060,15 @@ function UsersTab() {
           user={anamnesisUser}
           onClose={() => setAnamnesisUser(null)}
           onSaved={() => { setAnamnesisUser(null); load(); }}
+          authH={authH}
+        />
+      )}
+
+      {showAnamnesisForm && (
+        <AnamnesisModal
+          user={{ name: form.name || 'Novo Aluno', anamnesis_data: form.anamnesis_data ? JSON.stringify(form.anamnesis_data) : null }}
+          onClose={() => setShowAnamnesisForm(false)}
+          onSaved={(data) => { setForm({ ...form, anamnesis_data: data }); setShowAnamnesisForm(false); }}
           authH={authH}
         />
       )}

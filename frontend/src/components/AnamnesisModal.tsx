@@ -27,7 +27,7 @@ const defaultData: AnamnesisData = {
 interface Props {
   user: any;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (data?: AnamnesisData) => void;
   authH: () => any;
 }
 
@@ -53,16 +53,21 @@ export default function AnamnesisModal({ user, onClose, onSaved, authH }: Props)
     setSaving(true)
     setError('')
     try {
-      const r = await fetch(`/api/users/${user.id}/anamnesis`, {
-        method: 'PUT',
-        headers: { ...authH(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ anamnesis_data: data })
-      })
-      if (!r.ok) {
-        const d = await r.json()
-        setError(d.error || 'Erro ao salvar anamnese')
+      if (user?.id) {
+        const r = await fetch(`/api/users/${user.id}/anamnesis`, {
+          method: 'PUT',
+          headers: { ...authH(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ anamnesis_data: data })
+        })
+        if (!r.ok) {
+          const d = await r.json()
+          setError(d.error || 'Erro ao salvar anamnese')
+        } else {
+          onSaved(data)
+        }
       } else {
-        onSaved()
+        // User not created yet, just pass data back
+        onSaved(data)
       }
     } catch {
       setError('Erro de conexão')
