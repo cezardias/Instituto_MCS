@@ -318,6 +318,13 @@ try {
     console.error('Migration error:', e.message);
   }
 }
+try {
+  db.exec("ALTER TABLE projects ADD COLUMN area TEXT NOT NULL DEFAULT 'Educação';");
+} catch (e: any) {
+  if (!e.message.includes('duplicate column name')) {
+    console.error('Migration error (projects.area):', e.message);
+  }
+}
 db.exec(createDocuments)
 db.exec(createDenuncias)
 db.exec(createVideos)
