@@ -289,6 +289,11 @@ try { db.exec("ALTER TABLE users ADD COLUMN address TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN photo_url TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN parent_id INTEGER") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN birth_date TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN medical_report_url TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN anamnesis_url TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN family_income TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN parents_profession TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_type TEXT DEFAULT 'all'") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_id INTEGER") } catch(e) {}
 db.exec(createProjects)

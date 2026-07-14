@@ -24,7 +24,7 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Create user (admin only)
 router.post('/', authMiddleware, async (req, res) => {
-  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent } = req.body
+  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent, birth_date, medical_report_url, anamnesis_url, family_income, parents_profession } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if ((req as any).user.role !== 'admin') {
@@ -77,13 +77,13 @@ router.post('/', authMiddleware, async (req, res) => {
         const parentSystemEmail = parent.email || generateUniqueEmail(parent.name)
         const parentHashedPassword = await hashPassword('123456')
         
-        const parentStmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        const pInfo = parentStmt.run(tenant_id, parent.name, parentSystemEmail, parentHashedPassword, 'responsavel', parent.personal_email || null, parent.cpf || null, parent.rg || null, parent.phone || null, 1)
+        const parentStmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, must_change_password, birth_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        const pInfo = parentStmt.run(tenant_id, parent.name, parentSystemEmail, parentHashedPassword, 'responsavel', parent.personal_email || null, parent.cpf || null, parent.rg || null, parent.phone || null, 1, parent.birth_date || null)
         parent_id = pInfo.lastInsertRowid
       }
 
-      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id)
+      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id, birth_date, medical_report_url, anamnesis_url, family_income, parents_profession) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id, birth_date || null, medical_report_url || null, anamnesis_url || null, family_income || null, parents_profession || null)
       
       finalId = Number(info.lastInsertRowid)
       db.exec('COMMIT')
