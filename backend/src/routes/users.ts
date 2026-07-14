@@ -34,14 +34,32 @@ router.post('/', authMiddleware, async (req, res) => {
   if (!name) return res.status(400).json({ error: 'Name is required' })
 
   // Auto-generate system email if not provided
-  const generateEmail = (n: string) => {
+  const generateUniqueEmail = (n: string) => {
     const clean = n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
     const parts = clean.split(' ').filter(p => p.length > 0)
-    if (parts.length > 1) return `${parts[0]}.${parts[parts.length-1]}@institutomcs.org.br`
-    return `${parts[0]}@institutomcs.org.br`
+    let base = ''
+    if (parts.length > 1) {
+      base = `${parts[0]}.${parts[parts.length-1]}`
+    } else if (parts.length === 1) {
+      base = `${parts[0]}`
+    } else {
+      base = `usuario`
+    }
+    
+    let candidate = `${base}@institutomcs.org.br`
+    let counter = 1
+    while (db.prepare('SELECT id FROM users WHERE email = ?').get(candidate)) {
+      candidate = `${base}${counter}@institutomcs.org.br`
+      counter++
+    }
+    return candidate
   }
 
-  const systemEmail = email || generateEmail(name)
+  if (email && db.prepare('SELECT id FROM users WHERE email = ?').get(email)) {
+    return res.status(400).json({ error: 'O login (e-mail de acesso) informado já está em uso.' })
+  }
+
+  const systemEmail = email || generateUniqueEmail(name)
   const systemPassword = password || '123456'
 
   try {
@@ -56,7 +74,7 @@ router.post('/', authMiddleware, async (req, res) => {
       
       // If role is aluno and parent info exists, create parent first
       if (role === 'aluno' && parent && parent.name) {
-        const parentSystemEmail = parent.email || generateEmail(parent.name)
+        const parentSystemEmail = parent.email || generateUniqueEmail(parent.name)
         const parentHashedPassword = await hashPassword('123456')
         
         const parentStmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
