@@ -795,22 +795,207 @@ function NewsTab() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> :
+      news.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
+          <p className="text-4xl mb-4">📰</p>
+          <p className="text-gray-500 font-semibold mb-4">Nenhuma notícia publicada</p>
+          <button onClick={openNew} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800">Criar primeira notícia</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {news.map(item => (
+            <div key={item.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+              {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover" />}
+              <div className="p-5">
+                <span className="text-[10px] font-bold uppercase tracking-widest bg-dourado/10 text-dourado px-2 py-1 rounded-full">{item.category}</span>
+                <p className="font-bold text-carbono mt-2 text-sm leading-snug">{item.title}</p>
+                <p className="text-xs text-gray-400 mt-1">{new Date(item.created_at).toLocaleDateString('pt-BR')}</p>
+                <div className="flex gap-2 mt-4">
+                  <button onClick={() => openEdit(item)} className="flex-1 text-xs font-bold border border-gray-200 py-2 rounded-full hover:bg-gray-50">Editar</button>
+                  <button onClick={() => del(item.id)} className="flex-1 text-xs font-bold border border-red-200 text-red-500 py-2 rounded-full hover:bg-red-50">Excluir</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// USERS TAB
+// ═══════════════════════════════════════════════════════════════════
+function UsersTab() {
+  const [users, setUsers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', role: 'aluno',
+    personal_email: '', cpf: '', rg: '', phone: '', address: '',
+    birth_date: '', family_income: '', parents_profession: ''
+  })
+  const [parentForm, setParentForm] = useState({
+    name: '', email: '', personal_email: '', cpf: '', rg: '', phone: '', birth_date: ''
+  })
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [medicalReport, setMedicalReport] = useState<File | null>(null)
+  const [anamnesis, setAnamnesis] = useState<File | null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/users',{headers:authH()}); const d = await r.json(); setUsers(Array.isArray(d)?d:[]) } catch { setUsers([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault(); setSaving(true); setError('')
+    try {
+      let photo_url = ''
+      if (photo) {
+        const fd = new FormData()
+        fd.append('image', photo)
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (uploadRes.ok) {
+          const ud = await uploadRes.json()
+          photo_url = ud.url
+        }
+      }
+
+      let medical_report_url = ''
+      if (medicalReport) {
+        const fd = new FormData()
+        fd.append('image', medicalReport)
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (uploadRes.ok) { const ud = await uploadRes.json(); medical_report_url = ud.url }
+      }
+
+      let anamnesis_url = ''
+      if (anamnesis) {
+        const fd = new FormData()
+        fd.append('image', anamnesis)
+        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
+        if (uploadRes.ok) { const ud = await uploadRes.json(); anamnesis_url = ud.url }
+      }
+
+      const payload = {
+        ...form,
+        photo_url,
+        medical_report_url,
+        anamnesis_url,
+        parent: form.role === 'aluno' ? parentForm : null
+      }
+
+      const r = await fetch('/api/users',{method:'POST',headers:authH(),body:JSON.stringify(payload)})
+      if (!r.ok) { 
+        const d = await r.json(); setError(d.error||'Erro ao criar usuário') 
+      } else { 
+        setShowForm(false)
+        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:''})
+        setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
+        setPhoto(null)
+        setMedicalReport(null)
+        setAnamnesis(null)
+        load() 
+      }
+    } catch { setError('Erro de conexão') }
+    setSaving(false)
+  }
+  
+  const del = async (id: number) => { if(!confirm('Excluir usuário?')) return; await fetch(`/api/users/${id}`,{method:'DELETE',headers:authH()}); load() }
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div><h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2><p className="text-sm text-gray-400">{users.length} usuários cadastrados no ecossistema</p></div>
+        <button onClick={() => { setShowForm(true); setError('') }} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto pt-10 pb-20">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl p-8 relative">
+            <div className="flex justify-between mb-6 border-b border-gray-100 pb-4">
+              <div>
+                <h3 className="font-serif text-2xl text-carbono">Novo Cadastro</h3>
+                <p className="text-xs text-gray-400">Preencha os dados (o login será gerado automaticamente se não informado)</p>
+              </div>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl hover:text-carbono">×</button>
+            </div>
+            {error && <div className="mb-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
+            
+            <form onSubmit={save} className="space-y-6">
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="label-dash block mb-1">Perfil (Qual a função no Instituto?) *</label>
+                  <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="input-field w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50">
+                    <option value="aluno">Aluno (Cria cadastro do Pai/Mãe junto)</option>
+                    <option value="oficineiro">Oficineiro (Gestão de turmas)</option>
+                    <option value="coordenacao">Coordenação (Indicadores, Projetos)</option>
+                    <option value="diretoria">Diretoria (Financeiro, Compliance)</option>
+                    <option value="admin">Administrador (Controle Total)</option>
+                  </select>
+                </div>
+
+                <div className="col-span-2"><h4 className="font-bold text-gray-600 text-sm border-b pb-2 mt-2">Dados Pessoais do Titular</h4></div>
+
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Nome Completo *</label><input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">E-mail Pessoal</label><input type="email" value={form.personal_email} onChange={e=>setForm({...form,personal_email:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">CPF</label><input value={form.cpf} onChange={e=>setForm({...form,cpf:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">RG</label><input value={form.rg} onChange={e=>setForm({...form,rg:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Telefone / WhatsApp</label><input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Endereço Completo</label><input value={form.address} onChange={e=>setForm({...form,address:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+
+                <div className="col-span-2">
+                  <label className="label-dash text-xs text-gray-500 font-bold block mb-1">Foto de Perfil</label>
+                  <input type="file" accept="image/*" onChange={e=>setPhoto(e.target.files?.[0] || null)} className="w-full text-sm" />
                 </div>
               </div>
 
               {form.role === 'aluno' && (
-                <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
-                  <h4 className="font-bold text-blue-800 text-sm border-b border-blue-200 pb-2">Dados do Responsável (Pai / Mãe)</h4>
-                  <p className="text-xs text-blue-600 mb-4">Ao preencher, o sistema criará o usuário do responsável automaticamente.</p>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Nome do Responsável *</label><input required value={parentForm.name} onChange={e=>setParentForm({...parentForm,name:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">E-mail Pessoal (Responsável)</label><input type="email" value={parentForm.personal_email} onChange={e=>setParentForm({...parentForm,personal_email:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                    
-                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">CPF (Responsável)</label><input value={parentForm.cpf} onChange={e=>setParentForm({...parentForm,cpf:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                    <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Telefone (Responsável)</label><input value={parentForm.phone} onChange={e=>setParentForm({...parentForm,phone:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                <>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="col-span-2"><h4 className="font-bold text-gray-600 text-sm border-b pb-2">Dados Complementares do Aluno</h4></div>
+                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Data de Nascimento (Aluno) *</label><input type="date" required value={form.birth_date} onChange={e=>setForm({...form,birth_date:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Faixa Salarial Família</label>
+                      <select value={form.family_income} onChange={e=>setForm({...form,family_income:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm bg-white">
+                        <option value="">Selecione...</option>
+                        <option value="Ate 1 salario">Até 1 salário mínimo</option>
+                        <option value="1 a 3 salarios">1 a 3 salários mínimos</option>
+                        <option value="3 a 5 salarios">3 a 5 salários mínimos</option>
+                        <option value="Mais de 5 salarios">Mais de 5 salários mínimos</option>
+                      </select>
+                    </div>
+                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Profissão dos Pais</label><input value={form.parents_profession} onChange={e=>setForm({...form,parents_profession:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
+                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Laudo Médico (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setMedicalReport(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
+                    <div className="col-span-2"><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Questionário de Anamnese (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setAnamnesis(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
                   </div>
-                </div>
+
+                  <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
+                    <h4 className="font-bold text-blue-800 text-sm border-b border-blue-200 pb-2">Dados do Responsável (Pai / Mãe)</h4>
+                    <p className="text-xs text-blue-600 mb-4">Ao preencher, o sistema criará o usuário do responsável automaticamente.</p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Nome do Responsável *</label><input required value={parentForm.name} onChange={e=>setParentForm({...parentForm,name:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">E-mail Pessoal (Responsável)</label><input type="email" value={parentForm.personal_email} onChange={e=>setParentForm({...parentForm,personal_email:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      
+                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">CPF (Responsável)</label><input value={parentForm.cpf} onChange={e=>setParentForm({...parentForm,cpf:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Telefone (Responsável)</label><input value={parentForm.phone} onChange={e=>setParentForm({...parentForm,phone:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      
+                      <div className="col-span-2"><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Data de Nascimento (Responsável)</label><input type="date" value={parentForm.birth_date} onChange={e=>setParentForm({...parentForm,birth_date:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                    </div>
+                  </div>
+                </>
               )}
 
               <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
