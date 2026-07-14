@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import AnamnesisModal from '../components/AnamnesisModal'
 
 // ─── helpers ─────────────────────────────────────────────────────────
 const getToken = () => localStorage.getItem('mcs_token') || ''
@@ -847,7 +848,7 @@ function UsersTab() {
   })
   const [photo, setPhoto] = useState<File | null>(null)
   const [medicalReport, setMedicalReport] = useState<File | null>(null)
-  const [anamnesis, setAnamnesis] = useState<File | null>(null)
+  const [anamnesisUser, setAnamnesisUser] = useState<any>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -878,19 +879,10 @@ function UsersTab() {
         if (uploadRes.ok) { const ud = await uploadRes.json(); medical_report_url = ud.url }
       }
 
-      let anamnesis_url = ''
-      if (anamnesis) {
-        const fd = new FormData()
-        fd.append('image', anamnesis)
-        const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd })
-        if (uploadRes.ok) { const ud = await uploadRes.json(); anamnesis_url = ud.url }
-      }
-
       const payload = {
         ...form,
         photo_url,
         medical_report_url,
-        anamnesis_url,
         parent: form.role === 'aluno' ? parentForm : null
       }
 
@@ -903,7 +895,6 @@ function UsersTab() {
         setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
         setPhoto(null)
         setMedicalReport(null)
-        setAnamnesis(null)
         load() 
       }
     } catch { setError('Erro de conexão') }
@@ -977,8 +968,7 @@ function UsersTab() {
                       </select>
                     </div>
                     <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Profissão dos Pais</label><input value={form.parents_profession} onChange={e=>setForm({...form,parents_profession:e.target.value})} className="w-full border border-gray-200 p-2.5 rounded-xl text-sm" /></div>
-                    <div><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Laudo Médico (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setMedicalReport(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
-                    <div className="col-span-2"><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Questionário de Anamnese (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setAnamnesis(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
+                    <div className="col-span-2"><label className="label-dash text-xs text-gray-500 font-bold block mb-1">Laudo Médico (Anexo)</label><input type="file" accept=".pdf,image/*" onChange={e=>setMedicalReport(e.target.files?.[0] || null)} className="w-full text-sm" /></div>
                   </div>
 
                   <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
@@ -1048,6 +1038,7 @@ function UsersTab() {
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">{u.cpf || '-'}</td>
                     <td className="px-6 py-4 text-right">
+                      {u.role === 'aluno' && <button onClick={() => setAnamnesisUser(u)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mr-4">ANAMNESE</button>}
                       <button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
                     </td>
                   </tr>
@@ -1056,6 +1047,15 @@ function UsersTab() {
             </table>
           </div>
         </div>
+      )}
+
+      {anamnesisUser && (
+        <AnamnesisModal
+          user={anamnesisUser}
+          onClose={() => setAnamnesisUser(null)}
+          onSaved={() => { setAnamnesisUser(null); load(); }}
+          authH={authH}
+        />
       )}
     </div>
   )

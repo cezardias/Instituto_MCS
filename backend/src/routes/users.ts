@@ -15,7 +15,7 @@ router.get('/', authMiddleware, (req, res) => {
   }
 
   try {
-    const users = db.prepare('SELECT id, name, email, role, created_at FROM users WHERE tenant_id = ?').all(tenant_id)
+    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id FROM users WHERE tenant_id = ?').all(tenant_id)
     res.json(users)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' })
@@ -117,6 +117,26 @@ router.delete('/:id', authMiddleware, (req, res) => {
     res.json({ success: true })
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete user' })
+  }
+})
+
+// Update user anamnesis (admin only)
+router.put('/:id/anamnesis', authMiddleware, (req, res) => {
+  const { id } = req.params
+  const { anamnesis_data } = req.body
+  const tenant_id = (req as any).user.tenant_id
+
+  if ((req as any).user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden' })
+  }
+
+  try {
+    const stmt = db.prepare('UPDATE users SET anamnesis_data = ? WHERE id = ? AND tenant_id = ?')
+    const info = stmt.run(anamnesis_data ? JSON.stringify(anamnesis_data) : null, id, tenant_id)
+    if (info.changes === 0) return res.status(404).json({ error: 'User not found' })
+    res.json({ success: true })
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update anamnesis' })
   }
 })
 
