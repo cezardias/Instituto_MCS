@@ -159,6 +159,21 @@ const createComunicados = `CREATE TABLE IF NOT EXISTS comunicados (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
+const createOficineiroRegistrations = `CREATE TABLE IF NOT EXISTS oficineiro_registrations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  cpf TEXT NOT NULL,
+  birth_date TEXT NOT NULL,
+  education TEXT NOT NULL,
+  experience TEXT NOT NULL,
+  contribution TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pendente',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
 const createPassaporteItems = `CREATE TABLE IF NOT EXISTS passaporte_items (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tenant_id TEXT NOT NULL,
@@ -302,6 +317,7 @@ db.exec(createAlunos)
 db.exec(createNews)
 db.exec(createTransactions)
 db.exec(createAccountability)
+db.exec(createOficineiroRegistrations)
 
 // Migrations
 try {

@@ -22,6 +22,7 @@ interface VideoComment { id:number; user_name:string; comment:string; created_at
 interface Video { id:number; title:string; description:string; author:string; youtube_url:string; category:string; likes:number; userLiked:boolean; comments:VideoComment[]; created_at:string }
 interface Comunicado { id:number; title:string; message:string; author_name:string; created_at:string }
 interface PassaporteItem { id:number; user_name?:string; badge_name:string; description:string; points:number; created_at:string }
+interface OficineiroRegistration { id:number; tenant_id:string; name:string; email:string; phone:string; cpf:string; birth_date:string; education:string; experience:string; contribution:string; status:string; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -61,6 +62,7 @@ const SIDEBAR = [
   ]},
   { group: 'ADMIN', items: [
     { id:'users', label:'Usuários e Perfis', icon:'👥', roles:['admin'] },
+    { id:'oficineiros_registrations', label:'Inscrições Oficineiros', icon:'🧑‍🏫', roles:['admin', 'diretoria', 'coordenacao'] },
     { id:'config', label:'Configurações', icon:'⚙️', roles:['admin'] },
   ]},
 ]
@@ -3515,6 +3517,159 @@ function TurmasTab() {
           {classes.length === 0 && (
             <div className="col-span-full text-center py-20 bg-white rounded-3xl border border-gray-100 text-gray-400 shadow-sm">Nenhuma turma encontrada para o seu perfil.</div>
           )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// OFICINEIROS REGISTRATIONS TAB
+// ═══════════════════════════════════════════════════════════════════
+function OficineirosRegistrationTab() {
+  const user = getUser()
+  const [items, setItems] = useState<OficineiroRegistration[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedItem, setSelectedItem] = useState<OficineiroRegistration | null>(null)
+  const [statusSaving, setStatusSaving] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const r = await fetch('/api/oficineiros', { headers: authH() })
+      if (r.ok) setItems(await r.json())
+    } catch {}
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const updateStatus = async (id: number, newStatus: string) => {
+    if (!confirm(`Tem certeza que deseja marcar como ${newStatus}?`)) return
+    setStatusSaving(true)
+    try {
+      const r = await fetch(`/api/oficineiros/${id}`, {
+        method: 'PUT',
+        headers: authH(),
+        body: JSON.stringify({ status: newStatus })
+      })
+      if (r.ok) {
+        setSelectedItem(null)
+        load()
+      }
+    } catch {}
+    setStatusSaving(false)
+  }
+
+  const canEdit = user.role === 'admin'
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="font-serif text-2xl text-carbono">Inscrições de Oficineiros</h2>
+          <p className="text-sm text-gray-400">Gerencie as candidaturas feitas pelo site</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-20 text-gray-400">Carregando inscrições...</div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-gray-500">
+                <th className="p-4 font-semibold">Data</th>
+                <th className="p-4 font-semibold">Nome</th>
+                <th className="p-4 font-semibold">E-mail</th>
+                <th className="p-4 font-semibold">Telefone</th>
+                <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center py-12 text-gray-400">Nenhuma inscrição encontrada.</td>
+                </tr>
+              )}
+              {items.map(item => (
+                <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                  <td className="p-4 text-gray-500 whitespace-nowrap">
+                    {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                  </td>
+                  <td className="p-4 font-bold text-carbono">{item.name}</td>
+                  <td className="p-4 text-gray-500">{item.email}</td>
+                  <td className="p-4 text-gray-500">{item.phone}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                      item.status === 'aprovado' ? 'bg-green-100 text-green-700' :
+                      item.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {item.status.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => setSelectedItem(item)} className="text-dourado font-bold text-xs hover:underline">
+                      ANALISAR
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 relative">
+            <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl">×</button>
+            <h3 className="font-serif text-2xl text-carbono mb-6">Análise de Candidato</h3>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div><p className="text-xs text-gray-400 uppercase font-bold">Nome</p><p className="font-semibold text-carbono">{selectedItem.name}</p></div>
+              <div><p className="text-xs text-gray-400 uppercase font-bold">Data Nasc.</p><p className="text-carbono">{new Date(selectedItem.birth_date+'T00:00:00').toLocaleDateString('pt-BR')}</p></div>
+              <div><p className="text-xs text-gray-400 uppercase font-bold">E-mail</p><p className="text-carbono">{selectedItem.email}</p></div>
+              <div><p className="text-xs text-gray-400 uppercase font-bold">Telefone</p><p className="text-carbono">{selectedItem.phone}</p></div>
+              <div><p className="text-xs text-gray-400 uppercase font-bold">CPF</p><p className="text-carbono">{selectedItem.cpf}</p></div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Formação Escolar/Acadêmica</p>
+                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.education}</div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Experiência Profissional</p>
+                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.experience}</div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Como pode agregar</p>
+                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.contribution}</div>
+              </div>
+            </div>
+
+            {canEdit && selectedItem.status === 'pendente' && (
+              <div className="mt-8 flex gap-4">
+                <button 
+                  disabled={statusSaving}
+                  onClick={() => updateStatus(selectedItem.id, 'rejeitado')} 
+                  className="flex-1 bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 disabled:opacity-50"
+                >
+                  REJEITAR
+                </button>
+                <button 
+                  disabled={statusSaving}
+                  onClick={() => updateStatus(selectedItem.id, 'aprovado')} 
+                  className="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 disabled:opacity-50"
+                >
+                  APROVAR
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

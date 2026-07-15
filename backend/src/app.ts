@@ -23,6 +23,7 @@ import authorizationsRoutes from './routes/authorizations'
 import classesRoutes from './routes/classes'
 import assessmentsRoutes from './routes/assessments'
 import jornadaRoutes from './routes/jornada'
+import oficineirosRoutes from './routes/oficineiros'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -61,6 +62,7 @@ app.use('/api/authorizations', authorizationsRoutes)
 app.use('/api/classes', classesRoutes)
 app.use('/api/assessments', assessmentsRoutes)
 app.use('/api/jornada', jornadaRoutes)
+app.use('/api/oficineiros', oficineirosRoutes)
 app.use('/graphql', graphqlHTTP({ schema, rootValue, graphiql: true }))
 app.get('/health', (_, res) => res.json({ status: 'ok' }))
 

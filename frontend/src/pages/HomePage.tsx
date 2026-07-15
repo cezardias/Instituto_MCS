@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import OficineiroRegistrationModal from '../components/OficineiroRegistrationModal';
 
 export default function HomePage() {
+  const [showOficineiroModal, setShowOficineiroModal] = useState(false);
+
   return (
     <div className="bg-marfim text-carbono min-h-screen">
       {/* Hero Section */}
@@ -18,9 +22,17 @@ export default function HomePage() {
               Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
             </p>
             <div className="flex justify-center lg:justify-start gap-4">
-              <Link to="/projetos" className="bg-dourado text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center">
+              <Link to="/projetos" className="bg-dourado text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center shadow-lg">
                 CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
               </Link>
+            </div>
+            <div className="mt-6 flex justify-center lg:justify-start">
+              <button 
+                onClick={() => setShowOficineiroModal(true)}
+                className="bg-transparent border-2 border-dourado text-dourado hover:bg-dourado hover:text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center"
+              >
+                CADASTRO OFICINEIRO
+              </button>
             </div>
           </div>
 
@@ -83,6 +95,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      {/* Oficineiro Registration Modal */}
+      {showOficineiroModal && (
+        <OficineiroRegistrationModal onClose={() => setShowOficineiroModal(false)} />
+      )}
     </div>
   )
 }
