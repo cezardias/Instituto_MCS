@@ -253,7 +253,8 @@ export default function AdminDashboard() {
           {tab === 'autorizacoes' && <AutorizacoesTab />}
           {tab === 'turmas'      && <TurmasTab />}
           {tab === 'avaliacoes'  && <AvaliacoesTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'oficineiros_registrations' && <OficineirosRegistrationTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
