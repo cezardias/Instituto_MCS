@@ -15,12 +15,17 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
     experience: '',
     contribution: ''
   })
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!termsAccepted) {
+      setError('Você deve aceitar os termos de responsabilidade e política de segurança para continuar.')
+      return
+    }
     setSaving(true)
     setError('')
 
@@ -119,6 +124,20 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">O que você pode agregar ao projeto? *</label>
                 <textarea required value={form.contribution} onChange={e => setForm({...form, contribution: e.target.value})} className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50 min-h-[80px]" placeholder="Quais habilidades, ideias ou metodologias você traria para as oficinas?"></textarea>
+              </div>
+
+              <div className="flex items-start gap-3 mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <input 
+                  type="checkbox" 
+                  id="terms" 
+                  checked={termsAccepted} 
+                  onChange={e => setTermsAccepted(e.target.checked)} 
+                  className="mt-1 w-4 h-4 text-dourado rounded border-gray-300 focus:ring-dourado" 
+                  required
+                />
+                <label htmlFor="terms" className="text-sm text-gray-600">
+                  Li e concordo com os <span className="font-bold cursor-pointer text-carbono hover:underline">Termos de Responsabilidade</span> e a <span className="font-bold cursor-pointer text-carbono hover:underline">Política de Segurança</span> do Instituto MCS.
+                </label>
               </div>
 
               <div className="pt-4 flex gap-4">
