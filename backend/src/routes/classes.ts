@@ -170,6 +170,62 @@ router.post('/:id/lessons', authMiddleware, (req, res) => {
   }
 })
 
+// PUT /api/classes/lessons/:lessonId
+router.put('/lessons/:lessonId', authMiddleware, (req, res) => {
+  const { lessonId } = req.params
+  const { title, date, start_time, end_time, description } = req.body
+  const user = (req as any).user
+
+  const lesson = db.prepare('SELECT class_id FROM class_lessons WHERE id = ?').get(lessonId) as any
+  if (!lesson) return res.status(404).json({ error: 'Aula não encontrada' })
+
+  let allowed = false
+  if (user.role === 'admin' || user.role === 'diretoria') allowed = true
+  else if (user.role === 'oficineiro') {
+    const isTeacher = db.prepare('SELECT 1 FROM class_teachers WHERE class_id = ? AND teacher_id = ?').get(lesson.class_id, user.id)
+    if (isTeacher) allowed = true
+  }
+
+  if (!allowed) return res.status(403).json({ error: 'Acesso negado' })
+
+  try {
+    const stmt = db.prepare(`
+      UPDATE class_lessons 
+      SET title = ?, date = ?, start_time = ?, end_time = ?, description = ?
+      WHERE id = ?
+    `)
+    stmt.run(title, date, start_time || null, end_time || null, description || null, lessonId)
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
+// DELETE /api/classes/lessons/:lessonId
+router.delete('/lessons/:lessonId', authMiddleware, (req, res) => {
+  const { lessonId } = req.params
+  const user = (req as any).user
+
+  const lesson = db.prepare('SELECT class_id FROM class_lessons WHERE id = ?').get(lessonId) as any
+  if (!lesson) return res.status(404).json({ error: 'Aula não encontrada' })
+
+  let allowed = false
+  if (user.role === 'admin' || user.role === 'diretoria') allowed = true
+  else if (user.role === 'oficineiro') {
+    const isTeacher = db.prepare('SELECT 1 FROM class_teachers WHERE class_id = ? AND teacher_id = ?').get(lesson.class_id, user.id)
+    if (isTeacher) allowed = true
+  }
+
+  if (!allowed) return res.status(403).json({ error: 'Acesso negado' })
+
+  try {
+    db.prepare('DELETE FROM class_lessons WHERE id = ?').run(lessonId)
+    res.json({ success: true })
+  } catch (error: any) {
+    res.status(500).json({ error: error.message })
+  }
+})
+
 // GET /api/classes/lessons/:lessonId/attendance
 router.get('/lessons/:lessonId/attendance', authMiddleware, (req, res) => {
   const { lessonId } = req.params

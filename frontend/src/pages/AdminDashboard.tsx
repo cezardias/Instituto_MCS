@@ -3014,6 +3014,7 @@ function TurmasTab() {
   // Lessons state
   const [lessons, setLessons] = useState<any[]>([])
   const [showLessonForm, setShowLessonForm] = useState(false)
+  const [editingLesson, setEditingLesson] = useState<any>(null)
   const [lessonForm, setLessonForm] = useState({ title: '', date: new Date().toISOString().split('T')[0], start_time: '', end_time: '', description: '' })
   const [activeLesson, setActiveLesson] = useState<any>(null)
 
@@ -3168,11 +3169,41 @@ function TurmasTab() {
     } catch {}
   }
 
+  const openNewLesson = () => {
+    setEditingLesson(null)
+    setLessonForm({ title: '', date: new Date().toISOString().split('T')[0], start_time: '', end_time: '', description: '' })
+    setShowLessonForm(true)
+  }
+
+  const openEditLesson = (lesson: any) => {
+    setEditingLesson(lesson)
+    setLessonForm({
+      title: lesson.title,
+      date: lesson.date,
+      start_time: lesson.start_time || '',
+      end_time: lesson.end_time || '',
+      description: lesson.description || ''
+    })
+    setShowLessonForm(true)
+  }
+
+  const deleteLesson = async (lessonId: number) => {
+    if (!confirm('Excluir esta aula?')) return
+    try {
+      await fetch(`/api/classes/lessons/${lessonId}`, { method: 'DELETE', headers: authH() })
+      loadLessons(activeClass.id)
+    } catch {
+      alert('Erro ao excluir aula')
+    }
+  }
+
   const saveLesson = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await fetch(`/api/classes/${activeClass.id}/lessons`, {
-        method: 'POST', headers: authH(), body: JSON.stringify(lessonForm)
+      const method = editingLesson ? 'PUT' : 'POST'
+      const url = editingLesson ? `/api/classes/lessons/${editingLesson.id}` : `/api/classes/${activeClass.id}/lessons`
+      await fetch(url, {
+        method, headers: authH(), body: JSON.stringify(lessonForm)
       })
       setShowLessonForm(false)
       loadLessons(activeClass.id)
@@ -3308,12 +3339,12 @@ function TurmasTab() {
             <h2 className="font-serif text-2xl text-carbono">{activeClass.name}</h2>
             <p className="text-gray-500 text-sm">Diário de Classe - Aulas</p>
           </div>
-          <button onClick={() => setShowLessonForm(true)} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Registrar Nova Aula</button>
+          <button onClick={openNewLesson} className="bg-carbono text-marfim px-6 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Registrar Nova Aula</button>
         </div>
 
         {showLessonForm && (
           <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100 mb-6 relative">
-            <h3 className="font-bold text-carbono mb-4">Dados da Aula</h3>
+            <h3 className="font-bold text-carbono mb-4">{editingLesson ? 'Editar Aula' : 'Nova Aula'}</h3>
             <form onSubmit={saveLesson} className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="col-span-2 md:col-span-4">
                 <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Título / Assunto *</label>
@@ -3354,9 +3385,17 @@ function TurmasTab() {
                 {l.start_time && <p className="text-xs text-gray-500 mb-2">⏰ {l.start_time} {l.end_time && `às ${l.end_time}`}</p>}
                 {l.description && <p className="text-xs text-gray-600 line-clamp-2 mb-4">{l.description}</p>}
               </div>
-              <button onClick={() => openAttendance(l)} className="mt-4 w-full bg-gray-50 text-carbono py-2 rounded-xl text-xs font-bold hover:bg-gray-100 border border-gray-100">
-                📝 Fazer Chamada
-              </button>
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => openAttendance(l)} className="flex-1 bg-gray-50 text-carbono py-2 rounded-xl text-xs font-bold hover:bg-gray-100 border border-gray-100">
+                  📝 Fazer Chamada
+                </button>
+                {(canEditClasses || canTakeAttendance) && (
+                  <>
+                    <button onClick={() => openEditLesson(l)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-xl hover:bg-gray-50">Editar</button>
+                    <button onClick={() => deleteLesson(l.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-xl hover:bg-red-50">Excluir</button>
+                  </>
+                )}
+              </div>
             </div>
           ))}
           {lessons.length === 0 && <div className="col-span-full text-center py-12 text-gray-400 bg-white rounded-3xl border border-gray-100">Nenhuma aula registrada.</div>}
