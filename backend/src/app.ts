@@ -25,6 +25,7 @@ import classesRoutes from './routes/classes'
 import assessmentsRoutes from './routes/assessments'
 import jornadaRoutes from './routes/jornada'
 import oficineirosRoutes from './routes/oficineiros'
+import parceirosRoutes from './routes/parceiros'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -57,6 +58,7 @@ app.use('/api/finance', financeRoutes)
 app.use('/api/accountability', accountabilityRoutes)
 app.use('/api/documents', documentsRoutes)
 app.use('/api/denuncias', denunciasRoutes)
+app.use('/api/parceiros', parceirosRoutes)
 app.use('/api/videos', videosRoutes)
 app.use('/api/comunicados', comunicadosRoutes)
 app.use('/api/passaporte', passaporteRoutes)

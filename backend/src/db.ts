@@ -129,6 +129,20 @@ const createDenuncias = `CREATE TABLE IF NOT EXISTS reports_denuncias (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
 
+const createParceiros = `CREATE TABLE IF NOT EXISTS parceiros (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  responsavel TEXT,
+  endereco TEXT,
+  cnpj TEXT,
+  instagram TEXT,
+  website TEXT,
+  logo_url TEXT,
+  active INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
 const createVideos = `CREATE TABLE IF NOT EXISTS videos (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tenant_id TEXT NOT NULL,
@@ -376,6 +390,7 @@ for (const col of projectColumns) {
 }
 db.exec(createDocuments)
 db.exec(createDenuncias)
+db.exec(createParceiros)
 db.exec(createVideos)
 db.exec(createVideoLikes)
 db.exec(createVideoComments)

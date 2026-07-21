@@ -256,7 +256,8 @@ export default function AdminDashboard() {
           {tab === 'turmas'      && <TurmasTab />}
           {tab === 'avaliacoes'  && <AvaliacoesTab />}
           {tab === 'oficineiros_registrations' && <OficineirosRegistrationTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'parceiros'   && <ParceirosTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations','parceiros'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -3855,6 +3856,169 @@ function PreCadastrosTab() {
                   <td className="td-cell text-gray-500">{new Date(a.created_at).toLocaleDateString('pt-BR')}</td>
                   <td className="td-cell">
                     <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PARCEIROS TAB
+// ═══════════════════════════════════════════════════════════════════
+function ParceirosTab() {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [editing, setEditing] = useState<number|null>(null)
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1 })
+  const [imageFile, setImageFile] = useState<File|null>(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch(`/api/parceiros?tenant_id=${TENANT}`, {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const openNew = () => { setEditing(null); setForm({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1 }); setImageFile(null); setError(''); setShowForm(true) }
+  const openEdit = (p:any) => { setEditing(p.id); setForm(p); setImageFile(null); setError(''); setShowForm(true) }
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    setError('')
+    try {
+      let finalLogo = form.logo_url
+      if (imageFile) {
+        const fd = new FormData(); fd.append('file', imageFile); fd.append('tenant_id', TENANT)
+        const up = await fetch('/api/upload', { method:'POST', headers:authH(), body:fd })
+        if (up.ok) { const upData = await up.json(); finalLogo = upData.url }
+      }
+      const payload = { ...form, logo_url: finalLogo }
+      const method = editing ? 'PUT' : 'POST'
+      const url = editing ? `/api/parceiros/${editing}` : '/api/parceiros'
+      const res = await fetch(url, { method, headers: authH(), body: JSON.stringify(payload) })
+      if (!res.ok) throw new Error('Erro ao salvar')
+      setShowForm(false)
+      load()
+    } catch(err:any) { setError(err.message) }
+    setSaving(false)
+  }
+
+  const toggleActive = async (p:any) => {
+    const newActive = p.active === 1 ? 0 : 1;
+    await fetch(`/api/parceiros/${p.id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ ...p, active: newActive }) })
+    load()
+  }
+
+  const del = async (id:number) => {
+    if(!confirm('Excluir parceiro?')) return
+    await fetch(`/api/parceiros/${id}`, { method:'DELETE', headers:authH() })
+    load()
+  }
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Parceiros</h2>
+        <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Parceiro</button>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8">
+            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
+              <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Parceiro' : 'Novo Parceiro'}</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
+            </div>
+            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
+            <form onSubmit={save} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="label-dash">Nome do Parceiro *</label>
+                  <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="input-field" placeholder="Empresa ou Organização" />
+                </div>
+                <div>
+                  <label className="label-dash">Responsável</label>
+                  <input value={form.responsavel} onChange={e=>setForm({...form,responsavel:e.target.value})} className="input-field" placeholder="Nome do contato" />
+                </div>
+                <div>
+                  <label className="label-dash">CNPJ</label>
+                  <input value={form.cnpj} onChange={e=>setForm({...form,cnpj:e.target.value})} className="input-field" placeholder="00.000.000/0000-00" />
+                </div>
+                <div className="col-span-2">
+                  <label className="label-dash">Endereço</label>
+                  <input value={form.endereco} onChange={e=>setForm({...form,endereco:e.target.value})} className="input-field" placeholder="Endereço completo" />
+                </div>
+                <div>
+                  <label className="label-dash">Instagram</label>
+                  <input value={form.instagram} onChange={e=>setForm({...form,instagram:e.target.value})} className="input-field" placeholder="@parceiro" />
+                </div>
+                <div>
+                  <label className="label-dash">Website</label>
+                  <input value={form.website} onChange={e=>setForm({...form,website:e.target.value})} className="input-field" placeholder="https://..." />
+                </div>
+                <div className="col-span-2">
+                  <label className="label-dash">Logo do Parceiro</label>
+                  <input type="file" accept="image/*" onChange={e=>setImageFile(e.target.files?.[0]||null)} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-dourado/10 file:text-carbono hover:file:bg-dourado/20" />
+                  {form.logo_url && !imageFile && <p className="text-xs text-gray-500 mt-2">Logo atual: {form.logo_url.split('/').pop()}</p>}
+                </div>
+                <div className="col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <input type="checkbox" checked={form.active === 1} onChange={e=>setForm({...form,active: e.target.checked ? 1 : 0})} className="w-5 h-5 accent-dourado rounded" />
+                    <span className="text-sm font-bold text-gray-700">Mostrar no Site Público (Ativo)</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2 mt-4">
+                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold hover:bg-gray-50">Cancelar</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editing ? 'Salvar' : 'Criar Parceiro'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100">
+              <th className="th-cell">Logo</th><th className="th-cell">Nome / Responsável</th><th className="th-cell">Contato</th><th className="th-cell text-center">Exibição</th><th className="th-cell" />
+            </tr></thead>
+            <tbody>
+              {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum parceiro cadastrado</td></tr>}
+              {items.map(p => (
+                <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="td-cell">
+                    {p.logo_url ? <img src={p.logo_url} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem logo</div>}
+                  </td>
+                  <td className="td-cell">
+                    <div className="font-semibold text-carbono">{p.name}</div>
+                    {p.responsavel && <div className="text-xs text-gray-500">{p.responsavel}</div>}
+                  </td>
+                  <td className="td-cell text-gray-500">
+                    {p.website && <div className="text-xs">🌐 {p.website}</div>}
+                    {p.instagram && <div className="text-xs">📸 {p.instagram}</div>}
+                    {!p.website && !p.instagram && '-'}
+                  </td>
+                  <td className="td-cell text-center">
+                    <button onClick={() => toggleActive(p)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${p.active ? 'bg-green-500' : 'bg-gray-300'}`}>
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${p.active ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
+                    <div className="text-[10px] text-gray-500 mt-1">{p.active ? 'Ativo no Site' : 'Oculto'}</div>
+                  </td>
+                  <td className="td-cell">
+                    <div className="flex gap-2">
+                      <button onClick={() => openEdit(p)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
+                      <button onClick={() => del(p.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                    </div>
                   </td>
                 </tr>
               ))}

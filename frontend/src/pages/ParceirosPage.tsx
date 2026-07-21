@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 const tiposParceiros = [
   {
@@ -54,6 +55,19 @@ const numeros = [
 ]
 
 export default function ParceirosPage() {
+  const [dbParceiros, setDbParceiros] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch('/api/parceiros?tenant_id=instituto-mcs')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDbParceiros(data.filter(p => p.active === 1))
+        }
+      })
+      .catch(err => console.error(err))
+  }, [])
+
   return (
     <div className="bg-marfim text-carbono min-h-screen">
 
@@ -100,6 +114,47 @@ export default function ParceirosPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Parceiros Dinâmicos (Banco de Dados) ── */}
+      {dbParceiros.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+            <div className="text-center mb-14">
+              <span className="text-dourado font-bold text-xs uppercase tracking-widest mb-3 block">REDE DE APOIO</span>
+              <h2 className="font-serif text-3xl md:text-4xl">Nossos Parceiros Oficiais</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {dbParceiros.map(p => (
+                <div key={p.id} className="bg-gray-50 border border-gray-100 rounded-3xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+                  <div className="h-24 flex items-center justify-center mb-4 w-full bg-white rounded-xl">
+                    {p.logo_url ? (
+                      <img src={p.logo_url} alt={p.name} className="max-h-full max-w-full object-contain p-2" />
+                    ) : (
+                      <div className="text-4xl">🤝</div>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-carbono text-lg mb-1">{p.name}</h3>
+                  {p.responsavel && <p className="text-xs text-gray-500 mb-4">{p.responsavel}</p>}
+                  
+                  <div className="mt-auto flex gap-3">
+                    {p.website && (
+                      <a href={p.website} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition-colors" title="Website">
+                        🌐
+                      </a>
+                    )}
+                    {p.instagram && (
+                      <a href={`https://instagram.com/${p.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full bg-pink-50 text-pink-600 flex items-center justify-center hover:bg-pink-100 transition-colors" title="Instagram">
+                        📸
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Parceiros por Categoria ─────────────── */}
       <section className="py-20">
