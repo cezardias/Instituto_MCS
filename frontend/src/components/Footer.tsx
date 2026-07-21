@@ -20,20 +20,20 @@ export default function Footer() {
           <ul className="space-y-3 text-sm">
             <li><Link to="/" className="hover:text-dourado transition-colors">Início</Link></li>
             <li><Link to="/quem-somos" className="hover:text-dourado transition-colors">Quem Somos</Link></li>
-            <li><Link to="/projetos" className="hover:text-dourado transition-colors">Projetos</Link></li>
-            <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Transparência</Link></li>
-            <li><Link to="/compliance" className="hover:text-dourado transition-colors">Governança</Link></li>
+            {/* <li><Link to="/projetos" className="hover:text-dourado transition-colors">Projetos</Link></li> */}
+            {/* <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Transparência</Link></li> */}
+            {/* <li><Link to="/compliance" className="hover:text-dourado transition-colors">Governança</Link></li> */}
           </ul>
         </div>
 
         <div>
           <h4 className="text-marfim font-semibold uppercase tracking-widest text-xs mb-6">Links Rápidos</h4>
           <ul className="space-y-3 text-sm">
-            <li><Link to="/projetos" className="hover:text-dourado transition-colors">Banco de Projetos</Link></li>
+            {/* <li><Link to="/projetos" className="hover:text-dourado transition-colors">Banco de Projetos</Link></li> */}
             <li><Link to="/noticias" className="hover:text-dourado transition-colors">Notícias</Link></li>
             <li><Link to="/parceiros" className="hover:text-dourado transition-colors">Parceiros</Link></li>
             <li><Link to="/contato" className="hover:text-dourado transition-colors">Contato</Link></li>
-            <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Relatórios Anuais</Link></li>
+            {/* <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Relatórios Anuais</Link></li> */}
           </ul>
         </div>
 
