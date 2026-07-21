@@ -85,7 +85,7 @@ export default function ParceirosPage() {
                 <div key={p.id} className="bg-gray-50 border border-gray-100 rounded-3xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
                   <div className="h-24 flex items-center justify-center mb-4 w-full bg-white rounded-xl">
                     {p.logo_url ? (
-                      <img src={p.logo_url} alt={p.name} className="max-h-full max-w-full object-contain p-2" />
+                      <img src={p.logo_url.startsWith('http') ? p.logo_url : `/api${p.logo_url}`} alt={p.name} className="max-h-full max-w-full object-contain p-2" />
                     ) : (
                       <div className="text-4xl">🤝</div>
                     )}

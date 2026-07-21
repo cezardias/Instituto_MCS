@@ -3997,7 +3997,7 @@ function ParceirosTab() {
               {items.map(p => (
                 <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell">
-                    {p.logo_url ? <img src={p.logo_url} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem logo</div>}
+                    {p.logo_url ? <img src={p.logo_url.startsWith('http') ? p.logo_url : `/api${p.logo_url}`} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem logo</div>}
                   </td>
                   <td className="td-cell">
                     <div className="font-semibold text-carbono">{p.name}</div>
