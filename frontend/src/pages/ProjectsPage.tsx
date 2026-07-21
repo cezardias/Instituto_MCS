@@ -165,6 +165,77 @@ export default function ProjectsPage() {
           </div>
         </div>
 
+        {/* Project 3: MCS Família */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
+          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+            <img src="/hero.png" alt="MCS Família" className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm">
+              EM ANDAMENTO
+            </div>
+          </div>
+          
+          <div className="lg:w-3/5 p-8 lg:p-12">
+            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+              Fortaleça Toda a Família com o Projeto MCS Família!
+            </h2>
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o <strong>MCS Família</strong>, a base de sustentação do nosso ecossistema de desenvolvimento.
+            </p>
+
+            <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Família é essencial?</h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Acreditamos que o desenvolvimento de uma criança ou jovem só é completo quando a sua rede de apoio familiar também é fortalecida. O MCS Família atua lado a lado com os outros projetos do Instituto para garantir:
+            </p>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">⚖️</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Segurança e Cuidado</strong>
+                  <span className="text-gray-600 text-sm">Oferecemos atendimento psicossocial e orientação jurídica estruturada para dar tranquilidade e amparo aos lares.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">💼</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Geração de Renda e Autonomia</strong>
+                  <span className="text-gray-600 text-sm">Capacitamos pais, responsáveis e jovens por meio de trilhas profissionalizantes alinhadas às reais demandas das cadeias produtivas locais, como o turismo e a economia criativa.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">👪</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Integração Comunitária</strong>
+                  <span className="text-gray-600 text-sm">Criamos pontes entre a família e as inovações tecnológicas e culturais oferecidas pelo Instituto, unindo gerações em prol do bem comum.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🏡</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Dignidade e Bem-Estar</strong>
+                  <span className="text-gray-600 text-sm">Promovemos um ambiente onde o crescimento econômico e turístico de Alto Paraíso se converte em qualidade de vida concreta para cada família.</span>
+                </div>
+              </li>
+            </ul>
+
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+              <p className="text-gray-600 text-sm mb-2"><strong>O MCS Família:</strong> Funciona como um ponto de apoio contínuo para a comunidade.</p>
+              <p className="text-gray-600 text-sm mb-2"><strong>Acompanhamento:</strong> Trilhas formativas, mentorias e suporte integrado.</p>
+              <p className="text-gray-600 text-sm"><strong>Foco:</strong> Desenvolvimento humano, sustentabilidade e autonomia financeira.</p>
+            </div>
+
+            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+              Sua família vai encontrar o suporte necessário para transformar desafios em oportunidades e construir um futuro mais próspero.
+            </p>
+
+            <Link to="/contato" className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              Faça Parte Deste Movimento!
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </Link>
+          </div>
+        </div>
+
       </div>
     </div>
   )
