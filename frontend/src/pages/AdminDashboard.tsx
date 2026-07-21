@@ -468,7 +468,58 @@ function ProjetosTab() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    try { const r = await fetch(`/api/projects?tenant_id=${TENANT}`); setItems(await r.json()) } catch { setItems([]) }
+    try { 
+      const r = await fetch(`/api/projects?tenant_id=${TENANT}`); 
+      const data = await r.json();
+      
+      // AUTO-SEED: Se os projetos principais não existirem, cria-os automaticamente!
+      if (Array.isArray(data) && data.length < 4) {
+        const existingTitles = data.map((p:any) => p.title);
+        const seedProjects = [
+          {
+            title: 'MCS em Movimento',
+            area: 'Esporte',
+            location: 'Alto Paraíso de Goiás',
+            description: 'Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o MCS em Movimento, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.',
+            image_url: '/hero.png'
+          },
+          {
+            title: 'MCS Digital',
+            area: 'Tecnologia',
+            location: 'Alto Paraíso de Goiás',
+            description: 'Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o MCS Digital, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.',
+            image_url: '/hero.png'
+          },
+          {
+            title: 'MCS Família',
+            area: 'Comunidade',
+            location: 'Alto Paraíso de Goiás',
+            description: 'Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o MCS Família, a base de sustentação do nosso ecossistema de desenvolvimento.',
+            image_url: '/hero.png'
+          }
+        ];
+        
+        let seeded = false;
+        for (const p of seedProjects) {
+          if (!existingTitles.find((t:string) => t.includes(p.title.split(' ')[1]))) {
+            await fetch('/api/projects', {
+              method: 'POST',
+              headers: authH(),
+              body: JSON.stringify({ ...p, status: 'em_execucao' })
+            });
+            seeded = true;
+          }
+        }
+        if (seeded) {
+          const r2 = await fetch(`/api/projects?tenant_id=${TENANT}`);
+          setItems(await r2.json());
+        } else {
+          setItems(data);
+        }
+      } else {
+        setItems(data);
+      }
+    } catch { setItems([]) }
     setLoading(false)
   }, [])
   useEffect(() => { load() }, [load])
