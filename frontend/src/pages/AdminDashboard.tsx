@@ -3898,7 +3898,7 @@ function ParceirosTab() {
       let finalLogo = form.logo_url
       if (imageFile) {
         const fd = new FormData(); fd.append('image', imageFile); fd.append('tenant_id', TENANT)
-        const up = await fetch('/api/upload', { method:'POST', headers:authH(), body:fd })
+        const up = await fetch('/api/upload', { method:'POST', body:fd })
         if (up.ok) { const upData = await up.json(); finalLogo = upData.url }
       }
       const payload = { ...form, logo_url: finalLogo }
