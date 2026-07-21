@@ -91,7 +91,8 @@ export default function ParceirosPage() {
                     )}
                   </div>
                   <h3 className="font-bold text-carbono text-lg mb-1">{p.name}</h3>
-                  {p.responsavel && <p className="text-xs text-gray-500 mb-4">{p.responsavel}</p>}
+                  {p.cnpj && <p className="text-xs text-gray-400 mb-1">CNPJ: {p.cnpj}</p>}
+                  {p.responsavel && <p className="text-xs text-gray-500 mb-4">Responsável: {p.responsavel}</p>}
                   
                   <div className="mt-auto flex gap-3">
                     {p.website && (
