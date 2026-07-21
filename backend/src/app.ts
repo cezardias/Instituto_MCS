@@ -39,8 +39,8 @@ app.use(cors())
 app.use(express.json())
 
 // Serve static uploads
-app.use('/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')))
-app.use('/api/uploads', express.static(path.join(__dirname, '..', '..', 'uploads')))
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+app.use('/api/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
 app.use(tenantMiddleware)
 
