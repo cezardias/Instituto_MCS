@@ -49,7 +49,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Stats Section 
       <section className="border-t border-gray-200 bg-white pb-20 pt-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
@@ -95,6 +95,7 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      */}
       {/* Oficineiro Registration Modal */}
       {showOficineiroModal && (
         <OficineiroRegistrationModal onClose={() => setShowOficineiroModal(false)} />

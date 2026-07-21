@@ -44,10 +44,11 @@ export default function ContatoPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-carbono">Sede Principal</h4>
-                      <p className="text-gray-500 mt-1">Rua da Cultura, 123 - Centro<br/>São Paulo - SP, 01000-000</p>
+                      <p className="text-gray-500 mt-1">CEP 73.770-000.<br/>Alto Paraiso de GOIAS</p>
                     </div>
                   </div>
                   
+                  {/*
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-dourado/10 text-dourado flex items-center justify-center text-2xl shrink-0">
                       📞
@@ -57,6 +58,7 @@ export default function ContatoPage() {
                       <p className="text-gray-500 mt-1">+55 (11) 99999-9999<br/>Seg a Sex, das 9h às 18h</p>
                     </div>
                   </div>
+                  */}
 
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-dourado/10 text-dourado flex items-center justify-center text-2xl shrink-0">
