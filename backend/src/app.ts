@@ -12,6 +12,7 @@ import uploadRoutes from './routes/upload'
 import projectsRoutes from './routes/projects'
 import alunosRoutes from './routes/alunos'
 import statsRoutes from './routes/stats'
+import preRegistrationsRoutes from './routes/pre_registrations'
 import financeRoutes from './routes/finance'
 import accountabilityRoutes from './routes/accountability'
 import documentsRoutes from './routes/documents'
@@ -51,6 +52,7 @@ app.use('/api/upload', uploadRoutes)
 app.use('/api/projects', projectsRoutes)
 app.use('/api/alunos', alunosRoutes)
 app.use('/api/stats', statsRoutes)
+app.use('/api/pre-registration', preRegistrationsRoutes)
 app.use('/api/finance', financeRoutes)
 app.use('/api/accountability', accountabilityRoutes)
 app.use('/api/documents', documentsRoutes)

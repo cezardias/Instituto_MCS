@@ -1,6 +1,26 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/projects?tenant_id=mcs')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setProjects(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  const pMovimento = projects.find(p => p.title.toLowerCase().includes('movimento'));
+  const pDigital = projects.find(p => p.title.toLowerCase().includes('digital'));
+  const pFamilia = projects.find(p => p.title.toLowerCase().includes('família') || p.title.toLowerCase().includes('familia'));
+  const pRima = projects.find(p => p.title.toLowerCase().includes('rima'));
+
+  const knownIds = [pMovimento?.id, pDigital?.id, pFamilia?.id, pRima?.id].filter(Boolean);
+  const otherProjects = projects.filter(p => !knownIds.includes(p.id));
+
   return (
     <div className="bg-marfim min-h-screen pt-24 pb-20">
       {/* Hero Banner */}
@@ -25,20 +45,21 @@ export default function ProjectsPage() {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         
         {/* Project 1: MCS em Movimento */}
+        {pMovimento && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src="/hero.png" alt="MCS em Movimento" className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm">
-              EM ANDAMENTO
+            <img src={pMovimento.image_url || "/hero.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm uppercase">
+              {pMovimento.status.replace('_', ' ')}
             </div>
           </div>
           
           <div className="lg:w-3/5 p-8 lg:p-12">
             <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              Transforme o Futuro do Seu Filho com o Projeto MCS em Movimento!
+              {pMovimento.title}
             </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o <strong>MCS em Movimento</strong>, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+              {pMovimento.description || 'Uma iniciativa transformadora para o contraturno escolar.'}
             </p>
 
             <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS em Movimento é essencial?</h3>
@@ -87,28 +108,30 @@ export default function ProjectsPage() {
               Seu filho vai aprender a usar o corpo, o ritmo e a disciplina para construir um futuro com mais saúde, respeito e confiança.
             </p>
 
-            <Link to="/contato" className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+            <Link to={`/pre-cadastro?projeto=${pMovimento.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
               Garanta a Vaga do Seu Filho
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </Link>
           </div>
         </div>
+        )}
 
         {/* Project 2: MCS Digital */}
+        {pDigital && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src="/hero.png" alt="MCS Digital" className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm">
-              EM ANDAMENTO
+            <img src={pDigital.image_url || "/hero.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm uppercase">
+              {pDigital.status.replace('_', ' ')}
             </div>
           </div>
           
           <div className="lg:w-3/5 p-8 lg:p-12">
             <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              Prepare Seu Filho para a Era Digital com o Projeto MCS Digital!
+              {pDigital.title}
             </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o <strong>MCS Digital</strong>, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+              {pDigital.description || 'Uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores.'}
             </p>
 
             <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Digital é essencial?</h3>
@@ -158,28 +181,30 @@ export default function ProjectsPage() {
               Seu filho vai aprender a usar a Inteligência Artificial e a inovação para construir conhecimento, autonomia e novas oportunidades profissionais.
             </p>
 
-            <Link to="/contato" className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+            <Link to={`/pre-cadastro?projeto=${pDigital.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
               Garanta a Vaga do Seu Filho
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </Link>
           </div>
         </div>
+        )}
 
         {/* Project 3: MCS Família */}
+        {pFamilia && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src="/hero.png" alt="MCS Família" className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm">
-              EM ANDAMENTO
+            <img src={pFamilia.image_url || "/hero.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm uppercase">
+              {pFamilia.status.replace('_', ' ')}
             </div>
           </div>
           
           <div className="lg:w-3/5 p-8 lg:p-12">
             <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              Fortaleça Toda a Família com o Projeto MCS Família!
+              {pFamilia.title}
             </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o <strong>MCS Família</strong>, a base de sustentação do nosso ecossistema de desenvolvimento.
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+              {pFamilia.description || 'A base de sustentação do nosso ecossistema de desenvolvimento.'}
             </p>
 
             <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Família é essencial?</h3>
@@ -229,17 +254,19 @@ export default function ProjectsPage() {
               Sua família vai encontrar o suporte necessário para transformar desafios em oportunidades e construir um futuro mais próspero.
             </p>
 
-            <Link to="/contato" className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              Faça Parte Deste Movimento!
+            <Link to={`/pre-cadastro?projeto=${pFamilia.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              Faça Parte Deste Movimento
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </Link>
           </div>
         </div>
+        )}
 
         {/* Project 4: Conexão Rima */}
+        {pRima && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src="/conexao-rima.png" alt="Conexão Rima" className="w-full h-full object-cover absolute inset-0" onError={(e) => e.currentTarget.src = '/hero.png'} />
+            <img src={pRima.image_url || "/hero.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
               EM ANDAMENTO
             </div>
@@ -305,9 +332,48 @@ export default function ProjectsPage() {
             <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
               Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
             </p>
+
+            <Link to={`/pre-cadastro?projeto=${pRima.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              Garanta a Vaga pelo WhatsApp
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </Link>
           </div>
         </div>
+        )}
 
+        {/* Outros Projetos Cadastrados no Dashboard */}
+        {otherProjects.length > 0 && (
+          <>
+            <div className="my-16 flex items-center gap-6">
+              <div className="h-px bg-gray-200 flex-1"></div>
+              <h2 className="font-serif text-3xl text-carbono">Mais Projetos do Instituto</h2>
+              <div className="h-px bg-gray-200 flex-1"></div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              {otherProjects.map(p => (
+                <div key={p.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative h-64 bg-gray-200 overflow-hidden">
+                    <img src={p.image_url || '/hero.png'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <div className="absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold tracking-wider rounded-full border bg-white/90 text-carbono border-white shadow-sm uppercase backdrop-blur-sm">
+                      {p.status.replace('_', ' ')}
+                    </div>
+                  </div>
+                  <div className="p-8 flex-1 flex flex-col">
+                    <div className="text-dourado text-sm font-bold tracking-widest uppercase mb-2">{p.area}</div>
+                    <h3 className="font-serif text-2xl text-carbono mb-4 leading-tight group-hover:text-dourado transition-colors">{p.title}</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-8 flex-1 whitespace-pre-line line-clamp-4">
+                      {p.description}
+                    </p>
+                    <Link to={`/pre-cadastro?projeto=${p.id}`} className="inline-flex items-center gap-2 text-carbono font-bold text-sm uppercase tracking-wide hover:text-dourado transition-colors mt-auto">
+                      Garantir Vaga <span className="text-xl">→</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

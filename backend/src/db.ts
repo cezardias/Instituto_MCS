@@ -98,6 +98,17 @@ const createAccountability = `CREATE TABLE IF NOT EXISTS accountability_reports 
   FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
 )`
 
+const createPreRegistrations = `CREATE TABLE IF NOT EXISTS pre_registrations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT,
+  phone TEXT NOT NULL,
+  project_id INTEGER,
+  status TEXT NOT NULL DEFAULT 'pendente',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`
+
 const createDocuments = `CREATE TABLE IF NOT EXISTS documents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tenant_id TEXT NOT NULL,
@@ -317,6 +328,7 @@ db.exec(createAlunos)
 db.exec(createNews)
 db.exec(createTransactions)
 db.exec(createAccountability)
+db.exec(createPreRegistrations)
 db.exec(createOficineiroRegistrations)
 
 // Migrations
@@ -338,6 +350,11 @@ try {
   db.exec("ALTER TABLE projects ADD COLUMN area TEXT NOT NULL DEFAULT 'Educação';");
 } catch (e: any) {
   if (!e.message.includes('duplicate column name')) console.error('Migration error (projects.area):', e.message);
+}
+try {
+  db.exec("ALTER TABLE projects ADD COLUMN image_url TEXT;");
+} catch (e: any) {
+  if (!e.message.includes('duplicate column name')) console.error('Migration error (projects.image_url):', e.message);
 }
 
 const projectColumns = [

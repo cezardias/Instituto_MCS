@@ -31,6 +31,7 @@ const SIDEBAR = [
     { id:'projetos', label:'Projetos', icon:'🚀', roles:['admin', 'coordenacao', 'oficineiro'] },
     { id:'turmas', label:'Turmas e Frequência', icon:'🏫', roles:['admin', 'diretoria', 'coordenacao', 'oficineiro', 'aluno', 'responsavel'] },
     { id:'alunos', label:'Alunos', icon:'🎓', roles:['admin', 'coordenacao', 'oficineiro', 'responsavel'] },
+    { id:'precadastros', label:'Pré-Cadastros', icon:'📝', roles:['admin', 'coordenacao'] },
     { id:'avaliacoes', label:'Avaliações e Atividades', icon:'📝', roles:['admin', 'coordenacao', 'oficineiro', 'diretoria', 'aluno', 'responsavel'] },
     { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
     { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
@@ -248,6 +249,7 @@ export default function AdminDashboard() {
           {tab === 'canal'       && <DenunciasTab />}
           {tab === 'ead'         && <EadTab onClose={() => setTab('overview')} />}
           {tab === 'gestao_ead'  && <GestaoEadTab />}
+          {tab === 'precadastros' && <PreCadastrosTab />}
           {tab === 'comunicados' && <ComunicadosTab />}
           {tab === 'passaporte'  && <PassaporteTab />}
           {tab === 'autorizacoes' && <AutorizacoesTab />}
@@ -460,8 +462,9 @@ function ProjetosTab() {
   const [editing, setEditing] = useState<Project|null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const blank = { title:'', status:'em_execucao', area:'Educação', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'' }
+  const blank = { title:'', status:'em_execucao', area:'Educação', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'' }
   const [form, setForm] = useState<any>(blank)
+  const [imageFile, setImageFile] = useState<File|null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -470,16 +473,24 @@ function ProjetosTab() {
   }, [])
   useEffect(() => { load() }, [load])
 
-  const openNew = () => { setEditing(null); setForm(blank); setError(''); setShowForm(true) }
-  const openEdit = (p: Project) => { setEditing(p); setForm({...p}); setError(''); setShowForm(true) }
+  const openNew = () => { setEditing(null); setForm(blank); setImageFile(null); setError(''); setShowForm(true) }
+  const openEdit = (p: Project) => { setEditing(p); setForm({...p}); setImageFile(null); setError(''); setShowForm(true) }
   const del = async (id: number) => { if(!confirm('Excluir projeto?')) return; await fetch(`/api/projects/${id}`,{method:'DELETE',headers:authH()}); load() }
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
+    let imageUrl = form.image_url
+    if (imageFile) {
+      const fd = new FormData(); fd.append('file', imageFile)
+      try { const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); const d = await r.json(); if(d.url) imageUrl = d.url } catch { setError('Falha no upload'); setSaving(false); return }
+    }
     const method = editing ? 'PUT' : 'POST'
     const url = editing ? `/api/projects/${editing.id}` : '/api/projects'
     try {
-      const r = await fetch(url, {method, headers:authH(), body:JSON.stringify(form)})
-      if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro'); } else { setShowForm(false); load() }
+      const r = await fetch(url, {method, headers:authH(), body:JSON.stringify({...form, image_url: imageUrl})})
+      if (!r.ok) { 
+        if (r.status === 401) { alert('Sessão expirada. Faça login novamente.'); window.location.href='/login'; return; }
+        const d = await r.json(); setError(d.error || 'Erro'); 
+      } else { setShowForm(false); load() }
     } catch { setError('Erro de conexão') }
     setSaving(false)
   }
@@ -520,6 +531,11 @@ function ProjetosTab() {
                 <div className="col-span-2">
                   <label className="label-dash">Localização *</label>
                   <input required value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className="input-field" placeholder="Cidade / Estado" />
+                </div>
+                <div className="col-span-2">
+                  <label className="label-dash">Imagem do Projeto</label>
+                  <input type="file" accept="image/*" onChange={e=>setImageFile(e.target.files?.[0]||null)} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-dourado/10 file:text-carbono hover:file:bg-dourado/20" />
+                  {form.image_url && !imageFile && <p className="text-xs text-gray-500 mt-2">Imagem atual: {form.image_url.split('/').pop()}</p>}
                 </div>
                 <div>
                   <label className="label-dash">Beneficiados</label>
@@ -3710,6 +3726,88 @@ function OficineirosRegistrationTab() {
               </div>
             )}
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PRÉ-CADASTROS TAB
+// ═══════════════════════════════════════════════════════════════════
+function PreCadastrosTab() {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try { const r = await fetch('/api/pre-registration', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    setLoading(false)
+  }, [])
+  useEffect(() => { load() }, [load])
+
+  const updateStatus = async (id: number, status: string) => {
+    await fetch(`/api/pre-registration/${id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ status }) })
+    load()
+  }
+
+  const del = async (id: number) => {
+    if(!confirm('Excluir pré-cadastro?')) return;
+    await fetch(`/api/pre-registration/${id}`, { method: 'DELETE', headers: authH() })
+    load()
+  }
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <h2 className="font-serif text-2xl text-carbono">Pré-Cadastros de Interessados</h2>
+        <button onClick={() => {
+          // Export CSV
+          const csvContent = "data:text/csv;charset=utf-8," 
+            + "Nome,Email,Telefone,Projeto,Status,Data\n"
+            + items.map(e => `${e.name},${e.email||''},${e.phone},${e.project_name||'Geral'},${e.status},${new Date(e.created_at).toLocaleDateString('pt-BR')}`).join("\n")
+          const encodedUri = encodeURI(csvContent)
+          const link = document.createElement("a")
+          link.setAttribute("href", encodedUri)
+          link.setAttribute("download", "precadastros_mcs.csv")
+          document.body.appendChild(link)
+          link.click()
+        }} className="bg-green-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 flex items-center gap-2">Baixar CSV</button>
+      </div>
+
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead><tr className="border-b border-gray-100">
+              <th className="th-cell">Nome</th><th className="th-cell">Contato</th><th className="th-cell">Projeto de Interesse</th>
+              <th className="th-cell">Status</th><th className="th-cell">Data</th><th className="th-cell" />
+            </tr></thead>
+            <tbody>
+              {items.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">Nenhum pré-cadastro encontrado</td></tr>}
+              {items.map(a => (
+                <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                  <td className="td-cell font-semibold text-carbono">{a.name}</td>
+                  <td className="td-cell text-gray-500">
+                    <div>{a.phone}</div>
+                    <div className="text-xs">{a.email}</div>
+                  </td>
+                  <td className="td-cell text-gray-500 font-medium">{a.project_name || 'Geral'}</td>
+                  <td className="td-cell">
+                    <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white">
+                      <option value="pendente">Pendente</option>
+                      <option value="contatado">Contatado</option>
+                      <option value="matriculado">Matriculado</option>
+                      <option value="desistente">Desistente</option>
+                    </select>
+                  </td>
+                  <td className="td-cell text-gray-500">{new Date(a.created_at).toLocaleDateString('pt-BR')}</td>
+                  <td className="td-cell">
+                    <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
