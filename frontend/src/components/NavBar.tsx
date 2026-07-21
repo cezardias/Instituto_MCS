@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 const links = [
   { label: 'INÍCIO', to: '/' },
   { label: 'QUEM SOMOS', to: '/quem-somos' },
-  // { label: 'PROJETOS', to: '/projetos' },
+  { label: 'PROJETOS', to: '/projetos' },
   // { label: 'TRANSPARÊNCIA', to: '/transparencia' },
   // { label: 'COMPLIANCE', to: '/compliance' },
   // { label: 'BANCO DE PROJETOS', to: '/banco-de-projetos' },
