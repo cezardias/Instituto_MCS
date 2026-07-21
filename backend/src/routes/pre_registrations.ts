@@ -19,12 +19,12 @@ router.get('/', authMiddleware, (req, res) => {
 })
 
 router.post('/', (req, res) => {
-  const { tenant_id, name, email, phone, project_id } = req.body
+  const { tenant_id, name, email, phone, project_id, student_name } = req.body
   if (!tenant_id || !name || !phone) return res.status(400).json({ error: 'tenant_id, name and phone required' })
   try {
     const info = db.prepare(
-      'INSERT INTO pre_registrations (tenant_id, name, email, phone, project_id) VALUES (?,?,?,?,?)'
-    ).run(tenant_id, name, email || '', phone, project_id || null)
+      'INSERT INTO pre_registrations (tenant_id, name, email, phone, project_id, student_name) VALUES (?,?,?,?,?,?)'
+    ).run(tenant_id, name, email || '', phone, project_id || null, student_name || null)
     res.status(201).json({ id: info.lastInsertRowid })
   } catch (e: any) { res.status(500).json({ error: e.message }) }
 })

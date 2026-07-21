@@ -410,6 +410,10 @@ try {
   db.exec(`ALTER TABLE users ADD COLUMN last_activity TEXT`)
 } catch (err) {}
 
+try {
+  db.exec(`ALTER TABLE pre_registrations ADD COLUMN student_name TEXT`)
+} catch (err) {}
+
 // --- SEED PROJECTS ---
 try {
   const countProj = db.prepare("SELECT count(*) as c FROM projects WHERE tenant_id = 'mcs'").get() as any;

@@ -33,7 +33,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
       const response = await fetch('/api/oficineiros', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, tenant_id: 'mcs' })
+        body: JSON.stringify({ ...form, tenant_id: 'instituto-mcs' })
       })
 
       if (!response.ok) {

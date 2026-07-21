@@ -6,12 +6,12 @@ export default function PreCadastroPage() {
   const initialProjectId = searchParams.get('projeto') || '';
 
   const [projects, setProjects] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: '', phone: '', email: '', project_id: initialProjectId });
+  const [form, setForm] = useState({ name: '', student_name: '', phone: '', email: '', project_id: initialProjectId });
   const [status, setStatus] = useState<'idle'|'submitting'|'success'|'error'>('idle');
 
   useEffect(() => {
     // Fetch active projects to populate the dropdown
-    fetch('/api/projects?tenant_id=mcs')
+    fetch('/api/projects?tenant_id=instituto-mcs')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -29,16 +29,17 @@ export default function PreCadastroPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tenant_id: 'mcs',
+          tenant_id: 'instituto-mcs',
           name: form.name,
           phone: form.phone,
           email: form.email,
+          student_name: form.student_name,
           project_id: form.project_id || null
         })
       });
       if (res.ok) {
         setStatus('success');
-        setForm({ name: '', phone: '', email: '', project_id: '' });
+        setForm({ name: '', student_name: '', phone: '', email: '', project_id: '' });
       } else {
         setStatus('error');
       }
@@ -83,6 +84,11 @@ export default function PreCadastroPage() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-1">Nome Completo do Responsável *</label>
                   <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-dourado focus:ring-1 focus:ring-dourado transition-colors" placeholder="Ex: Maria da Silva" />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-1">Nome Completo do Aluno (Se aplicável)</label>
+                  <input value={form.student_name} onChange={e => setForm({...form, student_name: e.target.value})} className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:border-dourado focus:ring-1 focus:ring-dourado transition-colors" placeholder="Ex: João da Silva" />
                 </div>
                 
                 <div>

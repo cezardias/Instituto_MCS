@@ -3815,8 +3815,8 @@ function PreCadastrosTab() {
         <button onClick={() => {
           // Export CSV
           const csvContent = "data:text/csv;charset=utf-8," 
-            + "Nome,Email,Telefone,Projeto,Status,Data\n"
-            + items.map(e => `${e.name},${e.email||''},${e.phone},${e.project_name||'Geral'},${e.status},${new Date(e.created_at).toLocaleDateString('pt-BR')}`).join("\n")
+            + "Nome do Responsável,Nome do Aluno,Email,Telefone,Projeto,Status,Data\n"
+            + items.map(e => `${e.name},${e.student_name||''},${e.email||''},${e.phone},${e.project_name||'Geral'},${e.status},${new Date(e.created_at).toLocaleDateString('pt-BR')}`).join("\n")
           const encodedUri = encodeURI(csvContent)
           const link = document.createElement("a")
           link.setAttribute("href", encodedUri)
@@ -3830,7 +3830,7 @@ function PreCadastrosTab() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Nome</th><th className="th-cell">Contato</th><th className="th-cell">Projeto de Interesse</th>
+              <th className="th-cell">Responsável</th><th className="th-cell">Aluno</th><th className="th-cell">Contato</th><th className="th-cell">Projeto de Interesse</th>
               <th className="th-cell">Status</th><th className="th-cell">Data</th><th className="th-cell" />
             </tr></thead>
             <tbody>
@@ -3838,6 +3838,7 @@ function PreCadastrosTab() {
               {items.map(a => (
                 <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell font-semibold text-carbono">{a.name}</td>
+                  <td className="td-cell text-gray-500">{a.student_name || '-'}</td>
                   <td className="td-cell text-gray-500">
                     <div>{a.phone}</div>
                     <div className="text-xs">{a.email}</div>
