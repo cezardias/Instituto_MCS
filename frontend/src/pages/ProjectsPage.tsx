@@ -236,6 +236,83 @@ export default function ProjectsPage() {
           </div>
         </div>
 
+        {/* Project 4: Conexão Rima */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
+          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+            <img src="/conexao-rima.png" alt="Conexão Rima" className="w-full h-full object-cover absolute inset-0" onError={(e) => e.currentTarget.src = '/hero.png'} />
+            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
+              EM ANDAMENTO
+            </div>
+          </div>
+          
+          <div className="lg:w-3/5 p-8 lg:p-12">
+            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+              Contraturno Conexão Rima
+            </h2>
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento da leitura, escrita e comunicação de forma criativa e cidadã para alunos do 4º e 5º ano do Ensino Fundamental.
+            </p>
+
+            <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
+            
+            <ul className="space-y-4 mb-8">
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">📚</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Comunicação e Expressão</strong>
+                  <span className="text-gray-600 text-sm">Melhora da leitura, escrita e comunicação oral. Desenvolvimento da criatividade e expressão corporal.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🌟</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
+                  <span className="text-gray-600 text-sm">Fortalecimento da autoestima e da confiança através do protagonismo juvenil.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🤝</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Respeito e Cooperação</strong>
+                  <span className="text-gray-600 text-sm">Respeito e cooperação através da comunicação não violenta. Valorização da cultura brasileira, indígena, afro-brasileira e quilombola.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🌿</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Consciência Ambiental</strong>
+                  <span className="text-gray-600 text-sm">Conscientização ambiental sobre a importância das águas e do cerrado.</span>
+                </div>
+              </li>
+            </ul>
+
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
+                  <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Alunos do 4º e 5º ano (Escolas Ana Aguiar e Zeca de Faria)</p>
+                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. Municipal de Educação</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+              Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
+            </p>
+
+            <a href="https://wa.me/5561981748858" target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white font-bold py-4 px-8 rounded-full hover:bg-green-700 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              Mais informações (WhatsApp)
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   )
