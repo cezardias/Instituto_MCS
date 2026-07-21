@@ -94,6 +94,77 @@ export default function ProjectsPage() {
           </div>
         </div>
 
+        {/* Project 2: MCS Digital */}
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
+          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+            <img src="/hero.png" alt="MCS Digital" className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm">
+              EM ANDAMENTO
+            </div>
+          </div>
+          
+          <div className="lg:w-3/5 p-8 lg:p-12">
+            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+              Prepare Seu Filho para a Era Digital com o Projeto MCS Digital!
+            </h2>
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o <strong>MCS Digital</strong>, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.
+            </p>
+
+            <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Digital é essencial?</h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Em um mundo em rápida transformação, o acesso à tecnologia não pode ser um privilégio. O MCS Digital prepara os jovens para não apenas consumirem, mas pensarem e produzirem com ferramentas digitais:
+            </p>
+
+            <ul className="space-y-4 mb-8">
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">💻</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Letramento e Inovação</strong>
+                  <span className="text-gray-600 text-sm">Introduzimos conceitos de Inteligência Artificial, pensamento computacional e prompt engineering de forma lúdica e prática para crianças e jovens.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🚀</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Protagonismo e Empreendedorismo</strong>
+                  <span className="text-gray-600 text-sm">Através de trilhas divididas por idade (Exploradores Digitais e Criadores do Futuro), seu filho aprende a criar conteúdos reais, como guias turísticos, podcasts e bancos de imagens.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🛡️</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Valores e Ética Digital</strong>
+                  <span className="text-gray-600 text-sm">Promovemos o pensamento crítico e o uso responsável da tecnologia, combatendo fake news e ensinando sobre privacidade e cidadania digital.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">📍</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Conexão com o Território</strong>
+                  <span className="text-gray-600 text-sm">Unimos a tecnologia à realidade local, aplicando o aprendizado ao turismo, à gastronomia e à valorização da nossa Chapada dos Veadeiros.</span>
+                </div>
+              </li>
+            </ul>
+
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+              <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS Digital acontece em um ambiente estruturado e conectado nos polos de atendimento.</p>
+              <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Ciclos contínuos de aprendizado prático ao longo do ano.</p>
+              <p className="text-gray-600 text-sm"><strong>Estrutura:</strong> Turmas organizadas por faixa etária com foco em projetos reais.</p>
+            </div>
+
+            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+              Seu filho vai aprender a usar a Inteligência Artificial e a inovação para construir conhecimento, autonomia e novas oportunidades profissionais.
+            </p>
+
+            <Link to="/contato" className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              Garanta a Vaga do Seu Filho
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </Link>
+          </div>
+        </div>
+
       </div>
     </div>
   )
