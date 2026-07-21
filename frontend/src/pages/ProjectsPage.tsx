@@ -5,7 +5,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('/api/projects?tenant_id=mcs')
+    fetch('/api/projects?tenant_id=instituto-mcs')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setProjects(data);
