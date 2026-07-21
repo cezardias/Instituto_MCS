@@ -12,6 +12,7 @@ import LoginPage from './pages/LoginPage'
 import NoticiasPage from './pages/NoticiasPage'
 import ParceirosPage from './pages/ParceirosPage'
 import ContatoPage from './pages/ContatoPage'
+import RifaPage from './pages/RifaPage'
 
 // Layout wrapper com NavBar + Footer (site público)
 function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,7 @@ function App() {
       <Route path="/noticias" element={<PublicLayout><NoticiasPage /></PublicLayout>} />
       <Route path="/parceiros" element={<PublicLayout><ParceirosPage /></PublicLayout>} />
       <Route path="/contato" element={<PublicLayout><ContatoPage /></PublicLayout>} />
+      <Route path="/rifa" element={<PublicLayout><RifaPage /></PublicLayout>} />
     </Routes>
   )
 }

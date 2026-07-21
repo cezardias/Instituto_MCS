@@ -305,11 +305,6 @@ export default function ProjectsPage() {
             <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
               Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
             </p>
-
-            <a href="https://wa.me/5561981748858" target="_blank" rel="noopener noreferrer" className="bg-green-600 text-white font-bold py-4 px-8 rounded-full hover:bg-green-700 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              Mais informações (WhatsApp)
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-            </a>
           </div>
         </div>
 

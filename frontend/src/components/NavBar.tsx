@@ -11,6 +11,7 @@ const links = [
   { label: 'NOTÍCIAS', to: '/noticias' },
   { label: 'PARCEIROS', to: '/parceiros' },
   { label: 'CONTATO', to: '/contato' },
+  { label: 'RIFA MCS', to: '/rifa' },
 ]
 
 export default function NavBar() {

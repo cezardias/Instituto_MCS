@@ -49,6 +49,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Rifa MCS Highlight Banner */}
+      <section className="bg-white py-12 border-t border-gray-100">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-yellow-50 to-white border border-yellow-100 rounded-3xl p-8 lg:p-12 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="md:w-2/3">
+              <span className="text-yellow-600 font-bold tracking-widest text-xs uppercase mb-2 block flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></span>
+                Campanha Solidária
+              </span>
+              <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4">
+                Participe da <span className="text-dourado">Rifa MCS</span>
+              </h2>
+              <p className="text-gray-600 text-lg">
+                Ajude a financiar projetos de cultura, esporte e educação em Alto Paraíso. Itens exclusivos serão sorteados em breve!
+              </p>
+            </div>
+            <div className="md:w-1/3 flex justify-center md:justify-end shrink-0">
+              <Link to="/rifa" className="bg-dourado text-carbono font-bold py-4 px-10 rounded-full hover:bg-yellow-500 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2">
+                SAIBA MAIS E PARTICIPE
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section 
       <section className="border-t border-gray-200 bg-white pb-20 pt-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
