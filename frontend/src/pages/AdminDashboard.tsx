@@ -532,7 +532,7 @@ function ProjetosTab() {
     e.preventDefault(); setSaving(true); setError('')
     let imageUrl = form.image_url
     if (imageFile) {
-      const fd = new FormData(); fd.append('file', imageFile)
+      const fd = new FormData(); fd.append('image', imageFile)
       try { const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); const d = await r.json(); if(d.url) imageUrl = d.url } catch { setError('Falha no upload'); setSaving(false); return }
     }
     const method = editing ? 'PUT' : 'POST'
@@ -3897,7 +3897,7 @@ function ParceirosTab() {
     try {
       let finalLogo = form.logo_url
       if (imageFile) {
-        const fd = new FormData(); fd.append('file', imageFile); fd.append('tenant_id', TENANT)
+        const fd = new FormData(); fd.append('image', imageFile); fd.append('tenant_id', TENANT)
         const up = await fetch('/api/upload', { method:'POST', headers:authH(), body:fd })
         if (up.ok) { const upData = await up.json(); finalLogo = upData.url }
       }
