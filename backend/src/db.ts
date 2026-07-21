@@ -410,4 +410,47 @@ try {
   db.exec(`ALTER TABLE users ADD COLUMN last_activity TEXT`)
 } catch (err) {}
 
+// --- SEED PROJECTS ---
+try {
+  const countProj = db.prepare("SELECT count(*) as c FROM projects WHERE tenant_id = 'mcs'").get() as any;
+  if (countProj.c < 4) {
+    const insertProj = db.prepare('INSERT INTO projects (tenant_id, title, status, area, location, description, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    
+    const existing = db.prepare("SELECT title FROM projects WHERE tenant_id = 'mcs'").all() as any[];
+    const existingTitles = existing.map(e => e.title);
+
+    const seedProjects = [
+      {
+        title: 'MCS em Movimento',
+        area: 'Esporte',
+        location: 'Alto Paraíso de Goiás',
+        description: 'Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o MCS em Movimento, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.',
+        image_url: '/hero.png'
+      },
+      {
+        title: 'MCS Digital',
+        area: 'Tecnologia',
+        location: 'Alto Paraíso de Goiás',
+        description: 'Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o MCS Digital, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.',
+        image_url: '/hero.png'
+      },
+      {
+        title: 'MCS Família',
+        area: 'Comunidade',
+        location: 'Alto Paraíso de Goiás',
+        description: 'Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o MCS Família, a base de sustentação do nosso ecossistema de desenvolvimento.',
+        image_url: '/hero.png'
+      }
+    ];
+
+    for (const p of seedProjects) {
+      if (!existingTitles.find((t:string) => t.includes(p.title))) {
+        insertProj.run('mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url);
+      }
+    }
+  }
+} catch (e) {
+  console.error('Seed projects error:', e)
+}
+
 export default db
