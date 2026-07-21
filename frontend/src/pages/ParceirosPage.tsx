@@ -1,51 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
-const tiposParceiros = [
-  {
-    tipo: 'Parceiros Governamentais',
-    icone: '🏛️',
-    cor: 'bg-blue-50 border-blue-100',
-    iconeBg: 'bg-blue-100 text-blue-600',
-    parceiros: [
-      { nome: 'Ministério da Cultura', sigla: 'MinC', descricao: 'Apoio a projetos culturais e incentivos fiscais para iniciativas sociais.' },
-      { nome: 'Secretaria de Educação', sigla: 'SEDUC', descricao: 'Parceria em programas de reforço escolar e alfabetização.' },
-      { nome: 'Secretaria de Esporte', sigla: 'SEL', descricao: 'Fomento a projetos esportivos de inclusão social.' },
-    ]
-  },
-  {
-    tipo: 'Parceiros Empresariais',
-    icone: '🏢',
-    cor: 'bg-yellow-50 border-yellow-100',
-    iconeBg: 'bg-yellow-100 text-yellow-700',
-    parceiros: [
-      { nome: 'Empresas Privadas', sigla: 'Patrocinadores', descricao: 'Empresas comprometidas com a responsabilidade social e o desenvolvimento comunitário.' },
-      { nome: 'Indústria e Comércio', sigla: 'Apoiadores', descricao: 'Parceiros do setor produtivo que apoiam a geração de renda e capacitação.' },
-      { nome: 'Startups e Tecnologia', sigla: 'Inovação', descricao: 'Empresas de tecnologia que contribuem com soluções digitais para os projetos.' },
-    ]
-  },
-  {
-    tipo: 'Organizações da Sociedade Civil',
-    icone: '🤝',
-    cor: 'bg-green-50 border-green-100',
-    iconeBg: 'bg-green-100 text-green-700',
-    parceiros: [
-      { nome: 'ONGs e Associações', sigla: 'OSC', descricao: 'Entidades que somam esforços na construção de uma rede de proteção social.' },
-      { nome: 'Igrejas e Comunidades', sigla: 'Comunidade', descricao: 'Líderes comunitários e religiosos que ampliam o alcance das ações.' },
-      { nome: 'Universidades', sigla: 'Acadêmico', descricao: 'Instituições de ensino superior parceiras em pesquisa e extensão social.' },
-    ]
-  },
-  {
-    tipo: 'Parceiros Internacionais',
-    icone: '🌍',
-    cor: 'bg-purple-50 border-purple-100',
-    iconeBg: 'bg-purple-100 text-purple-700',
-    parceiros: [
-      { nome: 'Organizações Internacionais', sigla: 'ONU / UNICEF', descricao: 'Agências internacionais que reforçam boas práticas e recursos para projetos sociais.' },
-      { nome: 'Fundações Globais', sigla: 'Fundações', descricao: 'Fundações internacionais que apoiam iniciativas de impacto social em países em desenvolvimento.' },
-    ]
-  },
-]
+
 
 const numeros = [
   { valor: '23+', label: 'Parceiros ativos' },
@@ -156,46 +112,7 @@ export default function ParceirosPage() {
         </section>
       )}
 
-      {/* ── Parceiros por Categoria ─────────────── */}
-      <section className="py-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <span className="text-dourado font-bold text-xs uppercase tracking-widest mb-3 block">NOSSA REDE</span>
-            <h2 className="font-serif text-3xl md:text-4xl">Parceiros por categoria</h2>
-          </div>
 
-          <div className="space-y-12">
-            {tiposParceiros.map((grupo) => (
-              <div key={grupo.tipo}>
-                {/* Categoria header */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${grupo.iconeBg}`}>
-                    {grupo.icone}
-                  </div>
-                  <h3 className="font-bold text-lg text-carbono">{grupo.tipo}</h3>
-                  <div className="flex-1 h-px bg-gray-200 ml-2" />
-                </div>
-
-                {/* Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {grupo.parceiros.map((p) => (
-                    <div
-                      key={p.nome}
-                      className={`${grupo.cor} border rounded-2xl p-7 hover:-translate-y-1 hover:shadow-md transition-all duration-300`}
-                    >
-                      <div className={`inline-block text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 ${grupo.iconeBg}`}>
-                        {p.sigla}
-                      </div>
-                      <h4 className="font-bold text-carbono mb-2">{p.nome}</h4>
-                      <p className="text-sm text-gray-500 leading-relaxed">{p.descricao}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── Seja um Parceiro CTA ─────────────────── */}
       <section id="seja-parceiro" className="py-20 bg-carbono text-marfim">
