@@ -14,7 +14,7 @@ export default function RifaPage() {
               Rifa Solidária MCS
             </h1>
             <p className="text-carbono text-lg lg:text-xl font-medium leading-relaxed max-w-xl">
-              Participe da nossa rifa e ajude a financiar nossos projetos de educação, esporte, cultura e tecnologia para as crianças e jovens da Chapada dos Veadeiros.
+              Participe da nossa rifa e ajude a financiar nossos projetos de assistência social, esporte, cultura e amparo para as famílias e jovens da Chapada dos Veadeiros.
             </p>
           </div>
           <div className="relative z-10 p-10 lg:p-16 md:w-1/3 flex justify-center md:justify-end">

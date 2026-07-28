@@ -9,11 +9,11 @@ interface NewsItem {
   created_at: string
 }
 
-const CATEGORIES = ['Todas as notícias', 'Projetos', 'Educação', 'Eventos', 'Parcerias', 'Institucional']
+const CATEGORIES = ['Todas as notícias', 'Projetos', 'Ação Social', 'Eventos', 'Parcerias', 'Institucional']
 const TENANT_ID = 'instituto-mcs'
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Educação':      'bg-blue-500',
+  'Ação Social':   'bg-blue-500',
   'Esporte':       'bg-green-500',
   'Cultura':       'bg-purple-500',
   'Saúde':         'bg-teal-500',
@@ -29,7 +29,7 @@ const SEED_NEWS: NewsItem[] = [
   {
     id: 1,
     title: 'Oficinas pedagógicas fortalecem aprendizagem em Alto Paraíso de Goiás',
-    category: 'Educação',
+    category: 'Ação Social',
     content: 'Atividades lúdicas e personalizadas ajudam crianças a desenvolverem todo o seu potencial.',
     image_url: 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=600&q=80',
     created_at: '2024-05-10T00:00:00Z',
@@ -60,7 +60,7 @@ const SEED_NEWS: NewsItem[] = [
   },
   {
     id: 5,
-    title: 'Educação ambiental: pequenas ações, grandes mudanças',
+    title: 'Ação socioambiental: pequenas atitudes, grandes mudanças',
     category: 'Meio Ambiente',
     content: 'Alunos participam de atividades que incentivam o cuidado com o meio ambiente.',
     image_url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=600&q=80',
@@ -68,7 +68,7 @@ const SEED_NEWS: NewsItem[] = [
   },
   {
     id: 6,
-    title: 'Nova parceria fortalece projetos de educação e cultura',
+    title: 'Nova parceria fortalece projetos de assistência social e cultura',
     category: 'Parcerias',
     content: 'Instituto MCS e empresas parceiras unem forças para ampliar o impacto social.',
     image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80',

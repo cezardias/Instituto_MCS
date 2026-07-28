@@ -70,8 +70,8 @@ const SIDEBAR = [
 
 const STATUS_LABELS: Record<string,string> = { em_execucao:'Em Execução', em_planejamento:'Em Planejamento', concluido:'Concluído', suspenso:'Suspenso' }
 const STATUS_COLORS: Record<string,string> = { em_execucao:'bg-green-100 text-green-700', em_planejamento:'bg-blue-100 text-blue-700', concluido:'bg-gray-100 text-gray-600', suspenso:'bg-red-100 text-red-600' }
-const AREAS = ['Educação','Cultura','Esporte','Saúde','Meio Ambiente','Geração de Renda']
-const NEWS_CATS = ['Projetos','Educação','Eventos','Parcerias','Institucional','Saúde','Esporte','Cultura']
+const AREAS = ['Ação Social','Cultura','Esporte','Saúde','Meio Ambiente','Geração de Renda']
+const NEWS_CATS = ['Projetos','Ação Social','Eventos','Parcerias','Institucional','Saúde','Esporte','Cultura']
 
 // ─── Mini-chart helpers (pure SVG) ───────────────────────────────────
 function DonutChart({ data, total, colors }: { data:{label:string,value:number}[], total:number, colors:string[] }) {
@@ -303,7 +303,7 @@ function OverviewTab() {
   const areaData = stats?.alunos_por_area?.length
     ? stats.alunos_por_area.map(a=>({label:a.area, value:a.count}))
     : [
-        {label:'Educação',value:1682},{label:'Cultura',value:1208},{label:'Esporte',value:642},{label:'Formação Profissional',value:310}
+        {label:'Ação Social',value:1682},{label:'Cultura',value:1208},{label:'Esporte',value:642},{label:'Formação Profissional',value:310}
       ]
 
   const alertas = [
@@ -463,7 +463,7 @@ function ProjetosTab() {
   const [editing, setEditing] = useState<Project|null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const blank = { title:'', status:'em_execucao', area:'Educação', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'' }
+  const blank = { title:'', status:'em_execucao', area:'Ação Social', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'' }
   const [form, setForm] = useState<any>(blank)
   const [imageFile, setImageFile] = useState<File|null>(null)
 
@@ -666,7 +666,7 @@ function AlunosTab() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
-  const blank = { name:'', email:'', phone:'', area:'Educação', status:'ativo', birth_date:'' }
+  const blank = { name:'', email:'', phone:'', area:'Ação Social', status:'ativo', birth_date:'' }
   const [form, setForm] = useState<any>(blank)
 
   const load = useCallback(async () => {

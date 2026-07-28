@@ -21,7 +21,7 @@ export default function QuemSomos() {
                 Mais do que um instituto, somos um território de possibilidades onde transformamos emoção em expressão e conflito em consciência.
               </p>
               <p className="font-bold text-carbono">
-                Acreditamos que a cultura e a tecnologia são motores da mudança.
+                Acreditamos que a assistência social, unida à cultura, é o motor da mudança. Cuidamos das crianças, dos jovens e estendemos nossos braços a toda a família.
               </p>
             </div>
             <div className="w-12 h-[1px] bg-dourado mt-8 lg:mt-10 mx-auto lg:mx-0"></div>
@@ -64,16 +64,16 @@ export default function QuemSomos() {
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 rounded-full bg-yellow-50 text-dourado flex items-center justify-center mb-6 text-xl">💻</div>
-              <h3 className="font-bold mb-3 text-lg">Tecnologia e Inovação (MCS Digital)</h3>
+              <h3 className="font-bold mb-3 text-lg">Tecnologia e Cidadania (MCS Digital)</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Democratizamos o acesso à Inteligência Artificial e às ferramentas digitais para crianças e jovens, formando criadores, empreendedores e protagonistas da economia digital no Cerrado.
+                Democratizamos o acesso às ferramentas digitais como meio de inclusão e resgate social para crianças e jovens, formando cidadãos preparados e conectados.
               </p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 rounded-full bg-yellow-50 text-dourado flex items-center justify-center mb-6 text-xl">🤝</div>
-              <h3 className="font-bold mb-3 text-lg">Rede de Cuidado, Cidadania e Renda (MCS Família)</h3>
+              <h3 className="font-bold mb-3 text-lg">Rede de Assistência Social e Apoio (MCS Família)</h3>
               <p className="text-sm text-gray-600 leading-relaxed">
-                Acreditamos que a dignidade humana é um pilar estruturante. Oferecemos trilhas profissionalizantes, assistência e capacitação que abrem caminhos reais para a autonomia financeira.
+                Acreditamos que a dignidade começa no lar. Oferecemos assistência contínua, acolhimento psicossocial e trilhas de fortalecimento para estruturar e amparar as famílias da nossa comunidade.
               </p>
             </div>
           </div>
@@ -89,10 +89,10 @@ export default function QuemSomos() {
             </span>
             <h2 className="font-serif text-3xl mb-6">Por que o MCS é a sua melhor parceria?</h2>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Porque não acreditamos em soluções isoladas. O Instituto MCS entende que a transformação social acontece na intersecção entre o desenvolvimento humano, a sustentabilidade ambiental, a economia criativa e o letramento digital.
+              Porque não acreditamos em soluções isoladas. O Instituto MCS entende que a transformação social acontece no apoio contínuo que une acolhimento, desenvolvimento humano e letramento cidadão.
             </p>
             <p className="text-gray-600 leading-relaxed mb-8">
-              Somos a ponte que une o saber comunitário a oportunidades reais de futuro, garantindo que a inovação e o bem-estar caminhem juntos em nosso território.
+              Somos a rede de apoio que une o saber comunitário a oportunidades de resgate social, garantindo que o amparo à família e o bem-estar caminhem juntos em nosso território.
             </p>
           </div>
           
@@ -100,10 +100,10 @@ export default function QuemSomos() {
             <div className="absolute top-8 left-8 text-dourado/20 text-6xl font-serif">"</div>
             <div className="relative z-10">
               <p className="font-serif text-2xl md:text-3xl leading-relaxed text-dourado mb-6">
-                Mais que um projeto, somos um movimento.
+                Mais que um projeto, somos um movimento social.
               </p>
               <p className="text-gray-300 text-lg leading-relaxed">
-                Conectamos cultura, esporte, tecnologia e oportunidades para transformar o presente e construir o futuro de Alto Paraíso.
+                Conectamos assistência social, cultura e apoio direto para transformar o presente e estruturar o futuro das famílias de Alto Paraíso.
               </p>
             </div>
           </div>

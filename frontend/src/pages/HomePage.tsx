@@ -28,10 +28,10 @@ export default function HomePage() {
               | Instituto Movimento de Cultura Social
             </span>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight mb-6">
-              Transformamos realidades através da cultura, educação e oportunidades.
+              Transformamos realidades através da assistência social, cultura e fortalecimento comunitário.
             </h1>
             <p className="text-gray-600 text-base md:text-lg max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
-              Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
+              Promovemos o amparo às crianças, jovens e suas famílias, construindo uma base sólida de cidadania, dignidade e desenvolvimento social.
             </p>
             <div className="flex justify-center lg:justify-start gap-4">
               <Link to="/projetos" className="bg-dourado text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center shadow-lg">
@@ -52,7 +52,7 @@ export default function HomePage() {
             <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-[3/4] xl:aspect-[4/3]">
               <img 
                 src="/hero.png" 
-                alt="Criança sorrindo em projeto educacional" 
+                alt="Criança sorrindo em projeto social" 
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-carbono/60 to-transparent"></div>
@@ -74,7 +74,7 @@ export default function HomePage() {
                 Participe da <span className="text-dourado">Rifa MCS</span>
               </h2>
               <p className="text-gray-600 text-lg">
-                Ajude a financiar projetos de cultura, esporte e educação em Alto Paraíso. Itens exclusivos serão sorteados em breve!
+                Ajude a financiar projetos de transformação social, esporte e cultura para famílias em Alto Paraíso. Itens exclusivos serão sorteados em breve!
               </p>
             </div>
             <div className="md:w-1/3 flex justify-center md:justify-end shrink-0">
@@ -183,7 +183,7 @@ export default function HomePage() {
             <div className="col-span-2 lg:col-span-1 pl-0 lg:pl-8 lg:border-l border-gray-200 flex flex-col justify-center">
               <span className="text-dourado text-4xl leading-none font-serif block mb-2">&ldquo;</span>
               <p className="text-gray-600 italic text-sm mb-4">
-                Acreditamos no poder da cultura e da educação como caminhos para transformar vidas e construir uma sociedade mais consciente.
+                Acreditamos no poder do acolhimento social e da cultura como caminhos para transformar realidades e construir uma comunidade mais unida e forte.
               </p>
               <span className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Instituto MCS</span>
             </div>

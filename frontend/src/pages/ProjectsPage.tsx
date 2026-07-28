@@ -59,7 +59,7 @@ export default function ProjectsPage() {
               {pMovimento.title}
             </h2>
             <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
-              {pMovimento.description || 'Uma iniciativa transformadora para o contraturno escolar.'}
+              {pMovimento.description || 'Uma iniciativa transformadora de assistência continuada e desenvolvimento integral para crianças e jovens da comunidade.'}
             </p>
 
             <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS em Movimento é essencial?</h3>
@@ -100,8 +100,8 @@ export default function ProjectsPage() {
 
             <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
               <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS em Movimento acontece em um ambiente seguro e acolhedor nos Polos de Alto Paraíso de Goiás e região.</p>
-              <p className="text-gray-600 text-sm"><strong>Dias:</strong> Encontros semanais estruturados para o contraturno.</p>
+              <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS em Movimento acontece em um ambiente seguro e acolhedor nos Polos de Assistência e Cultura de Alto Paraíso de Goiás e região.</p>
+              <p className="text-gray-600 text-sm"><strong>Dias:</strong> Encontros semanais estruturados de convivência e fortalecimento de vínculos.</p>
             </div>
 
             <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
@@ -277,7 +277,7 @@ export default function ProjectsPage() {
               Contraturno Conexão Rima
             </h2>
             <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento da leitura, escrita e comunicação de forma criativa e cidadã para alunos do 4º e 5º ano do Ensino Fundamental.
+              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora para crianças e jovens da comunidade.
             </p>
 
             <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
@@ -323,8 +323,8 @@ export default function ProjectsPage() {
                 </div>
                 <div>
                   <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Alunos do 4º e 5º ano (Escolas Ana Aguiar e Zeca de Faria)</p>
-                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. Municipal de Educação</p>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
+                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
                 </div>
               </div>
             </div>
