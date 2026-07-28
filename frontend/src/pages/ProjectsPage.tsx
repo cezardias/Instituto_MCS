@@ -21,6 +21,11 @@ export default function ProjectsPage() {
   const knownIds = [pMovimento?.id, pDigital?.id, pFamilia?.id, pRima?.id].filter(Boolean);
   const otherProjects = projects.filter(p => !knownIds.includes(p.id));
 
+  const getImg = (p: any, fallback: string) => {
+    if (!p.image_url || p.image_url === '/hero.png' || p.image_url === '/hero_instituto_mcs.png') return fallback;
+    return p.image_url;
+  };
+
   return (
     <div className="bg-marfim min-h-screen pt-24 pb-20">
       {/* Hero Banner */}
@@ -44,11 +49,91 @@ export default function ProjectsPage() {
       {/* Main Content */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         
+        {/* Project 4: Conexão Rima */}
+        {pRima && (
+        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
+          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+            <img src={getImg(pRima, "/projeto_rima.png")} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
+            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
+              EM ANDAMENTO
+            </div>
+          </div>
+          
+          <div className="lg:w-3/5 p-8 lg:p-12">
+            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+              Contraturno Conexão Rima
+            </h2>
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora para crianças e jovens da comunidade.
+            </p>
+
+            <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
+            
+            <ul className="space-y-4 mb-8">
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">📚</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Comunicação e Expressão</strong>
+                  <span className="text-gray-600 text-sm">Melhora da leitura, escrita e comunicação oral. Desenvolvimento da criatividade e expressão corporal.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🌟</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
+                  <span className="text-gray-600 text-sm">Fortalecimento da autoestima e da confiança através do protagonismo juvenil.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🤝</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Respeito e Cooperação</strong>
+                  <span className="text-gray-600 text-sm">Respeito e cooperação através da comunicação não violenta. Valorização da cultura brasileira, indígena, afro-brasileira e quilombola.</span>
+                </div>
+              </li>
+              <li className="flex gap-4">
+                <span className="text-dourado text-xl mt-1">🌿</span>
+                <div>
+                  <strong className="text-carbono block mb-1">Consciência Ambiental</strong>
+                  <span className="text-gray-600 text-sm">Conscientização ambiental sobre a importância das águas e do cerrado.</span>
+                </div>
+              </li>
+            </ul>
+
+            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
+                  <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
+                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
+                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+              Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
+            </p>
+
+            <Link to={`/pre-cadastro?projeto=${pRima.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
+              FAÇA PARTE DESSE MOVIMENTO
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+            </Link>
+          </div>
+        </div>
+        )}
+
+
         {/* Project 1: MCS em Movimento */}
         {pMovimento && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pMovimento.image_url || "/projeto_movimento.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={getImg(pMovimento, "/projeto_movimento.png")} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm uppercase">
               {pMovimento.status.replace('_', ' ')}
             </div>
@@ -120,7 +205,7 @@ export default function ProjectsPage() {
         {pDigital && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pDigital.image_url || "/projeto_digital.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={getImg(pDigital, "/projeto_digital.png")} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm uppercase">
               {pDigital.status.replace('_', ' ')}
             </div>
@@ -193,7 +278,7 @@ export default function ProjectsPage() {
         {pFamilia && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pFamilia.image_url || "/projeto_familia.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={getImg(pFamilia, "/projeto_familia.png")} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm uppercase">
               {pFamilia.status.replace('_', ' ')}
             </div>
@@ -256,85 +341,6 @@ export default function ProjectsPage() {
 
             <Link to={`/pre-cadastro?projeto=${pFamilia.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
               Faça Parte Deste Movimento
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </Link>
-          </div>
-        </div>
-        )}
-
-        {/* Project 4: Conexão Rima */}
-        {pRima && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
-          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pRima.image_url || "/projeto_rima.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
-              EM ANDAMENTO
-            </div>
-          </div>
-          
-          <div className="lg:w-3/5 p-8 lg:p-12">
-            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              Contraturno Conexão Rima
-            </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora para crianças e jovens da comunidade.
-            </p>
-
-            <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
-            
-            <ul className="space-y-4 mb-8">
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">📚</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Comunicação e Expressão</strong>
-                  <span className="text-gray-600 text-sm">Melhora da leitura, escrita e comunicação oral. Desenvolvimento da criatividade e expressão corporal.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🌟</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
-                  <span className="text-gray-600 text-sm">Fortalecimento da autoestima e da confiança através do protagonismo juvenil.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🤝</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Respeito e Cooperação</strong>
-                  <span className="text-gray-600 text-sm">Respeito e cooperação através da comunicação não violenta. Valorização da cultura brasileira, indígena, afro-brasileira e quilombola.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🌿</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Consciência Ambiental</strong>
-                  <span className="text-gray-600 text-sm">Conscientização ambiental sobre a importância das águas e do cerrado.</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
-                  <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
-                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
-              Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
-            </p>
-
-            <Link to={`/pre-cadastro?projeto=${pRima.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              FAÇA PARTE DESSE MOVIMENTO
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </Link>
           </div>
