@@ -48,7 +48,7 @@ export default function ProjectsPage() {
         {pMovimento && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pMovimento.image_url || "/hero_instituto_mcs.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pMovimento.image_url || "/projeto_movimento.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm uppercase">
               {pMovimento.status.replace('_', ' ')}
             </div>
@@ -120,7 +120,7 @@ export default function ProjectsPage() {
         {pDigital && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pDigital.image_url || "/hero_instituto_mcs.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pDigital.image_url || "/projeto_digital.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm uppercase">
               {pDigital.status.replace('_', ' ')}
             </div>
@@ -193,7 +193,7 @@ export default function ProjectsPage() {
         {pFamilia && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pFamilia.image_url || "/hero_instituto_mcs.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pFamilia.image_url || "/projeto_familia.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm uppercase">
               {pFamilia.status.replace('_', ' ')}
             </div>
@@ -266,7 +266,7 @@ export default function ProjectsPage() {
         {pRima && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pRima.image_url || "/hero_instituto_mcs.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pRima.image_url || "/projeto_rima.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
               EM ANDAMENTO
             </div>
