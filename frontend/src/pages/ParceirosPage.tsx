@@ -3,12 +3,7 @@ import { useState, useEffect } from 'react'
 
 
 
-const numeros = [
-  { valor: '23+', label: 'Parceiros ativos' },
-  { valor: '7', label: 'Municípios alcançados' },
-  { valor: '15.000+', label: 'Beneficiados' },
-  { valor: '100%', label: 'Transparência' },
-]
+// Numeros dinamicos serao calculados no componente
 
 export default function ParceirosPage() {
   const [dbParceiros, setDbParceiros] = useState<any[]>([])
@@ -18,7 +13,7 @@ export default function ParceirosPage() {
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setDbParceiros(data.filter(p => p.active === 1))
+          setDbParceiros(data.filter(p => p.active == 1 || p.active === true || p.active === 'ativo'))
         }
       })
       .catch(err => console.error(err))
@@ -60,7 +55,12 @@ export default function ParceirosPage() {
 
             {/* Números */}
             <div className="grid grid-cols-2 gap-4">
-              {numeros.map((n) => (
+              {[
+                { valor: dbParceiros.length.toString(), label: 'Parceiros ativos' },
+                { valor: '1', label: 'Município focado' },
+                { valor: '+100', label: 'Famílias apoiadas' },
+                { valor: '100%', label: 'Transparência' },
+              ].map((n) => (
                 <div key={n.label} className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm text-center hover:shadow-md transition-shadow">
                   <strong className="block font-serif text-4xl text-carbono mb-2">{n.valor}</strong>
                   <span className="text-xs text-gray-500 uppercase tracking-widest font-semibold">{n.label}</span>

@@ -31,7 +31,7 @@ const SEED_NEWS: NewsItem[] = [
     title: 'Oficinas pedagógicas fortalecem aprendizagem em Alto Paraíso de Goiás',
     category: 'Ação Social',
     content: 'Atividades lúdicas e personalizadas ajudam crianças a desenvolverem todo o seu potencial.',
-    image_url: 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=600&q=80',
+    image_url: '/noticias_chapada.png',
     created_at: '2024-05-10T00:00:00Z',
   },
   {

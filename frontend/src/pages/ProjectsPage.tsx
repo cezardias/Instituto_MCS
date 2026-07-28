@@ -27,7 +27,7 @@ export default function ProjectsPage() {
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
         <div className="relative rounded-[2rem] overflow-hidden bg-carbono text-marfim flex flex-col md:flex-row items-center min-h-[360px]">
           <div className="absolute inset-0">
-            <img src="/hero.png" alt="Crianças" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+            <img src="/hero_instituto_mcs.png" alt="Crianças" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
           </div>
           <div className="relative z-10 p-10 lg:p-16 md:w-1/2">
             <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-4 block">Nossos Projetos —</span>
@@ -48,7 +48,7 @@ export default function ProjectsPage() {
         {pMovimento && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pMovimento.image_url || "/hero.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pMovimento.image_url || "/hero_instituto_mcs.png"} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm uppercase">
               {pMovimento.status.replace('_', ' ')}
             </div>
@@ -120,7 +120,7 @@ export default function ProjectsPage() {
         {pDigital && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pDigital.image_url || "/hero.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pDigital.image_url || "/hero_instituto_mcs.png"} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm uppercase">
               {pDigital.status.replace('_', ' ')}
             </div>
@@ -193,7 +193,7 @@ export default function ProjectsPage() {
         {pFamilia && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pFamilia.image_url || "/hero.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pFamilia.image_url || "/hero_instituto_mcs.png"} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm uppercase">
               {pFamilia.status.replace('_', ' ')}
             </div>
@@ -266,7 +266,7 @@ export default function ProjectsPage() {
         {pRima && (
         <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
           <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={pRima.image_url || "/hero.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
+            <img src={pRima.image_url || "/hero_instituto_mcs.png"} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
               EM ANDAMENTO
             </div>
@@ -354,7 +354,7 @@ export default function ProjectsPage() {
               {otherProjects.map(p => (
                 <div key={p.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                   <div className="relative h-64 bg-gray-200 overflow-hidden">
-                    <img src={p.image_url || '/hero.png'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={p.image_url || '/hero_instituto_mcs.png'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold tracking-wider rounded-full border bg-white/90 text-carbono border-white shadow-sm uppercase backdrop-blur-sm">
                       {p.status.replace('_', ' ')}
                     </div>

@@ -34,7 +34,7 @@ const seedProjects = [
   }
 ];
 
-const existing = db.prepare("SELECT title FROM projects WHERE tenant_id = 'mcs'").all();
+const existing = db.prepare("SELECT title FROM projects WHERE tenant_id = 'instituto-mcs'").all();
 const existingTitles = existing.map(e => e.title);
 
 const insert = db.prepare('INSERT INTO projects (tenant_id, title, status, area, location, description, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -42,7 +42,7 @@ const insert = db.prepare('INSERT INTO projects (tenant_id, title, status, area,
 let seeded = 0;
 for (const p of seedProjects) {
   if (!existingTitles.includes(p.title) && !existingTitles.find(t => t.includes(p.title.split(' ')[0]))) {
-    insert.run('mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url);
+    insert.run('instituto-mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url);
     seeded++;
   }
 }

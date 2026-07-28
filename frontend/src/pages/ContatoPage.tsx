@@ -66,7 +66,7 @@ export default function ContatoPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-carbono">E-mail</h4>
-                      <p className="text-gray-500 mt-1">contato@institutomcs.org.br<br/>parcerias@institutomcs.org.br</p>
+                      <p className="text-gray-500 mt-1">instituto.mcs.2026@gmail.com<br/>parcerias@institutomcs.org.br</p>
                     </div>
                   </div>
                 </div>

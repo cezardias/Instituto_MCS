@@ -31,12 +31,12 @@ var seedProjects = [
         image_url: '/conexao-rima.png'
     }
 ];
-var existing = db_1.default.prepare('SELECT count(*) as count FROM projects WHERE tenant_id = ?').get('mcs');
+var existing = db_1.default.prepare('SELECT count(*) as count FROM projects WHERE tenant_id = ?').get('instituto-mcs');
 if (existing.count === 0) {
     var insert = db_1.default.prepare('INSERT INTO projects (tenant_id, title, status, area, location, description, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)');
     for (var _i = 0, seedProjects_1 = seedProjects; _i < seedProjects_1.length; _i++) {
         var p = seedProjects_1[_i];
-        insert.run('mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url);
+        insert.run('instituto-mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url);
     }
     console.log('Seeded projects');
 }

@@ -51,7 +51,7 @@ export default function HomePage() {
           <div className="relative z-0 mt-8 lg:mt-0">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] lg:aspect-[3/4] xl:aspect-[4/3]">
               <img 
-                src="/hero.png" 
+                src="/hero_instituto_mcs.png" 
                 alt="Criança sorrindo em projeto social" 
                 className="w-full h-full object-cover"
               />
