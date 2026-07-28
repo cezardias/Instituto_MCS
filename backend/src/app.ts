@@ -100,6 +100,15 @@ async function seedAdmin() {
     )
     console.log(`✅ Admin criado: ${ADMIN_EMAIL} / admin123`)
   }
+
+  // Auto-fix tenant_ids from older versions
+  try {
+    const pUpdate = db.prepare("UPDATE projects SET tenant_id = 'instituto-mcs' WHERE tenant_id = 'mcs'").run()
+    if (pUpdate.changes > 0) console.log(`✅ Fixed ${pUpdate.changes} projects tenant_id`)
+    
+    const parcUpdate = db.prepare("UPDATE parceiros SET tenant_id = 'instituto-mcs' WHERE tenant_id = 'mcs'").run()
+    if (parcUpdate.changes > 0) console.log(`✅ Fixed ${parcUpdate.changes} parceiros tenant_id`)
+  } catch(e) {}
 }
 
 async function seedMCMission() {
