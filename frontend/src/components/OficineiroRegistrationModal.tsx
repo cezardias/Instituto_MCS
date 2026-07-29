@@ -50,8 +50,8 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl w-full max-w-2xl my-8 relative overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col relative overflow-hidden shadow-2xl">
         <button 
           onClick={onClose} 
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-2 text-2xl z-10"
@@ -59,7 +59,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
           ×
         </button>
 
-        <div className="p-8 md:p-10">
+        <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar">
           <div className="mb-8">
             <h2 className="font-serif text-3xl text-carbono mb-2">Cadastro de Oficineiro</h2>
             <p className="text-gray-500">Preencha o formulário abaixo para se candidatar a uma vaga de oficineiro em nossos projetos.</p>
