@@ -21,7 +21,7 @@ export default function QuemSomos() {
                 Mais do que um instituto, somos um território de possibilidades onde transformamos emoção em expressão e conflito em consciência.
               </p>
               <p className="font-bold text-carbono">
-                Acreditamos que a assistência social, unida à cultura, é o motor da mudança. Cuidamos das crianças, dos jovens e estendemos nossos braços a toda a família.
+                Acreditamos que a assistência social e a educação, unidas à cultura, são os motores da mudança. Cuidamos das crianças, dos jovens e estendemos nossos braços a toda a família.
               </p>
             </div>
             <div className="w-12 h-[1px] bg-dourado mt-8 lg:mt-10 mx-auto lg:mx-0"></div>
@@ -103,7 +103,7 @@ export default function QuemSomos() {
                 Mais que um projeto, somos um movimento social.
               </p>
               <p className="text-gray-300 text-lg leading-relaxed">
-                Conectamos assistência social, cultura e apoio direto para transformar o presente e estruturar o futuro das famílias de Alto Paraíso.
+                Conectamos assistência social, educação, cultura e apoio direto para transformar o presente e estruturar o futuro das famílias de Alto Paraíso.
               </p>
             </div>
           </div>
