@@ -1,6 +1,7 @@
 import express from 'express'
 import db from '../db'
 import { authMiddleware } from '../middleware/auth'
+import { hashPassword } from '../auth'
 
 const router = express.Router()
 
@@ -27,7 +28,6 @@ router.post('/', (req, res) => {
 router.get('/', authMiddleware, (req, res) => {
   const tenant_id = (req as any).user.tenant_id
   
-  // Only admin should see this, but we'll filter it on frontend/middleware level if needed
   try {
     const rows = db.prepare('SELECT * FROM oficineiro_registrations WHERE tenant_id = ? ORDER BY created_at DESC').all(tenant_id)
     res.json(rows)
@@ -37,7 +37,7 @@ router.get('/', authMiddleware, (req, res) => {
 })
 
 // PUT /api/oficineiros/:id (Protected - used to update status)
-router.put('/:id', authMiddleware, (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   const tenant_id = (req as any).user.tenant_id
   const { id } = req.params
   const { status } = req.body
@@ -49,6 +49,21 @@ router.put('/:id', authMiddleware, (req, res) => {
   try {
     const info = db.prepare('UPDATE oficineiro_registrations SET status = ? WHERE id = ? AND tenant_id = ?').run(status, id, tenant_id)
     if (info.changes === 0) return res.status(404).json({ error: 'Inscrição não encontrada' })
+
+    if (status === 'aprovado') {
+      const reg: any = db.prepare('SELECT * FROM oficineiro_registrations WHERE id = ?').get(id)
+      if (reg) {
+        const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(reg.email)
+        if (!existingUser) {
+          const defaultPassword = await hashPassword('123456')
+          db.prepare(`
+            INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
+            VALUES (?, ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
+          `).run(tenant_id, reg.name, reg.email, defaultPassword, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+        }
+      }
+    }
+
     res.json({ success: true })
   } catch (e: any) {
     res.status(500).json({ error: e.message })
