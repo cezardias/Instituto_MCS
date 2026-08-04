@@ -659,10 +659,10 @@ function AlunosTab() {
   const user = getUser()
   const canEdit = user?.role === 'admin' || user?.role === 'diretoria'
   
-  const [items, setItems] = useState<Aluno[]>([])
+  const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [editing, setEditing] = useState<Aluno|null>(null)
+  const [editing, setEditing] = useState<any|null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -671,26 +671,94 @@ function AlunosTab() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    try { const r = await fetch('/api/alunos', {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    try {
+      const [rAlunos, rUsers] = await Promise.all([
+        fetch('/api/alunos', { headers: authH() }),
+        fetch('/api/users', { headers: authH() })
+      ])
+      const alunosData = rAlunos.ok ? await rAlunos.json() : []
+      const usersData = rUsers.ok ? await rUsers.json() : []
+      
+      const listAlunos = Array.isArray(alunosData) ? alunosData : []
+      const listUsers = Array.isArray(usersData) ? usersData.filter((u: any) => u.role === 'aluno') : []
+
+      const combinedMap = new Map<string, any>()
+
+      // Add users with role 'aluno'
+      listUsers.forEach((u: any) => {
+        const key = (u.email || u.name).toLowerCase().trim()
+        combinedMap.set(key, {
+          id: u.id,
+          name: u.name,
+          email: u.email || '',
+          phone: u.phone || u.personal_email || '',
+          area: 'Educação',
+          status: 'ativo',
+          birth_date: u.birth_date || '',
+          created_at: u.created_at,
+          source: 'users'
+        })
+      })
+
+      // Add legacy alunos table records
+      listAlunos.forEach((a: any) => {
+        const key = (a.email || a.name).toLowerCase().trim()
+        if (!combinedMap.has(key)) {
+          combinedMap.set(key, {
+            id: a.id,
+            name: a.name,
+            email: a.email || '',
+            phone: a.phone || '',
+            area: a.area || 'Educação',
+            status: a.status || 'ativo',
+            birth_date: a.birth_date || '',
+            created_at: a.created_at,
+            source: 'alunos'
+          })
+        }
+      })
+
+      setItems(Array.from(combinedMap.values()))
+    } catch {
+      setItems([])
+    }
     setLoading(false)
   }, [])
+
   useEffect(() => { load() }, [load])
 
   const openNew = () => { setEditing(null); setForm(blank); setError(''); setShowForm(true) }
-  const openEdit = (a: Aluno) => { setEditing(a); setForm({...a}); setError(''); setShowForm(true) }
-  const del = async (id: number) => { if(!confirm('Excluir aluno?')) return; await fetch(`/api/alunos/${id}`,{method:'DELETE',headers:authH()}); load() }
+  const openEdit = (a: any) => { setEditing(a); setForm({...a}); setError(''); setShowForm(true) }
+  const del = async (a: any) => {
+    if (!confirm('Excluir aluno?')) return;
+    const url = a.source === 'users' ? `/api/users/${a.id}` : `/api/alunos/${a.id}`
+    await fetch(url, { method: 'DELETE', headers: authH() })
+    load()
+  }
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
-    const method = editing ? 'PUT' : 'POST'
-    const url = editing ? `/api/alunos/${editing.id}` : '/api/alunos'
-    try {
-      const r = await fetch(url, {method, headers:authH(), body:JSON.stringify(form)})
-      if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro') } else { setShowForm(false); load() }
-    } catch { setError('Erro de conexão') }
+    if (editing && editing.source === 'users') {
+      try {
+        const r = await fetch(`/api/users/${editing.id}`, {
+          method: 'PUT',
+          headers: authH(),
+          body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, birth_date: form.birth_date })
+        })
+        if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro') } else { setShowForm(false); load() }
+      } catch { setError('Erro de conexão') }
+    } else {
+      const method = editing ? 'PUT' : 'POST'
+      const url = editing ? `/api/alunos/${editing.id}` : '/api/alunos'
+      try {
+        const r = await fetch(url, { method, headers: authH(), body: JSON.stringify(form) })
+        if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro') } else { setShowForm(false); load() }
+      } catch { setError('Erro de conexão') }
+    }
     setSaving(false)
   }
 
-  const filtered = items.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || a.area.toLowerCase().includes(search.toLowerCase()))
+  const filtered = items.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || (a.area||'').toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div>
@@ -765,7 +833,7 @@ function AlunosTab() {
             <tbody>
               {filtered.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">Nenhum aluno encontrado</td></tr>}
               {filtered.map(a => (
-                <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                <tr key={`${a.source}-${a.id}`} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-dourado/20 text-dourado flex items-center justify-center font-bold text-sm shrink-0">{a.name[0]}</div>
@@ -784,7 +852,7 @@ function AlunosTab() {
                     {canEdit && (
                       <div className="flex gap-2">
                         <button onClick={() => openEdit(a)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
-                        <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                        <button onClick={() => del(a)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
                       </div>
                     )}
                   </td>
