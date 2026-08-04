@@ -15,7 +15,7 @@ router.get('/', authMiddleware, (req, res) => {
   }
 
   try {
-    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id FROM users WHERE tenant_id = ?').all(tenant_id)
+    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id, phone, birth_date, personal_email, address, rg, family_income, parents_profession FROM users WHERE tenant_id = ?').all(tenant_id)
     res.json(users)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' })
@@ -98,6 +98,51 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Email já existe (talvez o nome gerado colidiu)' })
     }
     res.status(500).json({ error: 'Failed to create user: ' + error.message })
+  }
+})
+
+// Update user (admin only)
+router.put('/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params
+  const { name, email, role, personal_email, cpf, rg, phone, address, photo_url, birth_date, family_income, parents_profession, password } = req.body
+  const tenant_id = (req as any).user.tenant_id
+
+  if ((req as any).user.role !== 'admin' && (req as any).user.role !== 'diretoria') {
+    return res.status(403).json({ error: 'Forbidden' })
+  }
+
+  try {
+    const updateCols = [
+      'name = ?', 'email = ?', 'role = ?', 'personal_email = ?', 'cpf = ?', 
+      'rg = ?', 'phone = ?', 'address = ?', 'birth_date = ?', 'family_income = ?', 'parents_profession = ?'
+    ]
+    const updateVals = [
+      name, email, role, personal_email || null, cpf || null,
+      rg || null, phone || null, address || null, birth_date || null, family_income || null, parents_profession || null
+    ]
+
+    if (photo_url) {
+      updateCols.push('photo_url = ?')
+      updateVals.push(photo_url)
+    }
+
+    if (password) {
+      updateCols.push('password_hash = ?')
+      updateVals.push(await hashPassword(password))
+    }
+
+    updateVals.push(id, tenant_id)
+
+    const stmt = db.prepare(`UPDATE users SET ${updateCols.join(', ')} WHERE id = ? AND tenant_id = ?`)
+    const info = stmt.run(...updateVals)
+
+    if (info.changes === 0) return res.status(404).json({ error: 'User not found' })
+    res.json({ success: true })
+  } catch (error: any) {
+    if (error.message.includes('UNIQUE constraint failed')) {
+      return res.status(400).json({ error: 'Email já existe' })
+    }
+    res.status(500).json({ error: 'Failed to update user' })
   }
 })
 

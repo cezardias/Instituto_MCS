@@ -908,11 +908,13 @@ function UsersTab() {
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [editingUser, setEditingUser] = useState<any | null>(null)
   
   const [form, setForm] = useState<any>({
     name: '', email: '', password: '', role: 'aluno',
     personal_email: '', cpf: '', rg: '', phone: '', address: '',
-    birth_date: '', family_income: '', parents_profession: '', anamnesis_data: null
+    birth_date: '', family_income: '', parents_profession: '', anamnesis_data: null,
+    photo_url: '', medical_report_url: ''
   })
   const [parentForm, setParentForm] = useState({
     name: '', email: '', personal_email: '', cpf: '', rg: '', phone: '', birth_date: ''
@@ -932,7 +934,7 @@ function UsersTab() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
     try {
-      let photo_url = ''
+      let photo_url = form.photo_url || ''
       if (photo) {
         const fd = new FormData()
         fd.append('image', photo)
@@ -943,7 +945,7 @@ function UsersTab() {
         }
       }
 
-      let medical_report_url = ''
+      let medical_report_url = form.medical_report_url || ''
       if (medicalReport) {
         const fd = new FormData()
         fd.append('image', medicalReport)
@@ -955,15 +957,19 @@ function UsersTab() {
         ...form,
         photo_url,
         medical_report_url,
-        parent: form.role === 'aluno' ? parentForm : null
+        parent: (!editingUser && form.role === 'aluno') ? parentForm : null
       }
 
-      const r = await fetch('/api/users',{method:'POST',headers:authH(),body:JSON.stringify(payload)})
+      const method = editingUser ? 'PUT' : 'POST'
+      const url = editingUser ? `/api/users/${editingUser.id}` : '/api/users'
+
+      const r = await fetch(url, { method, headers: authH(), body: JSON.stringify(payload) })
       if (!r.ok) { 
-        const d = await r.json(); setError(d.error||'Erro ao criar usuário') 
+        const d = await r.json(); setError(d.error || (editingUser ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário')) 
       } else { 
         setShowForm(false)
-        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null})
+        setEditingUser(null)
+        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:''})
         setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
         setPhoto(null)
         setMedicalReport(null)
@@ -975,11 +981,37 @@ function UsersTab() {
   
   const del = async (id: number) => { if(!confirm('Excluir usuário?')) return; await fetch(`/api/users/${id}`,{method:'DELETE',headers:authH()}); load() }
 
+  const openNew = () => {
+    setEditingUser(null)
+    setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:''})
+    setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
+    setPhoto(null)
+    setMedicalReport(null)
+    setError('')
+    setShowForm(true)
+  }
+
+  const openEdit = (u: any) => {
+    setEditingUser(u)
+    setForm({
+      name: u.name || '', email: u.email || '', password: '', role: u.role || 'aluno',
+      personal_email: u.personal_email || '', cpf: u.cpf || '', rg: u.rg || '', phone: u.phone || '', 
+      address: u.address || '', birth_date: u.birth_date || '', family_income: u.family_income || '', 
+      parents_profession: u.parents_profession || '', anamnesis_data: u.anamnesis_data || null,
+      photo_url: u.photo_url || '', medical_report_url: u.medical_report_url || ''
+    })
+    setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
+    setPhoto(null)
+    setMedicalReport(null)
+    setError('')
+    setShowForm(true)
+  }
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div><h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2><p className="text-sm text-gray-400">{users.length} usuários cadastrados no ecossistema</p></div>
-        <button onClick={() => { setShowForm(true); setError('') }} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
+        <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
       </div>
 
       {showForm && (
@@ -987,8 +1019,8 @@ function UsersTab() {
           <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl p-8 relative">
             <div className="flex justify-between mb-6 border-b border-gray-100 pb-4">
               <div>
-                <h3 className="font-serif text-2xl text-carbono">Novo Cadastro</h3>
-                <p className="text-xs text-gray-400">Preencha os dados (o login será gerado automaticamente se não informado)</p>
+                <h3 className="font-serif text-2xl text-carbono">{editingUser ? 'Editar Usuário' : 'Novo Cadastro'}</h3>
+                <p className="text-xs text-gray-400">{editingUser ? 'Atualize as informações do usuário' : 'Preencha os dados (o login será gerado automaticamente se não informado)'}</p>
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl hover:text-carbono">×</button>
             </div>
@@ -1048,26 +1080,28 @@ function UsersTab() {
                     </div>
                   </div>
 
-                  <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
-                    <h4 className="font-bold text-blue-800 text-sm border-b border-blue-200 pb-2">Dados do Responsável (Pai / Mãe)</h4>
-                    <p className="text-xs text-blue-600 mb-4">Ao preencher, o sistema criará o usuário do responsável automaticamente.</p>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Nome do Responsável *</label><input required value={parentForm.name} onChange={e=>setParentForm({...parentForm,name:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">E-mail Pessoal (Responsável)</label><input type="email" value={parentForm.personal_email} onChange={e=>setParentForm({...parentForm,personal_email:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                  {!editingUser && (
+                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 mt-6 space-y-4">
+                      <h4 className="font-bold text-blue-800 text-sm border-b border-blue-200 pb-2">Dados do Responsável (Pai / Mãe)</h4>
+                      <p className="text-xs text-blue-600 mb-4">Ao preencher, o sistema criará o usuário do responsável automaticamente.</p>
                       
-                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">CPF (Responsável)</label><input value={parentForm.cpf} onChange={e=>setParentForm({...parentForm,cpf:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                      <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Telefone (Responsável)</label><input value={parentForm.phone} onChange={e=>setParentForm({...parentForm,phone:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
-                      
-                      <div className="col-span-2"><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Data de Nascimento (Responsável)</label><input type="date" value={parentForm.birth_date} onChange={e=>setParentForm({...parentForm,birth_date:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Nome do Responsável *</label><input required value={parentForm.name} onChange={e=>setParentForm({...parentForm,name:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                        <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">E-mail Pessoal (Responsável)</label><input type="email" value={parentForm.personal_email} onChange={e=>setParentForm({...parentForm,personal_email:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                        
+                        <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">CPF (Responsável)</label><input value={parentForm.cpf} onChange={e=>setParentForm({...parentForm,cpf:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                        <div><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Telefone (Responsável)</label><input value={parentForm.phone} onChange={e=>setParentForm({...parentForm,phone:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                        
+                        <div className="col-span-2"><label className="label-dash text-xs text-blue-700 font-bold block mb-1">Data de Nascimento (Responsável)</label><input type="date" value={parentForm.birth_date} onChange={e=>setParentForm({...parentForm,birth_date:e.target.value})} className="w-full border border-blue-200 p-2.5 rounded-xl text-sm bg-white" /></div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </>
               )}
 
               <div className="flex gap-3 pt-6 border-t border-gray-100 mt-6">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3.5 rounded-full text-sm font-bold hover:bg-gray-50">Cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : 'FINALIZAR CADASTRO'}</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3.5 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editingUser ? 'SALVAR ALTERAÇÕES' : 'FINALIZAR CADASTRO'}</button>
               </div>
             </form>
           </div>
@@ -1115,7 +1149,8 @@ function UsersTab() {
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">{u.cpf || '-'}</td>
                     <td className="px-6 py-4 text-right">
-                      {u.role === 'aluno' && <button onClick={() => setAnamnesisUser(u)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mr-4">ANAMNESE</button>}
+                      {u.role === 'aluno' && <button onClick={() => setAnamnesisUser(u)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mr-3">ANAMNESE</button>}
+                      <button onClick={() => openEdit(u)} className="text-xs font-bold text-dourado hover:text-amber-700 mr-3">EDITAR</button>
                       <button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
                     </td>
                   </tr>
