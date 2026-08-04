@@ -63,7 +63,7 @@ const SIDEBAR = [
   ]},
   { group: 'ADMIN', items: [
     { id:'users', label:'Usuários e Perfis', icon:'👥', roles:['admin'] },
-    { id:'oficineiros_registrations', label:'Inscrições Oficineiros', icon:'🧑‍🏫', roles:['admin', 'diretoria', 'coordenacao'] },
+    { id:'oficineiros_registrations', label:'Inscrições Facilitadores MCS', icon:'🧑‍🏫', roles:['admin', 'diretoria', 'coordenacao'] },
     { id:'config', label:'Configurações', icon:'⚙️', roles:['admin'] },
   ]},
 ]
@@ -1001,7 +1001,7 @@ function UsersTab() {
                   <label className="label-dash block mb-1">Perfil (Qual a função no Instituto?) *</label>
                   <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})} className="input-field w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50">
                     <option value="aluno">Aluno (Cria cadastro do Pai/Mãe junto)</option>
-                    <option value="oficineiro">Oficineiro (Gestão de turmas)</option>
+                    <option value="oficineiro">Facilitador MCS (Gestão de turmas)</option>
                     <option value="coordenacao">Coordenação (Indicadores, Projetos)</option>
                     <option value="diretoria">Diretoria (Financeiro, Compliance)</option>
                     <option value="admin">Administrador (Controle Total)</option>
@@ -2959,7 +2959,7 @@ function AvaliacoesTab() {
                 </div>
 
                 <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                  <h3 className="font-bold text-lg text-carbono mb-4">Avaliação do Oficineiro</h3>
+                  <h3 className="font-bold text-lg text-carbono mb-4">Avaliação do Facilitador MCS</h3>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div className="md:col-span-1">
                       <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Nota (0 a {activeAssessment.max_score||10})</label>
@@ -3152,7 +3152,7 @@ function TurmasTab() {
         `
       })
       
-      const teachersStr = (c.teachers || []).map((t: any) => t.name).join(', ') || 'Nenhum oficineiro alocado'
+      const teachersStr = (c.teachers || []).map((t: any) => t.name).join(', ') || 'Nenhum facilitador MCS alocado'
       
       const html = `
         <!DOCTYPE html>
@@ -3184,7 +3184,7 @@ function TurmasTab() {
               <div class="header-text">
                 <h1>Instituto MCS</h1>
                 <p>Relatório Oficial de Frequência - Turma: <strong>${c.name}</strong></p>
-                <p>Oficineiro(s): <strong>${teachersStr}</strong></p>
+                <p>Facilitador(es) MCS: <strong>${teachersStr}</strong></p>
                 <p>Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} por ${user.name}</p>
               </div>
             </div>
@@ -3537,7 +3537,7 @@ function TurmasTab() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h2 className="font-serif text-3xl text-carbono">Gestão de Turmas e Frequência</h2>
-          <p className="text-sm text-gray-500">Turmas, Oficineiros e Diário de Classe.</p>
+          <p className="text-sm text-gray-500">Turmas, Facilitadores MCS e Diário de Classe.</p>
         </div>
         {canEditClasses && (
           <button onClick={openNew} className="bg-carbono text-marfim px-6 py-3 rounded-full text-sm font-bold hover:bg-gray-800 shadow-lg">+ Nova Turma</button>
@@ -3559,7 +3559,7 @@ function TurmasTab() {
               </div>
               
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Oficineiros / Professores</label>
+                <label className="block text-xs font-bold text-gray-500 mb-2 uppercase">Facilitadores MCS / Professores</label>
                 <div className="bg-gray-50 border border-gray-200 rounded-xl max-h-48 overflow-y-auto p-2 space-y-1">
                   {users.filter(u => u.role === 'oficineiro').map(u => (
                     <label key={u.id} className="flex items-center gap-2 text-sm p-2 hover:bg-white rounded cursor-pointer">
@@ -3567,7 +3567,7 @@ function TurmasTab() {
                       {u.name}
                     </label>
                   ))}
-                  {users.filter(u => u.role === 'oficineiro').length === 0 && <p className="text-xs text-gray-400 p-2">Nenhum oficineiro cadastrado.</p>}
+                  {users.filter(u => u.role === 'oficineiro').length === 0 && <p className="text-xs text-gray-400 p-2">Nenhum facilitador MCS cadastrado.</p>}
                 </div>
               </div>
 
@@ -3600,7 +3600,7 @@ function TurmasTab() {
               {c.description && <p className="text-sm text-gray-500 mb-4 line-clamp-2">{c.description}</p>}
               <div className="flex flex-wrap gap-2 mb-6">
                 <span className="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-1 rounded-md uppercase">{c.students?.length||0} Alunos</span>
-                <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase">{c.teachers?.length||0} Oficineiros</span>
+                <span className="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md uppercase">{c.teachers?.length||0} Facilitadores MCS</span>
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-gray-50">
                 <div className="flex gap-2">
@@ -3632,7 +3632,7 @@ function TurmasTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// OFICINEIROS REGISTRATIONS TAB
+// Facilitadores MCS Registrations Tab
 // ═══════════════════════════════════════════════════════════════════
 function OficineirosRegistrationTab() {
   const user = getUser()
@@ -3675,7 +3675,7 @@ function OficineirosRegistrationTab() {
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="font-serif text-2xl text-carbono">Inscrições de Oficineiros</h2>
+          <h2 className="font-serif text-2xl text-carbono">Inscrições de Facilitadores MCS</h2>
           <p className="text-sm text-gray-400">Gerencie as candidaturas feitas pelo site</p>
         </div>
       </div>

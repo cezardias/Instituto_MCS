@@ -43,7 +43,7 @@ export default function HomePage() {
                 onClick={() => setShowOficineiroModal(true)}
                 className="bg-transparent border-2 border-dourado text-dourado hover:bg-dourado hover:text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center"
               >
-                CADASTRO OFICINEIRO
+                CADASTRO FACILITADOR MCS
               </button>
             </div>
           </div>

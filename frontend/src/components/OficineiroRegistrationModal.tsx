@@ -61,8 +61,8 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
 
         <div className="p-8 md:p-10 overflow-y-auto custom-scrollbar">
           <div className="mb-8">
-            <h2 className="font-serif text-3xl text-carbono mb-2">Cadastro de Oficineiro</h2>
-            <p className="text-gray-500">Preencha o formulário abaixo para se candidatar a uma vaga de oficineiro em nossos projetos.</p>
+            <h2 className="font-serif text-3xl text-carbono mb-2">Cadastro de Facilitador MCS</h2>
+            <p className="text-gray-500">Preencha o formulário abaixo para se candidatar a uma vaga de facilitador MCS em nossos projetos.</p>
           </div>
 
           {success ? (
