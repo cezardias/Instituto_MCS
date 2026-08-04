@@ -448,6 +448,13 @@ for (const col of parceirosColumns) {
   }
 }
 
+try {
+  // Converte parceiros antigos (onde 'tipo' ainda está vazio ou nulo) para Fundadores aprovados e exibidos
+  db.exec(`UPDATE parceiros SET tipo = 'Fundador', status_aprovacao = 'aprovado', exibir_site = 1, aceitou_termos = 1 WHERE tipo IS NULL OR tipo = ''`);
+} catch (e: any) {
+  console.error('Migration error updating old parceiros:', e.message);
+}
+
 
 // --- SEED PROJECTS ---
 try {
