@@ -1144,8 +1144,19 @@ function UsersTab() {
                         u.role==='admin' ? 'bg-red-50 text-red-600' :
                         u.role==='aluno' ? 'bg-blue-50 text-blue-600' :
                         u.role==='responsavel' ? 'bg-purple-50 text-purple-600' :
+                        u.role==='oficineiro' ? 'bg-emerald-50 text-emerald-600' :
+                        u.role==='coordenacao' ? 'bg-amber-50 text-amber-600' :
+                        u.role==='diretoria' ? 'bg-indigo-50 text-indigo-600' :
                         'bg-gray-100 text-gray-600'
-                      }`}>{u.role}</span>
+                      }`}>
+                        {
+                          u.role === 'oficineiro' ? 'Facilitador MCS' :
+                          u.role === 'responsavel' ? 'Responsável' :
+                          u.role === 'coordenacao' ? 'Coordenação' :
+                          u.role === 'diretoria' ? 'Diretoria' :
+                          u.role
+                        }
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">{u.cpf || '-'}</td>
                     <td className="px-6 py-4 text-right">
