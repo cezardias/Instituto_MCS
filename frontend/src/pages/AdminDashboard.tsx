@@ -70,7 +70,7 @@ const SIDEBAR = [
 
 const STATUS_LABELS: Record<string,string> = { em_execucao:'Em Execução', em_planejamento:'Em Planejamento', concluido:'Concluído', suspenso:'Suspenso' }
 const STATUS_COLORS: Record<string,string> = { em_execucao:'bg-green-100 text-green-700', em_planejamento:'bg-blue-100 text-blue-700', concluido:'bg-gray-100 text-gray-600', suspenso:'bg-red-100 text-red-600' }
-const AREAS = ['Ação Social','Cultura','Esporte','Saúde','Meio Ambiente','Geração de Renda']
+const AREAS = ['Educação','Ação Social','Cultura','Esporte','Saúde','Meio Ambiente','Geração de Renda']
 const NEWS_CATS = ['Projetos','Ação Social','Eventos','Parcerias','Institucional','Saúde','Esporte','Cultura']
 
 // ─── Mini-chart helpers (pure SVG) ───────────────────────────────────

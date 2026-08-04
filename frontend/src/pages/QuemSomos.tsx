@@ -15,13 +15,22 @@ export default function QuemSomos() {
             </h1>
             <div className="space-y-4 md:space-y-6 text-base md:text-lg text-gray-700 leading-relaxed text-left">
               <p>
-                Nascemos em Alto Paraíso de Goiás para ser o elo entre a tradição que nos fundamenta e a inovação que nos impulsiona.
+                Nascemos em Alto Paraíso de Goiás com a convicção de que toda transformação começa quando pessoas encontram oportunidades, pertencimento e propósito.
               </p>
               <p>
-                Mais do que um instituto, somos um território de possibilidades onde transformamos emoção em expressão e conflito em consciência.
+                O Instituto MC'S une educação, assistência social e cultura para desenvolver crianças, adolescentes, jovens e suas famílias, criando caminhos para que cada pessoa descubra seu potencial e se torne protagonista da própria história.
+              </p>
+              <p>
+                Nossa inspiração nasce da força da cultura urbana, da arte e do diálogo. Acreditamos que a criatividade aproxima, que o conhecimento amplia horizontes e que a cultura é uma poderosa ferramenta para construir comunidades mais justas, pacíficas e participativas.
+              </p>
+              <p>
+                Mais do que oferecer projetos, cultivamos vínculos. Transformamos espaços em lugares de aprendizagem, talentos em oportunidades e diferenças em pontes para o encontro.
+              </p>
+              <p>
+                Porque acreditamos que o verdadeiro desenvolvimento acontece quando ninguém cresce sozinho. Cresce a criança, cresce a família, fortalece-se a comunidade e floresce o território.
               </p>
               <p className="font-bold text-carbono">
-                Acreditamos que a assistência social e a educação, unidas à cultura, são os motores da mudança. Cuidamos das crianças, dos jovens e estendemos nossos braços a toda a família.
+                O Instituto MC'S existe para tornar esse futuro possível: um futuro em que a cultura inspira, a educação emancipa e a assistência social garante que ninguém fique para trás.
               </p>
             </div>
             <div className="w-12 h-[1px] bg-dourado mt-8 lg:mt-10 mx-auto lg:mx-0"></div>
