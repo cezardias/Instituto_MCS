@@ -1133,7 +1133,7 @@ function UsersTab() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
-                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Formações Informadas no Cadastro</label>
+                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Formações / Experiências</label>
                       <textarea rows={2} value={form.education || ''} onChange={e => setForm({...form, education: e.target.value})} placeholder="Cursos, graduações, especializações..." className="w-full border border-emerald-200 p-2.5 rounded-xl text-sm bg-white outline-none focus:border-emerald-500 resize-none" />
                     </div>
 
