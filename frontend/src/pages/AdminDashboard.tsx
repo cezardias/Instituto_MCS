@@ -758,14 +758,24 @@ function AlunosTab() {
     setSaving(false)
   }
 
-  const filtered = items.filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || (a.area||'').toLowerCase().includes(search.toLowerCase()))
+  const filtered = items
+    .filter(a => {
+      const myRole = user?.role || 'user'
+      const myId = user?.id
+
+      if (myRole === 'admin' || myRole === 'diretoria' || myRole === 'coordenacao' || myRole === 'oficineiro') return true
+      if (myRole === 'aluno') return a.id === myId || (a.email && user?.email && a.email.toLowerCase() === user.email.toLowerCase())
+      if (myRole === 'responsavel') return a.parent_id === myId || (a.email && user?.email && a.email.toLowerCase() === user.email.toLowerCase())
+      return false
+    })
+    .filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || (a.area||'').toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-2xl text-carbono">Alunos</h2>
-          <p className="text-sm text-gray-400">{items.length} alunos cadastrados</p>
+          <p className="text-sm text-gray-400">{filtered.length} alunos cadastrados</p>
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar aluno..." className="border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-dourado w-48" />
@@ -971,18 +981,22 @@ function NewsTab() {
 // USERS TAB
 // ═══════════════════════════════════════════════════════════════════
 function UsersTab() {
+  const currentUser = getUser()
+  const canEdit = currentUser?.role === 'admin' || currentUser?.role === 'diretoria'
+  
   const [users, setUsers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [editingUser, setEditingUser] = useState<any | null>(null)
+  const [viewingUser, setViewingUser] = useState<any | null>(null)
   
   const [form, setForm] = useState<any>({
     name: '', email: '', password: '', role: 'aluno',
     personal_email: '', cpf: '', rg: '', phone: '', address: '',
     birth_date: '', family_income: '', parents_profession: '', anamnesis_data: null,
-    photo_url: '', medical_report_url: ''
+    photo_url: '', medical_report_url: '', education: '', availability_schedule: '', positive_points: '', negative_points: ''
   })
   const [parentForm, setParentForm] = useState({
     name: '', email: '', personal_email: '', cpf: '', rg: '', phone: '', birth_date: ''
@@ -1037,7 +1051,7 @@ function UsersTab() {
       } else { 
         setShowForm(false)
         setEditingUser(null)
-        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:''})
+        setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:'',education:'',availability_schedule:'',positive_points:'',negative_points:''})
         setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
         setPhoto(null)
         setMedicalReport(null)
@@ -1077,11 +1091,38 @@ function UsersTab() {
     setShowForm(true)
   }
 
+  // Filter users based on current user role
+  const visibleUsers = users.filter(u => {
+    const myRole = currentUser?.role || 'user'
+    const myId = currentUser?.id
+
+    // Admin, Diretoria, and Coordenação can see all users
+    if (myRole === 'admin' || myRole === 'diretoria' || myRole === 'coordenacao') return true
+    
+    // Facilitador MCS (oficineiro) can ONLY see Alunos and Responsáveis
+    if (myRole === 'oficineiro') return u.role === 'aluno' || u.role === 'responsavel'
+    
+    // Aluno can ONLY see their own profile
+    if (myRole === 'aluno') return u.id === myId || (u.email && currentUser?.email && u.email.toLowerCase() === currentUser.email.toLowerCase())
+    
+    // Responsável can ONLY see their own profile and their children
+    if (myRole === 'responsavel') return u.id === myId || u.parent_id === myId || (u.email && currentUser?.email && u.email.toLowerCase() === currentUser.email.toLowerCase())
+    
+    return false
+  })
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div><h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2><p className="text-sm text-gray-400">{users.length} usuários cadastrados no ecossistema</p></div>
-        <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Cadastro</button>
+        <div>
+          <h2 className="font-serif text-2xl text-carbono">Gestão de Usuários</h2>
+          <p className="text-sm text-gray-400">{visibleUsers.length} usuários disponíveis</p>
+        </div>
+        {canEdit && (
+          <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">
+            + Novo Cadastro
+          </button>
+        )}
       </div>
 
       {showForm && (
@@ -1097,7 +1138,6 @@ function UsersTab() {
             {error && <div className="mb-6 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl border border-red-100">{error}</div>}
             
             <form onSubmit={save} className="space-y-6">
-              
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="label-dash block mb-1">Perfil (Qual a função no Instituto?) *</label>
@@ -1220,8 +1260,8 @@ function UsersTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {users.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum usuário cadastrado.</td></tr>}
-                {users.map(u => (
+                {visibleUsers.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum usuário disponível para visualização.</td></tr>}
+                {visibleUsers.map(u => (
                   <tr key={u.id} className="hover:bg-gray-50/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -1231,7 +1271,13 @@ function UsersTab() {
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">{u.name[0]?.toUpperCase()}</div>
                         )}
                         <div>
-                          <p className="font-bold text-carbono">{u.name}</p>
+                          <p 
+                            onClick={() => setViewingUser(u)} 
+                            className="font-bold text-carbono cursor-pointer hover:text-dourado hover:underline transition-colors flex items-center gap-1.5 group"
+                          >
+                            {u.name}
+                            <span className="text-[10px] text-gray-400 group-hover:text-dourado font-normal">👁️</span>
+                          </p>
                           <p className="text-[11px] text-gray-400">{new Date(u.created_at).toLocaleDateString('pt-BR')}</p>
                         </div>
                       </div>
@@ -1258,14 +1304,114 @@ function UsersTab() {
                     </td>
                     <td className="px-6 py-4 text-center text-gray-400">{u.cpf || '-'}</td>
                     <td className="px-6 py-4 text-right">
-                      {u.role === 'aluno' && <button onClick={() => setAnamnesisUser(u)} className="text-xs font-bold text-blue-500 hover:text-blue-700 mr-3">ANAMNESE</button>}
-                      <button onClick={() => openEdit(u)} className="text-xs font-bold text-dourado hover:text-amber-700 mr-3">EDITAR</button>
-                      <button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
+                      <div className="flex items-center justify-end gap-3">
+                        <button onClick={() => setViewingUser(u)} className="text-xs font-bold text-gray-500 hover:text-carbono">VER FICHA</button>
+                        {canEdit && (
+                          <>
+                            {u.role === 'aluno' && <button onClick={() => setAnamnesisUser(u)} className="text-xs font-bold text-blue-500 hover:text-blue-700">ANAMNESE</button>}
+                            <button onClick={() => openEdit(u)} className="text-xs font-bold text-dourado hover:text-amber-700">EDITAR</button>
+                            <button onClick={() => del(u.id)} className="text-xs font-bold text-red-400 hover:text-red-600">EXCLUIR</button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW USER MODAL (READ ONLY) */}
+      {viewingUser && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl p-8 relative max-h-[90vh] overflow-y-auto">
+            <button onClick={() => setViewingUser(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-2xl font-bold">×</button>
+            
+            <div className="flex items-center gap-4 mb-6 border-b border-gray-100 pb-5">
+              {viewingUser.photo_url ? (
+                <img src={viewingUser.photo_url} alt={viewingUser.name} className="w-16 h-16 rounded-full object-cover border-2 border-dourado" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-carbono to-gray-800 text-marfim flex items-center justify-center font-serif text-2xl font-bold">
+                  {viewingUser.name?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <div>
+                <h3 className="font-serif text-2xl text-carbono font-bold">{viewingUser.name}</h3>
+                <span className="text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider bg-gray-100 text-gray-700 mt-1 inline-block">
+                  {
+                    viewingUser.role === 'oficineiro' ? 'Facilitador MCS' :
+                    viewingUser.role === 'responsavel' ? 'Responsável' :
+                    viewingUser.role === 'coordenacao' ? 'Coordenação' :
+                    viewingUser.role === 'diretoria' ? 'Diretoria' :
+                    viewingUser.role === 'aluno' ? 'Aluno' :
+                    viewingUser.role === 'admin' ? 'Administrador' : viewingUser.role
+                  }
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-6 text-sm">
+              <div>
+                <h4 className="font-bold text-gray-700 border-b pb-2 mb-3">Dados Principais</h4>
+                <div className="grid grid-cols-2 gap-3 text-gray-600">
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">E-mail (Login):</span> {viewingUser.email || '—'}</div>
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">E-mail Pessoal:</span> {viewingUser.personal_email || '—'}</div>
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">Telefone:</span> {viewingUser.phone || '—'}</div>
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">CPF:</span> {viewingUser.cpf || '—'}</div>
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">RG:</span> {viewingUser.rg || '—'}</div>
+                  <div><span className="font-semibold text-gray-400 text-xs uppercase block">Data de Nascimento:</span> {viewingUser.birth_date ? new Date(viewingUser.birth_date + 'T00:00:00').toLocaleDateString('pt-BR') : '—'}</div>
+                  <div className="col-span-2"><span className="font-semibold text-gray-400 text-xs uppercase block">Endereço:</span> {viewingUser.address || '—'}</div>
+                </div>
+              </div>
+
+              {viewingUser.role === 'oficineiro' && (
+                <div className="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100 space-y-3">
+                  <h4 className="font-bold text-emerald-800 border-b border-emerald-200 pb-2">Ficha do Facilitador MCS</h4>
+                  <div>
+                    <span className="font-bold text-emerald-800 text-xs uppercase block">Formações / Experiências:</span>
+                    <p className="text-gray-700 mt-1 whitespace-pre-wrap">{viewingUser.education || 'Nenhuma formação registrada'}</p>
+                  </div>
+                  <div>
+                    <span className="font-bold text-emerald-800 text-xs uppercase block">Horário de Disponibilidade:</span>
+                    <p className="text-gray-700 mt-1">{viewingUser.availability_schedule || 'Não informado'}</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <span className="font-bold text-emerald-800 text-xs uppercase block">Pontos Positivos:</span>
+                      <p className="text-gray-700 mt-1 whitespace-pre-wrap">{viewingUser.positive_points || 'Sem anotações'}</p>
+                    </div>
+                    <div>
+                      <span className="font-bold text-emerald-800 text-xs uppercase block">Pontos Negativos / Atenção:</span>
+                      <p className="text-gray-700 mt-1 whitespace-pre-wrap">{viewingUser.negative_points || 'Sem anotações'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {viewingUser.role === 'aluno' && (
+                <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100 space-y-3">
+                  <h4 className="font-bold text-blue-800 border-b border-blue-200 pb-2">Informações Complementares do Aluno</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div><span className="font-bold text-blue-800 text-xs uppercase block">Faixa Salarial Família:</span> {viewingUser.family_income || 'Não informada'}</div>
+                    <div><span className="font-bold text-blue-800 text-xs uppercase block">Profissão dos Pais:</span> {viewingUser.parents_profession || 'Não informada'}</div>
+                  </div>
+                  {viewingUser.anamnesis_data && (
+                    <div className="pt-2">
+                      <span className="font-bold text-blue-800 text-xs uppercase block">Anamnese Clínica:</span>
+                      <p className="text-xs text-blue-600 mt-1">✓ Registro de anamnese cadastrado no sistema</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 pt-4 border-t border-gray-100 flex justify-end">
+              <button onClick={() => setViewingUser(null)} className="bg-carbono text-marfim px-8 py-3 rounded-full text-xs font-bold hover:bg-gray-800 transition-colors">
+                FECHAR VISUALIZAÇÃO
+              </button>
+            </div>
           </div>
         </div>
       )}
