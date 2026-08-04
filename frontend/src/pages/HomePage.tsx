@@ -27,12 +27,16 @@ export default function HomePage() {
             <span className="text-dourado font-semibold tracking-wider text-xs md:text-sm uppercase mb-4 block">
               | Instituto Movimento de Cultura Social
             </span>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-7xl leading-tight mb-6">
-              Transformamos realidades através da assistência social, educação, cultura e fortalecimento comunitário.
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight mb-6">
+              Toda transformação começa com um encontro.
             </h1>
-            <p className="text-gray-600 text-base md:text-lg max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed">
-              Promovemos o amparo às crianças, jovens e suas famílias, construindo uma base sólida de cidadania, dignidade, educação e desenvolvimento socioeducacional.
-            </p>
+            <div className="text-gray-600 text-base md:text-lg max-w-lg mx-auto lg:mx-0 mb-10 leading-relaxed space-y-4">
+              <p>O encontro entre o cuidado e a oportunidade. Entre a educação e a cultura. Entre o talento e o incentivo. Entre pessoas que acreditam que um futuro melhor se constrói coletivamente.</p>
+              <p>É desse encontro que nasce o Instituto MC'S.</p>
+              <p>Unimos assistência social, educação, cultura e fortalecimento comunitário para desenvolver crianças, adolescentes, jovens e suas famílias, promovendo autonomia, cidadania e pertencimento.</p>
+              <p>Cada oficina, projeto e ação fortalece vínculos, desperta talentos e amplia horizontes, porque acreditamos que a transformação social acontece quando as pessoas encontram espaço para aprender, criar, participar e sonhar.</p>
+              <p className="font-bold text-carbono">Mais do que transformar realidades, cultivamos comunidades capazes de transformar o próprio futuro.</p>
+            </div>
             <div className="flex justify-center lg:justify-start gap-4">
               <Link to="/projetos" className="bg-dourado text-carbono text-sm md:text-base font-semibold py-4 px-6 md:px-8 rounded-full hover:bg-yellow-500 transition-colors inline-flex items-center gap-2 w-full sm:w-auto justify-center shadow-lg">
                 CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>

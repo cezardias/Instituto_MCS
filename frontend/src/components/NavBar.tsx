@@ -2,13 +2,13 @@ import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 const links = [
-  { label: 'INÍCIO', to: '/' },
-  { label: 'QUEM SOMOS', to: '/quem-somos' },
-  { label: 'PROJETOS', to: '/projetos' },
+  { label: 'PROPÓSITO', to: '/' },
+  { label: 'NOSSA ESSÊNCIA', to: '/quem-somos' },
+  { label: 'ECOSSISTEMA DE ATUAÇÃO', to: '/projetos' },
   // { label: 'TRANSPARÊNCIA', to: '/transparencia' },
   // { label: 'COMPLIANCE', to: '/compliance' },
   // { label: 'BANCO DE PROJETOS', to: '/banco-de-projetos' },
-  { label: 'NOTÍCIAS', to: '/noticias' },
+  // { label: 'NOTÍCIAS', to: '/noticias' },
   { label: 'ASSOCIADOS', to: '/associados' },
   { label: 'CONTATO', to: '/contato' },
   { label: 'RIFA MCS', to: '/rifa' },

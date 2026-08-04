@@ -18,9 +18,9 @@ export default function Footer() {
         <div>
           <h4 className="text-marfim font-semibold uppercase tracking-widest text-xs mb-6">Links Rápidos</h4>
           <ul className="space-y-3 text-sm">
-            <li><Link to="/" className="hover:text-dourado transition-colors">Início</Link></li>
-            <li><Link to="/quem-somos" className="hover:text-dourado transition-colors">Quem Somos</Link></li>
-            <li><Link to="/projetos" className="hover:text-dourado transition-colors">Projetos</Link></li>
+            <li><Link to="/" className="hover:text-dourado transition-colors">Propósito</Link></li>
+            <li><Link to="/quem-somos" className="hover:text-dourado transition-colors">Nossa Essência</Link></li>
+            <li><Link to="/projetos" className="hover:text-dourado transition-colors">Ecossistema de Atuação</Link></li>
             {/* <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Transparência</Link></li> */}
             {/* <li><Link to="/compliance" className="hover:text-dourado transition-colors">Governança</Link></li> */}
           </ul>
@@ -30,7 +30,7 @@ export default function Footer() {
           <h4 className="text-marfim font-semibold uppercase tracking-widest text-xs mb-6">Links Rápidos</h4>
           <ul className="space-y-3 text-sm">
             {/* <li><Link to="/projetos" className="hover:text-dourado transition-colors">Banco de Projetos</Link></li> */}
-            <li><Link to="/noticias" className="hover:text-dourado transition-colors">Notícias</Link></li>
+            {/* <li><Link to="/noticias" className="hover:text-dourado transition-colors">Notícias</Link></li> */}
             <li><Link to="/associados" className="hover:text-dourado transition-colors">Associados</Link></li>
             <li><Link to="/contato" className="hover:text-dourado transition-colors">Contato</Link></li>
             {/* <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Relatórios Anuais</Link></li> */}
