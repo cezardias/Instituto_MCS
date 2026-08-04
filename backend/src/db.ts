@@ -335,6 +335,10 @@ try { db.exec("ALTER TABLE users ADD COLUMN anamnesis_url TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN anamnesis_data TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN family_income TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN parents_profession TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN education TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN availability_schedule TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN positive_points TEXT") } catch(e) {}
+try { db.exec("ALTER TABLE users ADD COLUMN negative_points TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_type TEXT DEFAULT 'all'") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_id INTEGER") } catch(e) {}
 db.exec(createProjects)

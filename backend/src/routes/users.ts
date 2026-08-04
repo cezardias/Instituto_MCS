@@ -15,7 +15,7 @@ router.get('/', authMiddleware, (req, res) => {
   }
 
   try {
-    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id, phone, birth_date, personal_email, address, rg, family_income, parents_profession FROM users WHERE tenant_id = ?').all(tenant_id)
+    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id, phone, birth_date, personal_email, address, rg, family_income, parents_profession, education, availability_schedule, positive_points, negative_points FROM users WHERE tenant_id = ?').all(tenant_id)
     res.json(users)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' })
@@ -24,7 +24,7 @@ router.get('/', authMiddleware, (req, res) => {
 
 // Create user (admin only)
 router.post('/', authMiddleware, async (req, res) => {
-  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession } = req.body
+  const { name, email, password, role, personal_email, cpf, rg, phone, address, photo_url, parent, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession, education, availability_schedule, positive_points, negative_points } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if ((req as any).user.role !== 'admin') {
@@ -82,8 +82,8 @@ router.post('/', authMiddleware, async (req, res) => {
         parent_id = pInfo.lastInsertRowid
       }
 
-      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id, birth_date || null, medical_report_url || null, anamnesis_url || null, anamnesis_data ? JSON.stringify(anamnesis_data) : null, family_income || null, parents_profession || null)
+      const stmt = db.prepare('INSERT INTO users (tenant_id, name, email, password_hash, role, personal_email, cpf, rg, phone, address, photo_url, must_change_password, parent_id, birth_date, medical_report_url, anamnesis_url, anamnesis_data, family_income, parents_profession, education, availability_schedule, positive_points, negative_points) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      const info = stmt.run(tenant_id, name, systemEmail, hashedPassword, role || 'user', personal_email || null, cpf || null, rg || null, phone || null, address || null, photo_url || null, 1, parent_id, birth_date || null, medical_report_url || null, anamnesis_url || null, anamnesis_data ? JSON.stringify(anamnesis_data) : null, family_income || null, parents_profession || null, education || null, availability_schedule || null, positive_points || null, negative_points || null)
       
       finalId = Number(info.lastInsertRowid)
       db.exec('COMMIT')
@@ -104,7 +104,7 @@ router.post('/', authMiddleware, async (req, res) => {
 // Update user (admin only)
 router.put('/:id', authMiddleware, async (req, res) => {
   const { id } = req.params
-  const { name, email, role, personal_email, cpf, rg, phone, address, photo_url, birth_date, family_income, parents_profession, password } = req.body
+  const { name, email, role, personal_email, cpf, rg, phone, address, photo_url, birth_date, family_income, parents_profession, password, education, availability_schedule, positive_points, negative_points } = req.body
   const tenant_id = (req as any).user.tenant_id
 
   if ((req as any).user.role !== 'admin' && (req as any).user.role !== 'diretoria') {
@@ -114,11 +114,13 @@ router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const updateCols = [
       'name = ?', 'email = ?', 'role = ?', 'personal_email = ?', 'cpf = ?', 
-      'rg = ?', 'phone = ?', 'address = ?', 'birth_date = ?', 'family_income = ?', 'parents_profession = ?'
+      'rg = ?', 'phone = ?', 'address = ?', 'birth_date = ?', 'family_income = ?', 'parents_profession = ?',
+      'education = ?', 'availability_schedule = ?', 'positive_points = ?', 'negative_points = ?'
     ]
     const updateVals = [
       name, email, role, personal_email || null, cpf || null,
-      rg || null, phone || null, address || null, birth_date || null, family_income || null, parents_profession || null
+      rg || null, phone || null, address || null, birth_date || null, family_income || null, parents_profession || null,
+      education || null, availability_schedule || null, positive_points || null, negative_points || null
     ]
 
     if (photo_url) {

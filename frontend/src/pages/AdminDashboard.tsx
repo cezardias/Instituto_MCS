@@ -1051,7 +1051,7 @@ function UsersTab() {
 
   const openNew = () => {
     setEditingUser(null)
-    setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:''})
+    setForm({name:'',email:'',password:'',role:'aluno',personal_email:'',cpf:'',rg:'',phone:'',address:'',birth_date:'',family_income:'',parents_profession:'',anamnesis_data:null,photo_url:'',medical_report_url:'',education:'',availability_schedule:'',positive_points:'',negative_points:''})
     setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
     setPhoto(null)
     setMedicalReport(null)
@@ -1066,7 +1066,9 @@ function UsersTab() {
       personal_email: u.personal_email || '', cpf: u.cpf || '', rg: u.rg || '', phone: u.phone || '', 
       address: u.address || '', birth_date: u.birth_date || '', family_income: u.family_income || '', 
       parents_profession: u.parents_profession || '', anamnesis_data: u.anamnesis_data || null,
-      photo_url: u.photo_url || '', medical_report_url: u.medical_report_url || ''
+      photo_url: u.photo_url || '', medical_report_url: u.medical_report_url || '',
+      education: u.education || '', availability_schedule: u.availability_schedule || '',
+      positive_points: u.positive_points || '', negative_points: u.negative_points || ''
     })
     setParentForm({name:'',email:'',personal_email:'',cpf:'',rg:'',phone:'',birth_date:''})
     setPhoto(null)
@@ -1124,6 +1126,34 @@ function UsersTab() {
                   <input type="file" accept="image/*" onChange={e=>setPhoto(e.target.files?.[0] || null)} className="w-full text-sm" />
                 </div>
               </div>
+
+              {form.role === 'oficineiro' && (
+                <div className="bg-emerald-50/40 p-5 rounded-2xl border border-emerald-100 mt-6 space-y-4">
+                  <h4 className="font-bold text-emerald-800 text-sm border-b border-emerald-200 pb-2">Informações Adicionais do Facilitador MCS</h4>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Formações Informadas no Cadastro</label>
+                      <textarea rows={2} value={form.education || ''} onChange={e => setForm({...form, education: e.target.value})} placeholder="Cursos, graduações, especializações..." className="w-full border border-emerald-200 p-2.5 rounded-xl text-sm bg-white outline-none focus:border-emerald-500 resize-none" />
+                    </div>
+
+                    <div className="col-span-2">
+                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Horário de Disponibilidade</label>
+                      <input value={form.availability_schedule || ''} onChange={e => setForm({...form, availability_schedule: e.target.value})} placeholder="Ex: Segundas e Quartas das 14h às 18h" className="w-full border border-emerald-200 p-2.5 rounded-xl text-sm bg-white outline-none focus:border-emerald-500" />
+                    </div>
+
+                    <div>
+                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Pontos Positivos</label>
+                      <textarea rows={3} value={form.positive_points || ''} onChange={e => setForm({...form, positive_points: e.target.value})} placeholder="Qualidades, pontos fortes, diferenciais..." className="w-full border border-emerald-200 p-2.5 rounded-xl text-sm bg-white outline-none focus:border-emerald-500 resize-none" />
+                    </div>
+
+                    <div>
+                      <label className="label-dash text-xs text-emerald-800 font-bold block mb-1">Pontos Negativos / Atenção</label>
+                      <textarea rows={3} value={form.negative_points || ''} onChange={e => setForm({...form, negative_points: e.target.value})} placeholder="Pontos a melhorar, observações de atenção..." className="w-full border border-emerald-200 p-2.5 rounded-xl text-sm bg-white outline-none focus:border-emerald-500 resize-none" />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {form.role === 'aluno' && (
                 <>
