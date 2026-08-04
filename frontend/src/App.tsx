@@ -10,7 +10,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import StudentApp from './pages/StudentApp'
 import LoginPage from './pages/LoginPage'
 import NoticiasPage from './pages/NoticiasPage'
-import ParceirosPage from './pages/ParceirosPage'
+import AssociadosPage from './pages/AssociadosPage'
 import ContatoPage from './pages/ContatoPage'
 import RifaPage from './pages/RifaPage'
 import PreCadastroPage from './pages/PreCadastroPage'
@@ -44,7 +44,7 @@ function App() {
       <Route path="/compliance" element={<PublicLayout><CompliancePage /></PublicLayout>} />
       <Route path="/noticias" element={<PublicLayout><NoticiasPage /></PublicLayout>} />
       <Route path="/pre-cadastro" element={<PublicLayout><PreCadastroPage /></PublicLayout>} />
-      <Route path="/parceiros" element={<PublicLayout><ParceirosPage /></PublicLayout>} />
+      <Route path="/associados" element={<PublicLayout><AssociadosPage /></PublicLayout>} />
       <Route path="/contato" element={<PublicLayout><ContatoPage /></PublicLayout>} />
       <Route path="/rifa" element={<PublicLayout><RifaPage /></PublicLayout>} />
     </Routes>

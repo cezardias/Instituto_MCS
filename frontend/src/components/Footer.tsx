@@ -31,7 +31,7 @@ export default function Footer() {
           <ul className="space-y-3 text-sm">
             {/* <li><Link to="/projetos" className="hover:text-dourado transition-colors">Banco de Projetos</Link></li> */}
             <li><Link to="/noticias" className="hover:text-dourado transition-colors">Notícias</Link></li>
-            <li><Link to="/parceiros" className="hover:text-dourado transition-colors">Parceiros</Link></li>
+            <li><Link to="/associados" className="hover:text-dourado transition-colors">Associados</Link></li>
             <li><Link to="/contato" className="hover:text-dourado transition-colors">Contato</Link></li>
             {/* <li><Link to="/transparencia" className="hover:text-dourado transition-colors">Relatórios Anuais</Link></li> */}
           </ul>

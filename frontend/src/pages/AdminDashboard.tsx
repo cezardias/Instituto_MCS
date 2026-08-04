@@ -35,7 +35,7 @@ const SIDEBAR = [
     { id:'avaliacoes', label:'Avaliações e Atividades', icon:'📝', roles:['admin', 'coordenacao', 'oficineiro', 'diretoria', 'aluno', 'responsavel'] },
     { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
     { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
-    { id:'parceiros', label:'Parceiros', icon:'🤝', roles:['admin'] },
+    { id:'associados', label:'Associados', icon:'🤝', roles:['admin'] },
   ]},
   { group: 'FINANCEIRO', items: [
     { id:'financeiro', label:'Recursos Recebidos', icon:'💰', roles:['admin', 'diretoria'] },
@@ -256,8 +256,8 @@ export default function AdminDashboard() {
           {tab === 'turmas'      && <TurmasTab />}
           {tab === 'avaliacoes'  && <AvaliacoesTab />}
           {tab === 'oficineiros_registrations' && <OficineirosRegistrationTab />}
-          {tab === 'parceiros'   && <ParceirosTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations','parceiros'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {tab === 'associados'   && <AssociadosTab />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations','associados'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
@@ -3870,24 +3870,24 @@ function PreCadastrosTab() {
 // ═══════════════════════════════════════════════════════════════════
 // PARCEIROS TAB
 // ═══════════════════════════════════════════════════════════════════
-function ParceirosTab() {
+function AssociadosTab() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<number|null>(null)
   const [error, setError] = useState('')
-  const [form, setForm] = useState({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1 })
+  const [form, setForm] = useState({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1, tipo:'Voluntário', email:'', phone:'', cpf_cnpj:'', exibir_site:0, status_aprovacao:'pendente', aceitou_termos:0 })
   const [imageFile, setImageFile] = useState<File|null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
-    try { const r = await fetch(`/api/parceiros?tenant_id=${TENANT}`, {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    try { const r = await fetch(`/api/associados?tenant_id=${TENANT}`, {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
     setLoading(false)
   }, [])
   useEffect(() => { load() }, [load])
 
-  const openNew = () => { setEditing(null); setForm({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1 }); setImageFile(null); setError(''); setShowForm(true) }
+  const openNew = () => { setEditing(null); setForm({ name:'', responsavel:'', endereco:'', cnpj:'', instagram:'', website:'', logo_url:'', active:1, tipo:'Voluntário', email:'', phone:'', cpf_cnpj:'', exibir_site:0, status_aprovacao:'aprovado', aceitou_termos:1 }); setImageFile(null); setError(''); setShowForm(true) }
   const openEdit = (p:any) => { setEditing(p.id); setForm(p); setImageFile(null); setError(''); setShowForm(true) }
 
   const save = async (e: React.FormEvent) => {
@@ -3903,7 +3903,7 @@ function ParceirosTab() {
       }
       const payload = { ...form, logo_url: finalLogo }
       const method = editing ? 'PUT' : 'POST'
-      const url = editing ? `/api/parceiros/${editing}` : '/api/parceiros'
+      const url = editing ? `/api/associados/${editing}` : '/api/associados'
       const res = await fetch(url, { method, headers: authH(), body: JSON.stringify(payload) })
       if (!res.ok) throw new Error('Erro ao salvar')
       setShowForm(false)
@@ -3914,72 +3914,97 @@ function ParceirosTab() {
 
   const toggleActive = async (p:any) => {
     const newActive = p.active === 1 ? 0 : 1;
-    await fetch(`/api/parceiros/${p.id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ ...p, active: newActive }) })
+    await fetch(`/api/associados/${p.id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ ...p, active: newActive }) })
+    load()
+  }
+
+  const toggleExibirSite = async (p:any) => {
+    const newExibir = p.exibir_site === 1 ? 0 : 1;
+    await fetch(`/api/associados/${p.id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ ...p, exibir_site: newExibir }) })
+    load()
+  }
+
+  const changeStatus = async (p:any, status:string) => {
+    await fetch(`/api/associados/${p.id}`, { method: 'PUT', headers: authH(), body: JSON.stringify({ ...p, status_aprovacao: status }) })
     load()
   }
 
   const del = async (id:number) => {
-    if(!confirm('Excluir parceiro?')) return
-    await fetch(`/api/parceiros/${id}`, { method:'DELETE', headers:authH() })
+    if(!confirm('Excluir associado?')) return
+    await fetch(`/api/associados/${id}`, { method:'DELETE', headers:authH() })
     load()
   }
 
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="font-serif text-2xl text-carbono">Parceiros</h2>
-        <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Parceiro</button>
+        <h2 className="font-serif text-2xl text-carbono">Associados</h2>
+        <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Associado</button>
       </div>
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-8">
             <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-              <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Parceiro' : 'Novo Parceiro'}</h3>
+              <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Associado' : 'Novo Associado'}</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
             </div>
             {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
             <form onSubmit={save} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="label-dash">Nome do Parceiro *</label>
-                  <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="input-field" placeholder="Empresa ou Organização" />
+                  <label className="label-dash">Nome do Associado *</label>
+                  <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="input-field" placeholder="Nome Completo ou Empresa" />
                 </div>
                 <div>
-                  <label className="label-dash">Responsável</label>
-                  <input value={form.responsavel} onChange={e=>setForm({...form,responsavel:e.target.value})} className="input-field" placeholder="Nome do contato" />
+                  <label className="label-dash">E-mail</label>
+                  <input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className="input-field" placeholder="email@exemplo.com" />
                 </div>
                 <div>
-                  <label className="label-dash">CNPJ</label>
-                  <input value={form.cnpj} onChange={e=>setForm({...form,cnpj:e.target.value})} className="input-field" placeholder="00.000.000/0000-00" />
+                  <label className="label-dash">Telefone / WhatsApp</label>
+                  <input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
+                </div>
+                <div>
+                  <label className="label-dash">CPF / CNPJ</label>
+                  <input value={form.cpf_cnpj} onChange={e=>setForm({...form,cpf_cnpj:e.target.value})} className="input-field" placeholder="000.000.000-00" />
+                </div>
+                <div>
+                  <label className="label-dash">Tipo de Associação</label>
+                  <select value={form.tipo} onChange={e=>setForm({...form,tipo:e.target.value})} className="input-field">
+                    <option value="Fundador">Associado Fundador</option>
+                    <option value="Efetivo">Associado Efetivo</option>
+                    <option value="Contribuinte">Associado Contribuinte</option>
+                    <option value="Voluntário">Associado Voluntário</option>
+                    <option value="Benemérito ou Honorário">Associado Benemérito/Honorário</option>
+                  </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="label-dash">Endereço</label>
-                  <input value={form.endereco} onChange={e=>setForm({...form,endereco:e.target.value})} className="input-field" placeholder="Endereço completo" />
-                </div>
-                <div>
-                  <label className="label-dash">Instagram</label>
-                  <input value={form.instagram} onChange={e=>setForm({...form,instagram:e.target.value})} className="input-field" placeholder="@parceiro" />
-                </div>
-                <div>
-                  <label className="label-dash">Website</label>
-                  <input value={form.website} onChange={e=>setForm({...form,website:e.target.value})} className="input-field" placeholder="https://..." />
+                  <label className="label-dash">Status de Aprovação</label>
+                  <select value={form.status_aprovacao} onChange={e=>setForm({...form,status_aprovacao:e.target.value})} className="input-field">
+                    <option value="pendente">Pendente</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="rejeitado">Rejeitado</option>
+                  </select>
                 </div>
                 <div className="col-span-2">
-                  <label className="label-dash">Logo do Parceiro</label>
+                  <label className="label-dash">Foto ou Logo (Opcional)</label>
                   <input type="file" accept="image/*" onChange={e=>setImageFile(e.target.files?.[0]||null)} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-dourado/10 file:text-carbono hover:file:bg-dourado/20" />
                   {form.logo_url && !imageFile && <p className="text-xs text-gray-500 mt-2">Logo atual: {form.logo_url.split('/').pop()}</p>}
                 </div>
-                <div className="col-span-2">
+                <div className="col-span-2 grid grid-cols-2 gap-4">
                   <label className="flex items-center gap-2 cursor-pointer mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                     <input type="checkbox" checked={form.active === 1} onChange={e=>setForm({...form,active: e.target.checked ? 1 : 0})} className="w-5 h-5 accent-dourado rounded" />
-                    <span className="text-sm font-bold text-gray-700">Mostrar no Site Público (Ativo)</span>
+                    <span className="text-sm font-bold text-gray-700">Ativo</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <input type="checkbox" checked={form.exibir_site === 1} onChange={e=>setForm({...form,exibir_site: e.target.checked ? 1 : 0})} className="w-5 h-5 accent-dourado rounded" />
+                    <span className="text-sm font-bold text-gray-700">Exibir no Site</span>
                   </label>
                 </div>
               </div>
               <div className="flex gap-3 pt-2 mt-4">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold hover:bg-gray-50">Cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editing ? 'Salvar' : 'Criar Parceiro'}</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editing ? 'Salvar' : 'Criar Associado'}</button>
               </div>
             </form>
           </div>
@@ -3990,32 +4015,44 @@ function ParceirosTab() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Logo</th><th className="th-cell">Nome / Responsável</th><th className="th-cell">Contato</th><th className="th-cell text-center">Exibição</th><th className="th-cell" />
+              <th className="th-cell">Foto/Logo</th><th className="th-cell">Nome / Contato</th><th className="th-cell">Tipo / Status</th><th className="th-cell text-center">Ativo</th><th className="th-cell text-center">Exibir no Site</th><th className="th-cell" />
             </tr></thead>
             <tbody>
-              {items.length === 0 && <tr><td colSpan={5} className="text-center py-12 text-gray-400">Nenhum parceiro cadastrado</td></tr>}
+              {items.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">Nenhum associado cadastrado</td></tr>}
               {items.map(p => (
                 <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell">
-                    {p.logo_url ? <img src={p.logo_url.startsWith('http') ? p.logo_url : `/api${p.logo_url}`} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem logo</div>}
+                    {p.logo_url ? <img src={p.logo_url.startsWith('http') ? p.logo_url : `/api${p.logo_url}`} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem foto</div>}
                   </td>
                   <td className="td-cell">
                     <div className="font-semibold text-carbono">{p.name}</div>
-                    {p.responsavel && <div className="text-xs text-gray-500">{p.responsavel}</div>}
+                    {p.email && <div className="text-xs text-gray-500">{p.email}</div>}
+                    {p.phone && <div className="text-xs text-gray-500">{p.phone}</div>}
                   </td>
                   <td className="td-cell text-gray-500">
-                    {p.website && <div className="text-xs">🌐 {p.website}</div>}
-                    {p.instagram && <div className="text-xs">📸 {p.instagram}</div>}
-                    {!p.website && !p.instagram && '-'}
+                    <div className="font-medium text-gray-700">{p.tipo || 'N/A'}</div>
+                    <div className={`text-xs font-bold ${p.status_aprovacao === 'aprovado' ? 'text-green-600' : p.status_aprovacao === 'rejeitado' ? 'text-red-600' : 'text-yellow-600'}`}>
+                      {p.status_aprovacao?.toUpperCase()}
+                    </div>
                   </td>
                   <td className="td-cell text-center">
                     <button onClick={() => toggleActive(p)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${p.active ? 'bg-green-500' : 'bg-gray-300'}`}>
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${p.active ? 'translate-x-6' : 'translate-x-1'}`} />
                     </button>
-                    <div className="text-[10px] text-gray-500 mt-1">{p.active ? 'Ativo no Site' : 'Oculto'}</div>
+                  </td>
+                  <td className="td-cell text-center">
+                    <button onClick={() => toggleExibirSite(p)} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${p.exibir_site ? 'bg-blue-500' : 'bg-gray-300'}`}>
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${p.exibir_site ? 'translate-x-6' : 'translate-x-1'}`} />
+                    </button>
                   </td>
                   <td className="td-cell">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
+                      {p.status_aprovacao === 'pendente' && (
+                        <>
+                          <button onClick={() => changeStatus(p, 'aprovado')} className="text-xs font-bold border border-green-200 text-green-600 px-3 py-1.5 rounded-full hover:bg-green-50">Aprovar</button>
+                          <button onClick={() => changeStatus(p, 'rejeitado')} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Rejeitar</button>
+                        </>
+                      )}
                       <button onClick={() => openEdit(p)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
                       <button onClick={() => del(p.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
                     </div>

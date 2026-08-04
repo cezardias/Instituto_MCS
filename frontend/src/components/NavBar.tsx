@@ -9,7 +9,7 @@ const links = [
   // { label: 'COMPLIANCE', to: '/compliance' },
   // { label: 'BANCO DE PROJETOS', to: '/banco-de-projetos' },
   { label: 'NOTÍCIAS', to: '/noticias' },
-  { label: 'PARCEIROS', to: '/parceiros' },
+  { label: 'ASSOCIADOS', to: '/associados' },
   { label: 'CONTATO', to: '/contato' },
   { label: 'RIFA MCS', to: '/rifa' },
 ]

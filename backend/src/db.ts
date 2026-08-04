@@ -429,6 +429,26 @@ try {
   db.exec(`ALTER TABLE pre_registrations ADD COLUMN student_name TEXT`)
 } catch (err) {}
 
+// Migrações para transformar parceiros em associados
+const parceirosColumns = [
+  "ADD COLUMN tipo TEXT",
+  "ADD COLUMN status_aprovacao TEXT DEFAULT 'pendente'",
+  "ADD COLUMN email TEXT",
+  "ADD COLUMN phone TEXT",
+  "ADD COLUMN cpf_cnpj TEXT",
+  "ADD COLUMN exibir_site INTEGER DEFAULT 0",
+  "ADD COLUMN aceitou_termos INTEGER DEFAULT 0"
+];
+
+for (const col of parceirosColumns) {
+  try {
+    db.exec(`ALTER TABLE parceiros ${col};`);
+  } catch (e: any) {
+    if (!e.message.includes('duplicate column name')) console.error(`Migration error (parceiros ${col}):`, e.message);
+  }
+}
+
+
 // --- SEED PROJECTS ---
 try {
   const countProj = db.prepare("SELECT count(*) as c FROM projects WHERE tenant_id = 'mcs'").get() as any;
