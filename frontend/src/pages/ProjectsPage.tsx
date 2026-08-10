@@ -27,7 +27,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="bg-marfim min-h-screen pt-24 pb-20">
+    <div className="bg-marfim min-h-screen pt-24 pb-20 font-sans">
       {/* Hero Banner */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
         <div className="relative rounded-[2rem] overflow-hidden bg-carbono text-marfim flex flex-col md:flex-row items-center min-h-[360px]">
@@ -51,300 +51,315 @@ export default function ProjectsPage() {
         
         {/* Project 4: Conexão Rima */}
         {pRima && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
-          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={getImg(pRima, "/projeto_rima.png")} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-purple-100 text-purple-800 border-purple-200 shadow-sm">
-              EM ANDAMENTO
-            </div>
-          </div>
-          
-          <div className="lg:w-3/5 p-8 lg:p-12">
-            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              Contraturno Conexão Rima
-            </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-              <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora para crianças e jovens da comunidade.
-            </p>
-
-            <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
-            
-            <ul className="space-y-4 mb-8">
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">📚</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Comunicação e Expressão</strong>
-                  <span className="text-gray-600 text-sm">Melhora da leitura, escrita e comunicação oral. Desenvolvimento da criatividade e expressão corporal.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🌟</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
-                  <span className="text-gray-600 text-sm">Fortalecimento da autoestima e da confiança através do protagonismo juvenil.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🤝</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Respeito e Cooperação</strong>
-                  <span className="text-gray-600 text-sm">Respeito e cooperação através da comunicação não violenta. Valorização da cultura brasileira, indígena, afro-brasileira e quilombola.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🌿</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Consciência Ambiental</strong>
-                  <span className="text-gray-600 text-sm">Conscientização ambiental sobre a importância das águas e do cerrado.</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
-                  <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
-                  <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
-                  <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
-                </div>
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
+            <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+              <img src={getImg(pRima, "/projeto_rima.png")} alt={pRima.title} className="w-full h-full object-cover absolute inset-0" />
+              <div className={`absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-sm ${
+                pRima.active === 1 ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}>
+                {pRima.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
               </div>
             </div>
+            
+            <div className="lg:w-3/5 p-8 lg:p-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+                Contraturno Conexão Rima
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                <strong>Linguagem, Respeito e Expressão Cultural.</strong> Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora para crianças e jovens da comunidade.
+              </p>
 
-            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
-              Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
-            </p>
+              <h3 className="font-bold text-xl text-carbono mb-4">Benefícios e Aprendizados</h3>
+              
+              <ul className="space-y-4 mb-8">
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">📚</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Comunicação e Expressão</strong>
+                    <span className="text-gray-600 text-sm">Melhora da leitura, escrita e comunicação oral. Desenvolvimento da criatividade e expressão corporal.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🌟</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
+                    <span className="text-gray-600 text-sm">Fortalecimento da autoestima e da confiança através do protagonismo juvenil.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🤝</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Respeito e Cooperação</strong>
+                    <span className="text-gray-600 text-sm">Respeito e cooperação através da comunicação não violenta. Valorização da cultura brasileira, indígena, afro-brasileira e quilombola.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🌿</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Consciência Ambiental</strong>
+                    <span className="text-gray-600 text-sm">Conscientização ambiental sobre a importância das águas e do cerrado.</span>
+                  </div>
+                </li>
+              </ul>
 
-            <Link to={`/pre-cadastro?projeto=${pRima.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              FAÇA PARTE DESSE MOVIMENTO
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </Link>
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
+                    <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
+                    <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
+                    <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
+                    <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+                Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
+              </p>
+
+              {pRima.active === 1 && (
+                <Link to={`/pre-cadastro?projeto=${pRima.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider shadow-lg">
+                  Garanta Vaga do Seu Filho
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </Link>
+              )}
+            </div>
           </div>
-        </div>
         )}
-
 
         {/* Project 1: MCS em Movimento */}
         {pMovimento && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
-          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={getImg(pMovimento, "/projeto_movimento.png")} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-green-100 text-green-800 border-green-200 shadow-sm uppercase">
-              {pMovimento.status.replace('_', ' ')}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
+            <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+              <img src={getImg(pMovimento, "/projeto_movimento.png")} alt={pMovimento.title} className="w-full h-full object-cover absolute inset-0" />
+              <div className={`absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-sm ${
+                pMovimento.active === 1 ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}>
+                {pMovimento.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
+              </div>
+            </div>
+            
+            <div className="lg:w-3/5 p-8 lg:p-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+                {pMovimento.title}
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+                {pMovimento.description || 'Uma iniciativa transformadora de assistência continuada e desenvolvimento integral para crianças e jovens da comunidade.'}
+              </p>
+
+              <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS em Movimento é essencial?</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Mais do que uma atividade física, o MCS em Movimento é um ambiente de desenvolvimento integral. Aqui, cada criança e jovem é incentivado a desenvolver competências para a vida toda:
+              </p>
+
+              <ul className="space-y-4 mb-8">
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">⚽</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Saúde e Vitalidade</strong>
+                    <span className="text-gray-600 text-sm">Focamos na melhoria do condicionamento físico, da coordenação motora e da consciência corporal, garantindo uma base sólida para o bem-estar.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🤸</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
+                    <span className="text-gray-600 text-sm">Através da prática de Danças Urbanas e Capoeira, seu filho fortalecerá a autoestima, a disciplina e a autoconfiança, assumindo seu lugar como protagonista de sua própria história.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🤝</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Valores que Transformam</strong>
+                    <span className="text-gray-600 text-sm">Promovemos o respeito mútuo e a coletividade, ensinando os jovens a trabalhar em equipe, valorizar a união e superar desafios juntos.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🌱</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Consciência e Identidade</strong>
+                    <span className="text-gray-600 text-sm">Conectamos os alunos com suas raízes através da valorização da cultura corporal, da ancestralidade e das tradições do nosso Cerrado.</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+                <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS em Movimento acontece em um ambiente seguro e acolhedor nos Polos de Assistência e Cultura de Alto Paraíso de Goiás e região.</p>
+                <p className="text-gray-600 text-sm"><strong>Dias:</strong> Encontros semanais estruturados de convivência e fortalecimento de vínculos.</p>
+              </div>
+
+              <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+                Seu filho vai aprender a usar o corpo, o ritmo e a disciplina para construir um futuro com mais saúde, respeito e confiança.
+              </p>
+
+              {pMovimento.active === 1 && (
+                <Link to={`/pre-cadastro?projeto=${pMovimento.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider shadow-lg">
+                  Garanta Vaga do Seu Filho
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </Link>
+              )}
             </div>
           </div>
-          
-          <div className="lg:w-3/5 p-8 lg:p-12">
-            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              {pMovimento.title}
-            </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
-              {pMovimento.description || 'Uma iniciativa transformadora de assistência continuada e desenvolvimento integral para crianças e jovens da comunidade.'}
-            </p>
-
-            <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS em Movimento é essencial?</h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Mais do que uma atividade física, o MCS em Movimento é um ambiente de desenvolvimento integral. Aqui, cada criança e jovem é incentivado a desenvolver competências para a vida toda:
-            </p>
-
-            <ul className="space-y-4 mb-8">
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">⚽</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Saúde e Vitalidade</strong>
-                  <span className="text-gray-600 text-sm">Focamos na melhoria do condicionamento físico, da coordenação motora e da consciência corporal, garantindo uma base sólida para o bem-estar.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🤸</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Protagonismo e Confiança</strong>
-                  <span className="text-gray-600 text-sm">Através da prática de Danças Urbanas e Capoeira, seu filho fortalecerá a autoestima, a disciplina e a autoconfiança, assumindo seu lugar como protagonista de sua própria história.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🤝</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Valores que Transformam</strong>
-                  <span className="text-gray-600 text-sm">Promovemos o respeito mútuo e a coletividade, ensinando os jovens a trabalhar em equipe, valorizar a união e superar desafios juntos.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🌱</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Consciência e Identidade</strong>
-                  <span className="text-gray-600 text-sm">Conectamos os alunos com suas raízes através da valorização da cultura corporal, da ancestralidade e das tradições do nosso Cerrado.</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS em Movimento acontece em um ambiente seguro e acolhedor nos Polos de Assistência e Cultura de Alto Paraíso de Goiás e região.</p>
-              <p className="text-gray-600 text-sm"><strong>Dias:</strong> Encontros semanais estruturados de convivência e fortalecimento de vínculos.</p>
-            </div>
-
-            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
-              Seu filho vai aprender a usar o corpo, o ritmo e a disciplina para construir um futuro com mais saúde, respeito e confiança.
-            </p>
-
-            <Link to={`/pre-cadastro?projeto=${pMovimento.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              Garanta a Vaga do Seu Filho
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </Link>
-          </div>
-        </div>
         )}
 
         {/* Project 2: MCS Digital */}
         {pDigital && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
-          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={getImg(pDigital, "/projeto_digital.png")} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-blue-100 text-blue-800 border-blue-200 shadow-sm uppercase">
-              {pDigital.status.replace('_', ' ')}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
+            <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+              <img src={getImg(pDigital, "/projeto_digital.png")} alt={pDigital.title} className="w-full h-full object-cover absolute inset-0" />
+              <div className={`absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-sm ${
+                pDigital.active === 1 ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}>
+                {pDigital.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
+              </div>
+            </div>
+            
+            <div className="lg:w-3/5 p-8 lg:p-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+                {pDigital.title}
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+                {pDigital.description || 'Uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores.'}
+              </p>
+
+              <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Digital é essencial?</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Em um mundo em rápida transformação, o acesso à tecnologia não pode ser um privilégio. O MCS Digital prepara os jovens para não apenas consumirem, mas pensarem e produzirem com ferramentas digitais:
+              </p>
+
+              <ul className="space-y-4 mb-8">
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">💻</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Letramento e Inovação</strong>
+                    <span className="text-gray-600 text-sm">Introduzimos conceitos de Inteligência Artificial, pensamento computacional e prompt engineering de forma lúdica e prática para crianças e jovens.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🚀</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Protagonismo e Empreendedorismo</strong>
+                    <span className="text-gray-600 text-sm">Através de trilhas divididas por idade (Exploradores Digitais e Criadores do Futuro), seu filho aprende a criar conteúdos reais, como guias turísticos, podcasts e bancos de imagens.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🛡️</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Valores e Ética Digital</strong>
+                    <span className="text-gray-600 text-sm">Promovemos o pensamento crítico e o uso responsável da tecnologia, combatendo fake news e ensinando sobre privacidade e cidadania digital.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">📍</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Conexão com o Território</strong>
+                    <span className="text-gray-600 text-sm">Unimos a tecnologia à realidade local, aplicando o aprendizado ao turismo, à gastronomia e à valorização da nossa Chapada dos Veadeiros.</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+                <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS Digital acontece em um ambiente estruturado e conectado nos polos de atendimento.</p>
+                <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Ciclos contínuos de aprendizado prático ao longo do ano.</p>
+                <p className="text-gray-600 text-sm"><strong>Estrutura:</strong> Turmas organizadas por faixa etária com foco em projetos reais.</p>
+              </div>
+
+              <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+                Seu filho vai aprender a usar a Inteligência Artificial e a inovação para construir conhecimento, autonomia e novas oportunidades profissionais.
+              </p>
+
+              {pDigital.active === 1 && (
+                <Link to={`/pre-cadastro?projeto=${pDigital.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider shadow-lg">
+                  Garanta Vaga do Seu Filho
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </Link>
+              )}
             </div>
           </div>
-          
-          <div className="lg:w-3/5 p-8 lg:p-12">
-            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              {pDigital.title}
-            </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
-              {pDigital.description || 'Uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores.'}
-            </p>
-
-            <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Digital é essencial?</h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Em um mundo em rápida transformação, o acesso à tecnologia não pode ser um privilégio. O MCS Digital prepara os jovens para não apenas consumirem, mas pensarem e produzirem com ferramentas digitais:
-            </p>
-
-            <ul className="space-y-4 mb-8">
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">💻</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Letramento e Inovação</strong>
-                  <span className="text-gray-600 text-sm">Introduzimos conceitos de Inteligência Artificial, pensamento computacional e prompt engineering de forma lúdica e prática para crianças e jovens.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🚀</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Protagonismo e Empreendedorismo</strong>
-                  <span className="text-gray-600 text-sm">Através de trilhas divididas por idade (Exploradores Digitais e Criadores do Futuro), seu filho aprende a criar conteúdos reais, como guias turísticos, podcasts e bancos de imagens.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🛡️</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Valores e Ética Digital</strong>
-                  <span className="text-gray-600 text-sm">Promovemos o pensamento crítico e o uso responsável da tecnologia, combatendo fake news e ensinando sobre privacidade e cidadania digital.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">📍</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Conexão com o Território</strong>
-                  <span className="text-gray-600 text-sm">Unimos a tecnologia à realidade local, aplicando o aprendizado ao turismo, à gastronomia e à valorização da nossa Chapada dos Veadeiros.</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS Digital acontece em um ambiente estruturado e conectado nos polos de atendimento.</p>
-              <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Ciclos contínuos de aprendizado prático ao longo do ano.</p>
-              <p className="text-gray-600 text-sm"><strong>Estrutura:</strong> Turmas organizadas por faixa etária com foco em projetos reais.</p>
-            </div>
-
-            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
-              Seu filho vai aprender a usar a Inteligência Artificial e a inovação para construir conhecimento, autonomia e novas oportunidades profissionais.
-            </p>
-
-            <Link to={`/pre-cadastro?projeto=${pDigital.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              Garanta a Vaga do Seu Filho
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </Link>
-          </div>
-        </div>
         )}
 
         {/* Project 3: MCS Família */}
         {pFamilia && (
-        <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
-          <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
-            <img src={getImg(pFamilia, "/projeto_familia.png")} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border bg-yellow-100 text-yellow-800 border-yellow-200 shadow-sm uppercase">
-              {pFamilia.status.replace('_', ' ')}
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
+            <div className="lg:w-2/5 relative min-h-[300px] bg-gray-200">
+              <img src={getImg(pFamilia, "/projeto_familia.png")} alt={pFamilia.title} className="w-full h-full object-cover absolute inset-0" />
+              <div className={`absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-sm ${
+                pFamilia.active === 1 ? 'bg-green-100 text-green-800 border-green-200' : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}>
+                {pFamilia.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
+              </div>
+            </div>
+            
+            <div className="lg:w-3/5 p-8 lg:p-12">
+              <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
+                {pFamilia.title}
+              </h2>
+              <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
+                {pFamilia.description || 'A base de sustentação do nosso ecossistema de desenvolvimento.'}
+              </p>
+
+              <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Família é essencial?</h3>
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Acreditamos que o desenvolvimento de uma criança ou jovem só é completo quando a sua rede de apoio familiar também é fortalecida. O MCS Família atua lado a lado com os outros projetos do Instituto para garantir:
+              </p>
+
+              <ul className="space-y-4 mb-8">
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">⚖️</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Segurança e Cuidado</strong>
+                    <span className="text-gray-600 text-sm">Oferecemos atendimento psicossocial e orientação jurídica estruturada para dar tranquilidade e amparo aos lares.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">💼</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Geração de Renda e Autonomia</strong>
+                    <span className="text-gray-600 text-sm">Capacitamos pais, responsáveis e jovens por meio de trilhas profissionalizantes alinhadas às reais demandas das cadeias produtivas locais, como o turismo e a economia criativa.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">👪</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Integração Comunitária</strong>
+                    <span className="text-gray-600 text-sm">Criamos pontes entre a família e as inovações tecnológicas e culturais oferecidas pelo Instituto, unindo gerações em prol do bem comum.</span>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="text-dourado text-xl mt-1">🏡</span>
+                  <div>
+                    <strong className="text-carbono block mb-1">Dignidade e Bem-Estar</strong>
+                    <span className="text-gray-600 text-sm">Promovemos um ambiente onde o crescimento econômico e turístico de Alto Paraíso se converte em qualidade de vida concreta para cada família.</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+                <p className="text-gray-600 text-sm mb-2"><strong>O MCS Família:</strong> Funciona como um ponto de apoio contínuo para a comunidade.</p>
+                <p className="text-gray-600 text-sm mb-2"><strong>Acompanhamento:</strong> Trilhas formativas, mentorias e suporte integrado.</p>
+                <p className="text-gray-600 text-sm"><strong>Foco:</strong> Desenvolvimento humano, sustentabilidade e autonomia financeira.</p>
+              </div>
+
+              <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
+                Sua família vai encontrar o suporte necessário para transformar desafios em oportunidades e construir um futuro mais próspero.
+              </p>
+
+              {pFamilia.active === 1 && (
+                <Link to={`/pre-cadastro?projeto=${pFamilia.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider shadow-lg">
+                  Garanta Vaga do Seu Filho
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                </Link>
+              )}
             </div>
           </div>
-          
-          <div className="lg:w-3/5 p-8 lg:p-12">
-            <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
-              {pFamilia.title}
-            </h2>
-            <p className="text-gray-600 text-lg mb-8 leading-relaxed whitespace-pre-line">
-              {pFamilia.description || 'A base de sustentação do nosso ecossistema de desenvolvimento.'}
-            </p>
-
-            <h3 className="font-bold text-xl text-carbono mb-4">Por que o MCS Família é essencial?</h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Acreditamos que o desenvolvimento de uma criança ou jovem só é completo quando a sua rede de apoio familiar também é fortalecida. O MCS Família atua lado a lado com os outros projetos do Instituto para garantir:
-            </p>
-
-            <ul className="space-y-4 mb-8">
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">⚖️</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Segurança e Cuidado</strong>
-                  <span className="text-gray-600 text-sm">Oferecemos atendimento psicossocial e orientação jurídica estruturada para dar tranquilidade e amparo aos lares.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">💼</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Geração de Renda e Autonomia</strong>
-                  <span className="text-gray-600 text-sm">Capacitamos pais, responsáveis e jovens por meio de trilhas profissionalizantes alinhadas às reais demandas das cadeias produtivas locais, como o turismo e a economia criativa.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">👪</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Integração Comunitária</strong>
-                  <span className="text-gray-600 text-sm">Criamos pontes entre a família e as inovações tecnológicas e culturais oferecidas pelo Instituto, unindo gerações em prol do bem comum.</span>
-                </div>
-              </li>
-              <li className="flex gap-4">
-                <span className="text-dourado text-xl mt-1">🏡</span>
-                <div>
-                  <strong className="text-carbono block mb-1">Dignidade e Bem-Estar</strong>
-                  <span className="text-gray-600 text-sm">Promovemos um ambiente onde o crescimento econômico e turístico de Alto Paraíso se converte em qualidade de vida concreta para cada família.</span>
-                </div>
-              </li>
-            </ul>
-
-            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-              <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-              <p className="text-gray-600 text-sm mb-2"><strong>O MCS Família:</strong> Funciona como um ponto de apoio contínuo para a comunidade.</p>
-              <p className="text-gray-600 text-sm mb-2"><strong>Acompanhamento:</strong> Trilhas formativas, mentorias e suporte integrado.</p>
-              <p className="text-gray-600 text-sm"><strong>Foco:</strong> Desenvolvimento humano, sustentabilidade e autonomia financeira.</p>
-            </div>
-
-            <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
-              Sua família vai encontrar o suporte necessário para transformar desafios em oportunidades e construir um futuro mais próspero.
-            </p>
-
-            <Link to={`/pre-cadastro?projeto=${pFamilia.id}`} className="bg-carbono text-marfim font-bold py-4 px-8 rounded-full hover:bg-gray-800 transition-colors inline-flex items-center gap-2 text-sm uppercase tracking-wider">
-              Faça Parte Deste Movimento
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-            </Link>
-          </div>
-        </div>
         )}
 
         {/* Outros Projetos Cadastrados no Dashboard */}
@@ -361,8 +376,10 @@ export default function ProjectsPage() {
                 <div key={p.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                   <div className="relative h-64 bg-gray-200 overflow-hidden">
                     <img src={p.image_url || '/hero_instituto_mcs.png'} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                    <div className="absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold tracking-wider rounded-full border bg-white/90 text-carbono border-white shadow-sm uppercase backdrop-blur-sm">
-                      {p.status.replace('_', ' ')}
+                    <div className={`absolute top-4 left-4 z-20 px-3 py-1 text-[10px] font-bold tracking-wider rounded-full border shadow-sm uppercase backdrop-blur-sm ${
+                      p.active === 1 ? 'bg-green-100/90 text-green-800 border-green-200' : 'bg-gray-100/90 text-gray-600 border-gray-200'
+                    }`}>
+                      {p.active === 1 ? '🟢 ATIVO' : '⚪ EM BREVE'}
                     </div>
                   </div>
                   <div className="p-8 flex-1 flex flex-col">
@@ -371,9 +388,11 @@ export default function ProjectsPage() {
                     <p className="text-gray-600 text-sm leading-relaxed mb-8 flex-1 whitespace-pre-line line-clamp-4">
                       {p.description}
                     </p>
-                    <Link to={`/pre-cadastro?projeto=${p.id}`} className="inline-flex items-center gap-2 text-carbono font-bold text-sm uppercase tracking-wide hover:text-dourado transition-colors mt-auto">
-                      Garantir Vaga <span className="text-xl">→</span>
-                    </Link>
+                    {p.active === 1 && (
+                      <Link to={`/pre-cadastro?projeto=${p.id}`} className="inline-flex items-center gap-2 text-carbono font-bold text-sm uppercase tracking-wide hover:text-dourado transition-colors mt-auto">
+                        Garanta Vaga do Seu Filho <span className="text-xl">→</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))}

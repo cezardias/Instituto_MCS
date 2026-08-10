@@ -11,7 +11,7 @@ const TENANT = 'instituto-mcs'
 // ─── types ───────────────────────────────────────────────────────────
 interface Stats { alunos_ativos: number; projetos_em_execucao: number; total_noticias: number; total_usuarios: number; pessoas_beneficiadas: number; recursos_captados: number; alunos_por_area: {area:string,count:number}[]; projetos_por_status: {status:string,count:number}[] }
 interface News { id:number; title:string; category:string; content:string; image_url:string|null; created_at:string }
-interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; created_at:string }
+interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; image_url?:string; active?:number; created_at:string }
 interface Aluno { id:number; name:string; email:string; phone:string; area:string; status:string; birth_date:string; created_at:string }
 interface User { id:number; name:string; email:string; role:string; created_at:string }
 interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; receipt_url?:string; expected_date?:string; created_at:string }
@@ -463,7 +463,7 @@ function ProjetosTab() {
   const [editing, setEditing] = useState<Project|null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const blank = { title:'', status:'em_execucao', area:'Ação Social', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'' }
+  const blank = { title:'', status:'em_execucao', area:'Ação Social', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'', active:1 }
   const [form, setForm] = useState<any>(blank)
   const [imageFile, setImageFile] = useState<File|null>(null)
 
@@ -478,31 +478,42 @@ function ProjetosTab() {
         const existingTitles = data.map((p:any) => p.title);
         const seedProjects = [
           {
+            title: 'Contraturno Conexão Rima',
+            area: 'Cultura',
+            location: 'Alto Paraíso de Goiás',
+            description: 'Linguagem, Respeito e Expressão Cultural. Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora.',
+            image_url: '/projeto_rima.png',
+            active: 1
+          },
+          {
             title: 'MCS em Movimento',
             area: 'Esporte',
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o MCS em Movimento, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.',
-            image_url: '/hero.png'
+            image_url: '/hero.png',
+            active: 0
           },
           {
             title: 'MCS Digital',
             area: 'Tecnologia',
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o MCS Digital, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.',
-            image_url: '/hero.png'
+            image_url: '/hero.png',
+            active: 0
           },
           {
             title: 'MCS Família',
             area: 'Comunidade',
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o MCS Família, a base de sustentação do nosso ecossistema de desenvolvimento.',
-            image_url: '/hero.png'
+            image_url: '/hero.png',
+            active: 0
           }
         ];
         
         let seeded = false;
         for (const p of seedProjects) {
-          if (!existingTitles.find((t:string) => t.includes(p.title.split(' ')[1]))) {
+          if (!existingTitles.find((t:string) => t.toLowerCase().includes(p.title.split(' ')[1].toLowerCase()))) {
             await fetch('/api/projects', {
               method: 'POST',
               headers: authH(),
@@ -526,7 +537,7 @@ function ProjetosTab() {
   useEffect(() => { load() }, [load])
 
   const openNew = () => { setEditing(null); setForm(blank); setImageFile(null); setError(''); setShowForm(true) }
-  const openEdit = (p: Project) => { setEditing(p); setForm({...p}); setImageFile(null); setError(''); setShowForm(true) }
+  const openEdit = (p: Project) => { setEditing(p); setForm({ active: 1, ...p }); setImageFile(null); setError(''); setShowForm(true) }
   const del = async (id: number) => { if(!confirm('Excluir projeto?')) return; await fetch(`/api/projects/${id}`,{method:'DELETE',headers:authH()}); load() }
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
@@ -568,8 +579,24 @@ function ProjetosTab() {
                   <label className="label-dash">Título *</label>
                   <input required value={form.title} onChange={e=>setForm({...form,title:e.target.value})} className="input-field" placeholder="Nome do projeto" />
                 </div>
+                
+                <div className="col-span-2">
+                  <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-2xl border border-gray-200 hover:bg-gray-100/80 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      checked={form.active === 1} 
+                      onChange={e => setForm({...form, active: e.target.checked ? 1 : 0})} 
+                      className="w-5 h-5 accent-dourado rounded" 
+                    />
+                    <div>
+                      <span className="text-sm font-bold text-carbono block">Projeto Ativo no Site</span>
+                      <span className="text-xs text-gray-500">Ao marcar como Ativo, o botão "Garanta Vaga do Seu Filho" será exibido na página pública do projeto.</span>
+                    </div>
+                  </label>
+                </div>
+
                 <div>
-                  <label className="label-dash">Status</label>
+                  <label className="label-dash">Status Interno</label>
                   <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="input-field">
                     {Object.entries(STATUS_LABELS).map(([v,l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
@@ -623,15 +650,20 @@ function ProjetosTab() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Título</th><th className="th-cell">Área</th><th className="th-cell">Status</th>
+              <th className="th-cell">Título</th><th className="th-cell">Área</th><th className="th-cell">Inscrição no Site</th><th className="th-cell">Status Interno</th>
               <th className="th-cell">Localização</th><th className="th-cell">Beneficiados</th><th className="th-cell">Orçamento</th><th className="th-cell" />
             </tr></thead>
             <tbody>
-              {items.length === 0 && <tr><td colSpan={7} className="text-center py-12 text-gray-400">Nenhum projeto cadastrado</td></tr>}
+              {items.length === 0 && <tr><td colSpan={8} className="text-center py-12 text-gray-400">Nenhum projeto cadastrado</td></tr>}
               {items.map(p => (
                 <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell font-semibold text-carbono">{p.title}</td>
                   <td className="td-cell text-gray-500">{p.area}</td>
+                  <td className="td-cell">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${p.active === 1 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {p.active === 1 ? '🟢 ATIVO (Com Botão)' : '⚪ INATIVO (Sem Botão)'}
+                    </span>
+                  </td>
                   <td className="td-cell"><span className={`text-[10px] font-bold px-2 py-1 rounded-full ${STATUS_COLORS[p.status]||'bg-gray-100 text-gray-600'}`}>{STATUS_LABELS[p.status]||p.status}</span></td>
                   <td className="td-cell text-gray-500">{p.location}</td>
                   <td className="td-cell text-gray-500">{p.beneficiados?.toLocaleString('pt-BR') || '—'}</td>
