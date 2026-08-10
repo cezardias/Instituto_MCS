@@ -5,7 +5,6 @@ const links = [
   { label: 'PROPÓSITO', to: '/' },
   { label: 'NOSSA ESSÊNCIA', to: '/quem-somos' },
   { label: 'ECOSSISTEMA DE ATUAÇÃO', to: '/projetos' },
-  { label: 'TRABALHOS', to: '/trabalhos' },
   { label: 'ASSOCIADOS', to: '/associados' },
   { label: 'CONTATO', to: '/contato' },
   { label: 'RIFA MCS', to: '/rifa' },

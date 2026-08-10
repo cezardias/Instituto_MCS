@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface Assignment {
   id: number;
@@ -19,7 +20,19 @@ interface Assignment {
   created_at: string;
 }
 
+const getUser = (): any => {
+  try {
+    const stored = localStorage.getItem('mcs_user') || sessionStorage.getItem('mcs_user');
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function TrabalhosPage() {
+  const navigate = useNavigate();
+  const currentUser = getUser();
+
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -36,9 +49,9 @@ export default function TrabalhosPage() {
   const [formSuccess, setFormSuccess] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
-    student_name: '',
-    student_email: '',
-    parent_email: '',
+    student_name: currentUser?.role === 'aluno' ? currentUser.name || '' : '',
+    student_email: currentUser?.role === 'aluno' ? currentUser.email || '' : '',
+    parent_email: currentUser?.role === 'responsavel' ? currentUser.email || '' : (currentUser?.parent_email || ''),
     turma: 'Contraturno Conexão Rima',
     title: '',
     description: ''
@@ -55,7 +68,14 @@ export default function TrabalhosPage() {
   const loadAssignments = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/assignments?tenant_id=mcs');
+      let url = '/api/assignments?tenant_id=mcs';
+      if (currentUser?.role === 'aluno' && currentUser?.name) {
+        url += `&student_name=${encodeURIComponent(currentUser.name)}`;
+      } else if (currentUser?.role === 'responsavel' && currentUser?.email) {
+        url += `&parent_email=${encodeURIComponent(currentUser.email)}`;
+      }
+
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setAssignments(data);
@@ -64,11 +84,15 @@ export default function TrabalhosPage() {
       console.error('Erro ao carregar trabalhos:', err);
     }
     setLoading(false);
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
-    loadAssignments();
-  }, [loadAssignments]);
+    if (currentUser) {
+      loadAssignments();
+    } else {
+      setLoading(false);
+    }
+  }, [loadAssignments, currentUser]);
 
   const handleFileUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +129,7 @@ export default function TrabalhosPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          student_id: currentUser?.id,
           file_url: fileUrl,
           file_name: file.name,
           file_type: file.name.split('.').pop()?.toLowerCase() || ''
@@ -116,9 +141,9 @@ export default function TrabalhosPage() {
       setFormSuccess('Trabalho enviado com sucesso! O professor e a diretoria foram notificados.');
       setFile(null);
       setFormData({
-        student_name: '',
-        student_email: '',
-        parent_email: '',
+        student_name: currentUser?.role === 'aluno' ? currentUser.name || '' : '',
+        student_email: currentUser?.role === 'aluno' ? currentUser.email || '' : '',
+        parent_email: currentUser?.role === 'responsavel' ? currentUser.email || '' : (currentUser?.parent_email || ''),
         turma: 'Contraturno Conexão Rima',
         title: '',
         description: ''
@@ -140,7 +165,7 @@ export default function TrabalhosPage() {
 
     setEvaluating(true);
     try {
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const token = localStorage.getItem('mcs_token') || sessionStorage.getItem('mcs_token');
       const res = await fetch(`/api/assignments/${selectedAssignment.id}`, {
         method: 'PUT',
         headers: {
@@ -154,7 +179,7 @@ export default function TrabalhosPage() {
         setSelectedAssignment(null);
         loadAssignments();
       } else {
-        alert('Erro ao atualizar avaliação. Verifique se está autenticado no painel.');
+        alert('Erro ao atualizar avaliação. Verifique suas credenciais.');
       }
     } catch (err) {
       console.error(err);
@@ -162,8 +187,61 @@ export default function TrabalhosPage() {
     setEvaluating(false);
   };
 
-  // Filtragem dos Trabalhos
+  const handleDeleteAssignment = async (id: number) => {
+    if (!confirm('Deseja realmente excluir este trabalho enviado?')) return;
+    try {
+      const token = localStorage.getItem('mcs_token') || sessionStorage.getItem('mcs_token');
+      const res = await fetch(`/api/assignments/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        loadAssignments();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // 🔒 Bloqueio de acesso para usuários não autenticados
+  if (!currentUser || !currentUser.role) {
+    return (
+      <div className="bg-marfim min-h-screen pt-28 pb-20 font-sans flex items-center justify-center px-4">
+        <div className="bg-white rounded-3xl p-10 max-w-lg w-full text-center border border-gray-100 shadow-xl">
+          <div className="w-16 h-16 bg-amber-100 text-dourado rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+            🔒
+          </div>
+          <h2 className="font-serif text-2xl text-carbono mb-2">Acesso Restrito ao Portal</h2>
+          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            O Portal de Trabalhos e Atividades é exclusivo para Alunos, Responsáveis, Oficineiros e a Diretoria do Instituto MCS. Faça login com suas credenciais para acessar seu perfil.
+          </p>
+          <Link
+            to="/login"
+            className="w-full bg-carbono text-marfim font-bold py-3.5 px-6 rounded-full hover:bg-gray-800 transition-colors inline-block text-xs uppercase tracking-wider shadow-md"
+          >
+            Entrar no Portal MCS
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Filtragem dos Trabalhos baseada no papel
   const filteredAssignments = assignments.filter(item => {
+    // Escopo por perfil
+    if (currentUser.role === 'aluno') {
+      const isMyWork =
+        item.student_name.toLowerCase().includes(currentUser.name.toLowerCase()) ||
+        (item.student_email && item.student_email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        item.student_id === currentUser.id;
+      if (!isMyWork) return false;
+    } else if (currentUser.role === 'responsavel') {
+      const isChildWork =
+        (item.parent_email && item.parent_email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (currentUser.student_name && item.student_name.toLowerCase().includes(currentUser.student_name.toLowerCase()));
+      if (!isChildWork) return false;
+    }
+
     const matchesSearch =
       item.student_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -174,6 +252,21 @@ export default function TrabalhosPage() {
 
     return matchesSearch && matchesTurma && matchesStatus;
   });
+
+  const canEvaluate = ['admin', 'diretoria', 'coordenacao', 'oficineiro'].includes(currentUser.role);
+  const canUpload = ['aluno', 'responsavel', 'admin', 'diretoria', 'coordenacao', 'oficineiro'].includes(currentUser.role);
+
+  const getRoleLabel = () => {
+    switch (currentUser.role) {
+      case 'aluno': return 'Painel do Estudante';
+      case 'responsavel': return 'Painel do Responsável Legal';
+      case 'oficineiro': return 'Painel do Facilitador / Oficineiro';
+      case 'diretoria':
+      case 'admin':
+      case 'coordenacao': return 'Painel Executivo da Diretoria';
+      default: return 'Portal de Trabalhos';
+    }
+  };
 
   const getFileBadgeColor = (type?: string) => {
     switch (type) {
@@ -204,28 +297,33 @@ export default function TrabalhosPage() {
     <div className="bg-marfim min-h-screen pt-24 pb-20 font-sans">
       {/* Banner Principal */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-10">
-        <div className="relative rounded-[2.5rem] overflow-hidden bg-carbono text-marfim p-8 lg:p-14 shadow-xl border border-carbono/20 flex flex-col md:flex-row items-center justify-between">
+        <div className="relative rounded-[2.5rem] overflow-hidden bg-carbono text-marfim p-8 lg:p-12 shadow-xl border border-carbono/20 flex flex-col md:flex-row items-center justify-between">
           <div className="relative z-10 md:w-2/3">
-            <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-3 block">
-              Portal do Estudante e do Responsável —
+            <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-2 block">
+              {getRoleLabel()} — Instituto MCS
             </span>
-            <h1 className="font-serif text-3xl lg:text-5xl leading-tight mb-4">
-              Envio e Gestão de Trabalhos Escolares
+            <h1 className="font-serif text-3xl lg:text-5xl leading-tight mb-3">
+              Trabalhos e Atividades Escolares
             </h1>
             <p className="text-gray-300 text-sm leading-relaxed max-w-2xl">
-              Alunos podem enviar suas pesquisas, trabalhos manuais e atividades em formato PDF, Word ou imagem. Responsáveis, oficineiros e a diretoria acompanham cada entrega com transparência.
+              {currentUser.role === 'aluno' && 'Envie suas tarefas, pesquisas e atividades em PDF, Word ou imagem e consulte suas notas e pareceres.'}
+              {currentUser.role === 'responsavel' && 'Acompanhe todas as atividades e notas enviadas pelo seu filho de forma segura e individualizada.'}
+              {currentUser.role === 'oficineiro' && 'Gerencie as atividades entregues pelos alunos da sua turma, atribua notas e envie orientações pedagógicas.'}
+              {['admin', 'diretoria', 'coordenacao'].includes(currentUser.role) && 'Visão completa e unificada de todos os trabalhos entregues pelos estudantes de todas as turmas do Instituto.'}
             </p>
           </div>
           <div className="mt-6 md:mt-0 relative z-10 shrink-0">
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="bg-dourado text-carbono font-bold px-8 py-4 rounded-full hover:bg-yellow-500 transition-all transform hover:-translate-y-1 shadow-lg text-sm uppercase tracking-wider flex items-center gap-3"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-              </svg>
-              Enviar Trabalho do Aluno
-            </button>
+            {canUpload && (
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="bg-dourado text-carbono font-bold px-8 py-4 rounded-full hover:bg-yellow-500 transition-all transform hover:-translate-y-1 shadow-lg text-sm uppercase tracking-wider flex items-center gap-3"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Enviar Novo Trabalho
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -273,7 +371,7 @@ export default function TrabalhosPage() {
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Nome do aluno, e-mail ou título..."
+                placeholder="Nome do aluno ou título do trabalho..."
                 className="w-full bg-gray-50 border border-gray-200 text-carbono text-xs font-medium pl-10 pr-4 py-2.5 rounded-xl outline-none focus:border-dourado"
               />
               <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -287,20 +385,24 @@ export default function TrabalhosPage() {
       {/* Grid de Trabalhos Enviados */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
         {loading ? (
-          <div className="text-center py-20 text-gray-400">Carregando trabalhos e atividades...</div>
+          <div className="text-center py-20 text-gray-400">Carregando trabalhos...</div>
         ) : filteredAssignments.length === 0 ? (
           <div className="bg-white rounded-3xl p-12 text-center border border-gray-100">
             <span className="text-4xl mb-3 block">📚</span>
             <h3 className="font-serif text-2xl text-carbono mb-2">Nenhum trabalho encontrado</h3>
             <p className="text-gray-500 text-sm max-w-md mx-auto mb-6">
-              Nenhuma atividade postada atende aos filtros selecionados. Clique no botão abaixo para realizar um novo envio.
+              {currentUser.role === 'aluno' && 'Você ainda não possui trabalhos enviados nesta turma.'}
+              {currentUser.role === 'responsavel' && 'Nenhum trabalho registrado para o estudante vinculado.'}
+              {canEvaluate && 'Nenhum trabalho postado para os filtros selecionados.'}
             </p>
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="bg-carbono text-marfim px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-gray-800"
-            >
-              + Enviar Novo Trabalho
-            </button>
+            {canUpload && (
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="bg-carbono text-marfim px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-gray-800"
+              >
+                + Enviar Novo Trabalho
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -350,23 +452,35 @@ export default function TrabalhosPage() {
                     rel="noopener noreferrer"
                     className="flex-1 bg-carbono text-marfim text-center py-2.5 rounded-full text-xs font-bold hover:bg-gray-800 transition-colors flex items-center justify-center gap-1.5"
                   >
-                    <span>📥</span> Baixar / Visualizar
+                    <span>📥</span> Baixar / Ver
                   </a>
 
-                  <button
-                    onClick={() => {
-                      setSelectedAssignment(item);
-                      setEvalData({
-                        status: item.status || 'aprovado',
-                        grade: item.grade || '',
-                        feedback: item.feedback || ''
-                      });
-                    }}
-                    className="border border-dourado text-carbono font-bold px-3 py-2.5 rounded-full text-[11px] hover:bg-dourado/20 transition-colors"
-                    title="Avaliar Trabalho (Professores e Diretoria)"
-                  >
-                    ⭐ Avaliar
-                  </button>
+                  {canEvaluate && (
+                    <button
+                      onClick={() => {
+                        setSelectedAssignment(item);
+                        setEvalData({
+                          status: item.status || 'aprovado',
+                          grade: item.grade || '',
+                          feedback: item.feedback || ''
+                        });
+                      }}
+                      className="border border-dourado text-carbono font-bold px-3 py-2.5 rounded-full text-[11px] hover:bg-dourado/20 transition-colors"
+                      title="Avaliar Trabalho"
+                    >
+                      ⭐ Avaliar
+                    </button>
+                  )}
+
+                  {canEvaluate && (
+                    <button
+                      onClick={() => handleDeleteAssignment(item.id)}
+                      className="text-red-500 font-bold p-2.5 hover:bg-red-50 rounded-full transition-colors"
+                      title="Excluir Trabalho"
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -391,7 +505,7 @@ export default function TrabalhosPage() {
               </span>
               <h3 className="font-serif text-2xl text-carbono">Anexar Trabalho do Estudante</h3>
               <p className="text-xs text-gray-400 mt-1">
-                Formatos suportados: PDF, Word (.doc, .docx) ou Imagem (.jpg, .png).
+                Formatos aceitos: PDF, Word (.doc, .docx) ou Imagem (.jpg, .png).
               </p>
             </div>
 
@@ -405,8 +519,9 @@ export default function TrabalhosPage() {
                   <input
                     required
                     value={formData.student_name}
+                    disabled={currentUser?.role === 'aluno'}
                     onChange={e => setFormData({ ...formData, student_name: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-dourado"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-dourado disabled:opacity-80 font-semibold"
                     placeholder="Nome do estudante"
                   />
                 </div>
@@ -442,8 +557,9 @@ export default function TrabalhosPage() {
                   <input
                     type="email"
                     value={formData.student_email}
+                    disabled={currentUser?.role === 'aluno'}
                     onChange={e => setFormData({ ...formData, student_email: e.target.value })}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-dourado"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 outline-none focus:border-dourado disabled:opacity-80"
                     placeholder="E-mail do aluno se tiver"
                   />
                 </div>

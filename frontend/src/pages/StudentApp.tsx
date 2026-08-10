@@ -87,6 +87,7 @@ export default function StudentApp() {
       {/* Bottom Nav Bar */}
       <nav className="fixed bottom-0 w-full bg-white border-t border-gray-100 flex items-center justify-around h-[72px] sm:h-20 z-50 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <NavItem icon="🗺️" label="Jornada" active={activeTab === 'jornada'} onClick={() => setActiveTab('jornada')} />
+        <NavItem icon="📁" label="Trabalhos" active={false} onClick={() => navigate('/trabalhos')} />
         <NavItem icon="🏅" label="Passaporte" active={activeTab === 'passaporte'} onClick={() => setActiveTab('passaporte')} />
         <NavItem icon="📅" label="Eventos" active={activeTab === 'eventos'} onClick={() => setActiveTab('eventos')} />
         <NavItem icon="🛒" label="Loja" active={activeTab === 'loja'} onClick={() => setActiveTab('loja')} />
