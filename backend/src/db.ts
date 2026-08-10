@@ -433,9 +433,39 @@ try {
   db.exec(`ALTER TABLE users ADD COLUMN last_activity TEXT`)
 } catch (err) {}
 
-try {
-  db.exec(`ALTER TABLE pre_registrations ADD COLUMN student_name TEXT`)
-} catch (err) {}
+const studentExtraColumns = [
+  "ADD COLUMN student_name TEXT",
+  "ADD COLUMN student_email TEXT",
+  "ADD COLUMN student_cpf TEXT",
+  "ADD COLUMN student_rg TEXT",
+  "ADD COLUMN gender TEXT",
+  "ADD COLUMN rnm TEXT",
+  "ADD COLUMN school_name TEXT",
+  "ADD COLUMN school_shift TEXT",
+  "ADD COLUMN school_grade TEXT",
+  "ADD COLUMN health_allergies TEXT",
+  "ADD COLUMN blood_type TEXT",
+  "ADD COLUMN weight TEXT",
+  "ADD COLUMN height TEXT",
+  "ADD COLUMN medications TEXT",
+  "ADD COLUMN health_conditions TEXT",
+  "ADD COLUMN parent_name TEXT",
+  "ADD COLUMN family_income TEXT",
+  "ADD COLUMN parents_profession TEXT",
+  "ADD COLUMN workplace TEXT",
+  "ADD COLUMN emergency_phone TEXT",
+  "ADD COLUMN family_kinship TEXT",
+  "ADD COLUMN image_voice_authorization INTEGER DEFAULT 1",
+  "ADD COLUMN pick_drop_responsibility INTEGER DEFAULT 1",
+  "ADD COLUMN project_expectations TEXT",
+  "ADD COLUMN safety_word TEXT"
+];
+
+for (const col of studentExtraColumns) {
+  try { db.exec(`ALTER TABLE pre_registrations ${col};`); } catch (e) {}
+  try { db.exec(`ALTER TABLE users ${col};`); } catch (e) {}
+  try { db.exec(`ALTER TABLE alunos ${col};`); } catch (e) {}
+}
 
 const oficineiroColumns = [
   "ADD COLUMN test_answers TEXT",

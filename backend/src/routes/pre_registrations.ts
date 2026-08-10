@@ -19,12 +19,34 @@ router.get('/', authMiddleware, (req, res) => {
 })
 
 router.post('/', (req, res) => {
-  const { tenant_id, name, email, phone, project_id, student_name } = req.body
+  const {
+    tenant_id, name, email, phone, project_id, student_name, student_email, student_cpf, student_rg,
+    address, gender, rnm, school_name, school_shift, school_grade, birth_date,
+    health_allergies, blood_type, weight, height, medications, health_conditions,
+    parent_name, family_income, parents_profession, workplace, emergency_phone, family_kinship,
+    image_voice_authorization, pick_drop_responsibility, project_expectations, safety_word
+  } = req.body
+
   if (!tenant_id || !name || !phone) return res.status(400).json({ error: 'tenant_id, name and phone required' })
+
   try {
-    const info = db.prepare(
-      'INSERT INTO pre_registrations (tenant_id, name, email, phone, project_id, student_name) VALUES (?,?,?,?,?,?)'
-    ).run(tenant_id, name, email || '', phone, project_id || null, student_name || null)
+    const info = db.prepare(`
+      INSERT INTO pre_registrations (
+        tenant_id, name, email, phone, project_id, student_name, student_email, student_cpf, student_rg,
+        address, gender, rnm, school_name, school_shift, school_grade, birth_date,
+        health_allergies, blood_type, weight, height, medications, health_conditions,
+        parent_name, family_income, parents_profession, workplace, emergency_phone, family_kinship,
+        image_voice_authorization, pick_drop_responsibility, project_expectations, safety_word
+      ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    `).run(
+      tenant_id, name, email || '', phone, project_id || null, student_name || null, student_email || null, student_cpf || null, student_rg || null,
+      address || null, gender || null, rnm || null, school_name || null, school_shift || null, school_grade || null, birth_date || null,
+      health_allergies || null, blood_type || null, weight || null, height || null, medications || null, health_conditions || null,
+      parent_name || name, family_income || null, parents_profession || null, workplace || null, emergency_phone || null, family_kinship || null,
+      image_voice_authorization !== undefined ? (image_voice_authorization ? 1 : 0) : 1,
+      pick_drop_responsibility !== undefined ? (pick_drop_responsibility ? 1 : 0) : 1,
+      project_expectations || null, safety_word || null
+    )
     res.status(201).json({ id: info.lastInsertRowid })
   } catch (e: any) { res.status(500).json({ error: e.message }) }
 })

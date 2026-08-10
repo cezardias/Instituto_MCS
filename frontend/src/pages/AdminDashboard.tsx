@@ -4277,6 +4277,7 @@ function OficineirosRegistrationTab() {
 function PreCadastrosTab() {
   const [items, setItems] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedItem, setSelectedItem] = useState<any | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -4296,58 +4297,206 @@ function PreCadastrosTab() {
     load()
   }
 
+  const exportCSV = () => {
+    const csvHeader = "Data,Responsável,Vínculo,Telefone,Emergência,Email,Aluno,Data Nasc Aluno,Escola,Turno,Turma,Tipo Sanguíneo,Peso,Altura,Alergias,Medicamentos,Patologia/Diagnóstico,Palavra Segura,Projeto,Status\n"
+    const csvRows = items.map(e => [
+      new Date(e.created_at).toLocaleDateString('pt-BR'),
+      `"${e.parent_name || e.name || ''}"`,
+      `"${e.family_kinship || ''}"`,
+      `"${e.phone || ''}"`,
+      `"${e.emergency_phone || ''}"`,
+      `"${e.email || ''}"`,
+      `"${e.student_name || ''}"`,
+      `"${e.birth_date ? new Date(e.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : ''}"`,
+      `"${e.school_name || ''}"`,
+      `"${e.school_shift || ''}"`,
+      `"${e.school_grade || ''}"`,
+      `"${e.blood_type || ''}"`,
+      `"${e.weight || ''}"`,
+      `"${e.height || ''}"`,
+      `"${e.health_allergies || ''}"`,
+      `"${e.medications || ''}"`,
+      `"${e.health_conditions || ''}"`,
+      `"${e.safety_word || ''}"`,
+      `"${e.project_name || 'Geral'}"`,
+      `"${e.status}"`
+    ].join(",")).join("\n")
+
+    const csvContent = "data:text/csv;charset=utf-8," + csvHeader + csvRows
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", "precadastros_alunos_mcs.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="font-serif text-2xl text-carbono">Pré-Cadastros de Interessados</h2>
-        <button onClick={() => {
-          // Export CSV
-          const csvContent = "data:text/csv;charset=utf-8," 
-            + "Nome do Responsável,Nome do Aluno,Email,Telefone,Projeto,Status,Data\n"
-            + items.map(e => `${e.name},${e.student_name||''},${e.email||''},${e.phone},${e.project_name||'Geral'},${e.status},${new Date(e.created_at).toLocaleDateString('pt-BR')}`).join("\n")
-          const encodedUri = encodeURI(csvContent)
-          const link = document.createElement("a")
-          link.setAttribute("href", encodedUri)
-          link.setAttribute("download", "precadastros_mcs.csv")
-          document.body.appendChild(link)
-          link.click()
-        }} className="bg-green-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 flex items-center gap-2">Baixar CSV</button>
+        <div>
+          <h2 className="font-serif text-2xl text-carbono">Fichas de Inscrição e Pré-Cadastros dos Alunos</h2>
+          <p className="text-sm text-gray-400">Consulte dados pessoais, fichas de saúde, contatos de emergência e termos de autorização</p>
+        </div>
+        <button onClick={exportCSV} className="bg-green-600 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-green-700 flex items-center gap-2 shadow-md">
+          🟢 Baixar CSV Completo
+        </button>
       </div>
 
-      {loading ? <div className="text-center py-20 text-gray-400">Carregando...</div> : (
+      {loading ? <div className="text-center py-20 text-gray-400">Carregando inscrições...</div> : (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Responsável</th><th className="th-cell">Aluno</th><th className="th-cell">Contato</th><th className="th-cell">Projeto de Interesse</th>
-              <th className="th-cell">Status</th><th className="th-cell">Data</th><th className="th-cell" />
-            </tr></thead>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-gray-500">
+                <th className="p-4 font-semibold">Data</th>
+                <th className="p-4 font-semibold">Aluno</th>
+                <th className="p-4 font-semibold">Responsável / Vínculo</th>
+                <th className="p-4 font-semibold">Contatos (WhatsApp & Emergência)</th>
+                <th className="p-4 font-semibold">Escola / Turno</th>
+                <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold"></th>
+              </tr>
+            </thead>
             <tbody>
-              {items.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">Nenhum pré-cadastro encontrado</td></tr>}
+              {items.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-gray-400">Nenhum pré-cadastro encontrado.</td>
+                </tr>
+              )}
               {items.map(a => (
                 <tr key={a.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                  <td className="td-cell font-semibold text-carbono">{a.name}</td>
-                  <td className="td-cell text-gray-500">{a.student_name || '-'}</td>
-                  <td className="td-cell text-gray-500">
-                    <div>{a.phone}</div>
-                    <div className="text-xs">{a.email}</div>
+                  <td className="p-4 text-gray-500 whitespace-nowrap">
+                    {new Date(a.created_at).toLocaleDateString('pt-BR')}
                   </td>
-                  <td className="td-cell text-gray-500 font-medium">{a.project_name || 'Geral'}</td>
-                  <td className="td-cell">
-                    <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white">
+                  <td className="p-4 font-bold text-carbono">
+                    <div>{a.student_name || 'Não informado'}</div>
+                    {a.birth_date && <div className="text-xs text-gray-400 font-normal">Nasc: {new Date(a.birth_date+'T00:00:00').toLocaleDateString('pt-BR')}</div>}
+                  </td>
+                  <td className="p-4 text-gray-600">
+                    <div className="font-semibold text-carbono">{a.parent_name || a.name}</div>
+                    <div className="text-xs text-gray-400">{a.family_kinship || 'Responsável'}</div>
+                  </td>
+                  <td className="p-4 text-gray-600 text-xs space-y-0.5">
+                    <div><span className="font-bold">Principal:</span> {a.phone}</div>
+                    {a.emergency_phone && <div><span className="font-bold text-rose-600">Emergência:</span> {a.emergency_phone}</div>}
+                  </td>
+                  <td className="p-4 text-gray-500 text-xs">
+                    <div>{a.school_name || 'Geral'}</div>
+                    {a.school_shift && <div className="text-[11px] text-gray-400">{a.school_shift} {a.school_grade ? `(${a.school_grade})` : ''}</div>}
+                  </td>
+                  <td className="p-4">
+                    <select value={a.status} onChange={e => updateStatus(a.id, e.target.value)} className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white font-bold text-carbono outline-none">
                       <option value="pendente">Pendente</option>
                       <option value="contatado">Contatado</option>
                       <option value="matriculado">Matriculado</option>
                       <option value="desistente">Desistente</option>
                     </select>
                   </td>
-                  <td className="td-cell text-gray-500">{new Date(a.created_at).toLocaleDateString('pt-BR')}</td>
-                  <td className="td-cell">
-                    <button onClick={() => del(a.id)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
+                  <td className="p-4 text-right">
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setSelectedItem(a)} className="text-dourado font-bold text-xs hover:underline">
+                        VER FICHA
+                      </button>
+                      <button onClick={() => del(a.id)} className="text-xs font-bold text-red-500 hover:underline">
+                        Excluir
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* MODAL DETALHADO DA FICHA DO ALUNO */}
+      {selectedItem && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
+            <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl z-10">×</button>
+
+            <div className="mb-6 border-b border-gray-100 pb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-dourado block mb-1">Ficha Técnica do Aluno MCS</span>
+              <h3 className="font-serif text-3xl text-carbono">{selectedItem.student_name || selectedItem.name}</h3>
+              <p className="text-xs text-gray-400">Inscrição registrada em {new Date(selectedItem.created_at).toLocaleDateString('pt-BR')}</p>
+            </div>
+
+            {/* SEÇÃO: DADOS DO ALUNO */}
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-dourado">
+                <span>🎓</span> Dados Pessoais e Escolares do Estudante
+              </h4>
+              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Data de Nasc.</p><p className="font-semibold text-carbono">{selectedItem.birth_date ? new Date(selectedItem.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Sexo</p><p className="font-semibold text-carbono">{selectedItem.gender || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RNM (Migratório)</p><p className="font-semibold text-carbono">{selectedItem.rnm || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">CPF Aluno</p><p className="font-semibold text-carbono">{selectedItem.student_cpf || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RG Aluno</p><p className="font-semibold text-carbono">{selectedItem.student_rg || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Aluno</p><p className="font-semibold text-carbono truncate">{selectedItem.student_email || '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Endereço Residencial</p><p className="font-semibold text-carbono">{selectedItem.address || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Escola</p><p className="font-semibold text-carbono">{selectedItem.school_name || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Turno Escolar</p><p className="font-semibold text-carbono">{selectedItem.school_shift || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Turma / Ano</p><p className="font-semibold text-carbono">{selectedItem.school_grade || '—'}</p></div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: FICHA DE SAÚDE */}
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-rose-600">
+                <span>🏥</span> Ficha e Informações de Saúde
+              </h4>
+              <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Tipo Sanguíneo</p><p className="font-bold text-rose-700">{selectedItem.blood_type || 'Não informado'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Peso</p><p className="font-semibold text-carbono">{selectedItem.weight ? `${selectedItem.weight}` : '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Altura</p><p className="font-semibold text-carbono">{selectedItem.height ? `${selectedItem.height}` : '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Alergias</p><p className="font-semibold text-carbono">{selectedItem.health_allergies || 'Nenhuma informada'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Uso de Medicamento</p><p className="font-semibold text-carbono">{selectedItem.medications || 'Nenhum informado'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Patologia / Diagnóstico / Suspeitas</p><p className="font-semibold text-carbono">{selectedItem.health_conditions || 'Nenhuma informada'}</p></div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: RESPONSÁVEL LEGAL */}
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-blue-600">
+                <span>👨‍👩‍👧</span> Responsável Legal & Contatos de Emergência
+              </h4>
+              <div className="bg-blue-50/40 p-4 rounded-2xl border border-blue-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Nome do Responsável</p><p className="font-bold text-carbono">{selectedItem.parent_name || selectedItem.name}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Vínculo Familiar</p><p className="font-semibold text-carbono">{selectedItem.family_kinship || 'Responsável'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Palavra Segura (Retirada)</p><p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block">{selectedItem.safety_word || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone Principal</p><p className="font-semibold text-carbono">{selectedItem.phone}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Contato Emergência</p><p className="font-bold text-rose-600">{selectedItem.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedItem.email || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Profissão</p><p className="font-semibold text-carbono">{selectedItem.parents_profession || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Faixa Salarial</p><p className="font-semibold text-carbono">{selectedItem.family_income || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Local de Trabalho</p><p className="font-semibold text-carbono">{selectedItem.workplace || '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Expectativa com o Projeto</p><p className="font-semibold text-carbono">{selectedItem.project_expectations || '—'}</p></div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: AUTORIZAÇÕES */}
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs space-y-2 mb-6">
+              <div className="flex items-center justify-between">
+                <span>📷 Autorização de Imagem e Voz:</span>
+                <span className={`font-bold px-2 py-0.5 rounded ${selectedItem.image_voice_authorization !== 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {selectedItem.image_voice_authorization !== 0 ? 'AUTORIZADO' : 'NÃO AUTORIZADO'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>🚗 Ciência da Responsabilidade pelo Transporte:</span>
+                <span className={`font-bold px-2 py-0.5 rounded ${selectedItem.pick_drop_responsibility !== 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {selectedItem.pick_drop_responsibility !== 0 ? 'CIENTE E DE ACORDO' : 'NÃO DECLARADO'}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 text-right">
+              <button onClick={() => setSelectedItem(null)} className="bg-carbono text-white px-6 py-2.5 rounded-full font-bold text-xs hover:bg-gray-800">
+                Fechar Ficha
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

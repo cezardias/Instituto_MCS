@@ -15,7 +15,7 @@ router.get('/', authMiddleware, (req, res) => {
   }
 
   try {
-    const users = db.prepare('SELECT id, name, email, role, created_at, photo_url, cpf, anamnesis_data, parent_id, phone, birth_date, personal_email, address, rg, family_income, parents_profession, education, availability_schedule, positive_points, negative_points FROM users WHERE tenant_id = ?').all(tenant_id)
+    const users = db.prepare('SELECT * FROM users WHERE tenant_id = ?').all(tenant_id)
     res.json(users)
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch users' })
