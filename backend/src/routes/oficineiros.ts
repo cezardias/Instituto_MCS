@@ -7,7 +7,7 @@ const router = express.Router()
 
 // POST /api/oficineiros (Public - used by landing page)
 router.post('/', (req, res) => {
-  const { tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, test_answers, scores, primary_profile, secondary_profile } = req.body
+  const { tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, availability, test_answers, scores, primary_profile, secondary_profile } = req.body
 
   if (!tenant_id || !name || !email || !phone || !cpf || !birth_date || !education || !experience || !contribution) {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios.' })
@@ -19,10 +19,10 @@ router.post('/', (req, res) => {
   try {
     const info = db.prepare(
       `INSERT INTO oficineiro_registrations 
-       (tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, test_answers, scores, primary_profile, secondary_profile) 
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
+       (tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, availability, test_answers, scores, primary_profile, secondary_profile) 
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
     ).run(
-      tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution,
+      tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, availability || '',
       testAnswersStr, scoresStr, primary_profile || null, secondary_profile || null
     )
     

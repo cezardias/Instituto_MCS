@@ -74,7 +74,8 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
     birth_date: '',
     education: '',
     experience: '',
-    contribution: ''
+    contribution: '',
+    availability: ''
   })
   const [termsAccepted, setTermsAccepted] = useState(false)
   
@@ -308,6 +309,11 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">O que você pode agregar ao projeto? *</label>
                     <textarea required value={form.contribution} onChange={e => setForm({...form, contribution: e.target.value})} className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50 text-sm min-h-[70px] resize-none" placeholder="Habilidades, ideias ou metodologias..." />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Disponibilidade de Agenda (Dias, Turnos e Horários disponíveis) *</label>
+                    <textarea required value={form.availability} onChange={e => setForm({...form, availability: e.target.value})} className="w-full border border-gray-200 p-3 rounded-xl outline-none focus:border-dourado bg-gray-50 text-sm min-h-[70px] resize-none" placeholder="Informe os dias da semana (ex: Terças e Quintas), turnos (Manhã/Tarde) ou horários em que possui disponibilidade..." />
                   </div>
 
                   <div className="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">

@@ -22,7 +22,7 @@ interface VideoComment { id:number; user_name:string; comment:string; created_at
 interface Video { id:number; title:string; description:string; author:string; youtube_url:string; category:string; likes:number; userLiked:boolean; comments:VideoComment[]; created_at:string }
 interface Comunicado { id:number; title:string; message:string; author_name:string; created_at:string }
 interface PassaporteItem { id:number; user_name?:string; badge_name:string; description:string; points:number; created_at:string }
-interface OficineiroRegistration { id:number; tenant_id:string; name:string; email:string; phone:string; cpf:string; birth_date:string; education:string; experience:string; contribution:string; test_answers?:any; scores?:any; primary_profile?:'A'|'B'|'C'|'D'; secondary_profile?:'A'|'B'|'C'|'D'; status:string; created_at:string }
+interface OficineiroRegistration { id:number; tenant_id:string; name:string; email:string; phone:string; cpf:string; birth_date:string; education:string; experience:string; contribution:string; availability?:string; test_answers?:any; scores?:any; primary_profile?:'A'|'B'|'C'|'D'; secondary_profile?:'A'|'B'|'C'|'D'; status:string; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -4342,6 +4342,12 @@ function OficineirosRegistrationTab() {
                   <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">O que pode agregar aos projetos MCS</p>
                   <div className="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 whitespace-pre-wrap">{selectedItem.contribution}</div>
                 </div>
+                {selectedItem.availability && (
+                  <div>
+                    <p className="text-[10px] text-amber-600 uppercase font-bold mb-1">📅 Disponibilidade de Agenda (Datas e Horários)</p>
+                    <div className="bg-amber-50/70 border border-amber-200 p-4 rounded-xl text-xs text-amber-950 font-semibold whitespace-pre-wrap">{selectedItem.availability}</div>
+                  </div>
+                )}
               </div>
 
               {/* Botões de Ação para Diretoria */}

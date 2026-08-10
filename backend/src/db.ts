@@ -345,6 +345,7 @@ try { db.exec("ALTER TABLE users ADD COLUMN positive_points TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN negative_points TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_type TEXT DEFAULT 'all'") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_id INTEGER") } catch(e) {}
+try { db.exec("ALTER TABLE oficineiro_registrations ADD COLUMN availability TEXT") } catch(e) {}
 const createAssignments = `
 CREATE TABLE IF NOT EXISTS assignments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
