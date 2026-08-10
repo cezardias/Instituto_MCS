@@ -11,7 +11,7 @@ const TENANT = 'instituto-mcs'
 // ─── types ───────────────────────────────────────────────────────────
 interface Stats { alunos_ativos: number; projetos_em_execucao: number; total_noticias: number; total_usuarios: number; pessoas_beneficiadas: number; recursos_captados: number; alunos_por_area: {area:string,count:number}[]; projetos_por_status: {status:string,count:number}[] }
 interface News { id:number; title:string; category:string; content:string; image_url:string|null; created_at:string }
-interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; image_url?:string; active?:number; created_at:string }
+interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; image_url?:string; active?:number; periodo?:string; dias?:string; horarios?:string; publico?:string; apoio?:string; created_at:string }
 interface Aluno { id:number; name:string; email:string; phone:string; area:string; status:string; birth_date:string; created_at:string }
 interface User { id:number; name:string; email:string; role:string; created_at:string }
 interface Transaction { id:number; tenant_id:string; type:string; category:string; description:string; amount:number; date:string; status:string; receipt_url?:string; expected_date?:string; created_at:string }
@@ -463,7 +463,7 @@ function ProjetosTab() {
   const [editing, setEditing] = useState<Project|null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const blank = { title:'', status:'em_execucao', area:'Ação Social', location:'', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'', active:1 }
+  const blank = { title:'', status:'em_execucao', area:'Ação Social', location:'Polo UAB Alto Paraíso de Goiás', beneficiados:0, budget:0, start_date:'', end_date:'', description:'', image_url:'', active:1, periodo:'', dias:'', horarios:'', publico:'', apoio:'' }
   const [form, setForm] = useState<any>(blank)
   const [imageFile, setImageFile] = useState<File|null>(null)
 
@@ -480,10 +480,15 @@ function ProjetosTab() {
           {
             title: 'Contraturno Conexão Rima',
             area: 'Cultura',
-            location: 'Alto Paraíso de Goiás',
+            location: 'Polo UAB Alto Paraíso de Goiás',
             description: 'Linguagem, Respeito e Expressão Cultural. Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora.',
             image_url: '/projeto_rima.png',
-            active: 1
+            active: 1,
+            periodo: 'Agosto a Dezembro',
+            dias: 'Terças e Quintas-feiras',
+            horarios: 'Manhã (09h às 10h) | Tarde (15h às 16h)',
+            publico: 'Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)',
+            apoio: 'Sec. de Assistência Social / Sec. de Educação'
           },
           {
             title: 'MCS em Movimento',
@@ -491,7 +496,12 @@ function ProjetosTab() {
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o MCS em Movimento, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.',
             image_url: '/hero.png',
-            active: 0
+            active: 0,
+            periodo: 'Anual',
+            dias: 'Encontros Semanais',
+            horarios: 'Contraturno Escolar',
+            publico: 'Crianças e Jovens da Comunidade',
+            apoio: 'Instituto MCS'
           },
           {
             title: 'MCS Digital',
@@ -499,7 +509,12 @@ function ProjetosTab() {
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o MCS Digital, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.',
             image_url: '/hero.png',
-            active: 0
+            active: 0,
+            periodo: 'Ciclos Contínuos',
+            dias: 'A definir',
+            horarios: 'A definir',
+            publico: 'Estudantes por Faixa Etária',
+            apoio: 'Instituto MCS'
           },
           {
             title: 'MCS Família',
@@ -507,7 +522,12 @@ function ProjetosTab() {
             location: 'Alto Paraíso de Goiás',
             description: 'Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o MCS Família, a base de sustentação do nosso ecossistema de desenvolvimento.',
             image_url: '/hero.png',
-            active: 0
+            active: 0,
+            periodo: 'Contínuo',
+            dias: 'Segunda a Sexta',
+            horarios: 'Horário Comercial',
+            publico: 'Famílias e Comunidade Local',
+            apoio: 'Rede de Apoio Multidisciplinar'
           }
         ];
         
@@ -537,7 +557,7 @@ function ProjetosTab() {
   useEffect(() => { load() }, [load])
 
   const openNew = () => { setEditing(null); setForm(blank); setImageFile(null); setError(''); setShowForm(true) }
-  const openEdit = (p: Project) => { setEditing(p); setForm({ active: 1, ...p }); setImageFile(null); setError(''); setShowForm(true) }
+  const openEdit = (p: Project) => { setEditing(p); setForm({ active: 1, periodo:'', dias:'', horarios:'', publico:'', apoio:'', ...p }); setImageFile(null); setError(''); setShowForm(true) }
   const del = async (id: number) => { if(!confirm('Excluir projeto?')) return; await fetch(`/api/projects/${id}`,{method:'DELETE',headers:authH()}); load() }
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
@@ -607,10 +627,45 @@ function ProjetosTab() {
                     {AREAS.map(a => <option key={a}>{a}</option>)}
                   </select>
                 </div>
-                <div className="col-span-2">
-                  <label className="label-dash">Localização *</label>
-                  <input required value={form.location} onChange={e=>setForm({...form,location:e.target.value})} className="input-field" placeholder="Cidade / Estado" />
+
+                {/* SEÇÃO DETALHES DO PROGRAMA */}
+                <div className="col-span-2 pt-2 border-t border-gray-100 mt-2">
+                  <h4 className="font-bold text-sm text-carbono uppercase tracking-wider mb-2 text-dourado flex items-center gap-2">
+                    <span>📌</span> Detalhes do Programa (Exibidos no Card do Site)
+                  </h4>
                 </div>
+
+                <div>
+                  <label className="label-dash">Local *</label>
+                  <input required value={form.location || ''} onChange={e=>setForm({...form,location:e.target.value})} className="input-field" placeholder="ex: Polo UAB Alto Paraíso de Goiás" />
+                </div>
+                <div>
+                  <label className="label-dash">Período</label>
+                  <input value={form.periodo || ''} onChange={e=>setForm({...form,periodo:e.target.value})} className="input-field" placeholder="ex: Agosto a Dezembro" />
+                </div>
+                <div>
+                  <label className="label-dash">Dias de Funcionamento</label>
+                  <input value={form.dias || ''} onChange={e=>setForm({...form,dias:e.target.value})} className="input-field" placeholder="ex: Terças e Quintas-feiras" />
+                </div>
+                <div>
+                  <label className="label-dash">Horários</label>
+                  <input value={form.horarios || ''} onChange={e=>setForm({...form,horarios:e.target.value})} className="input-field" placeholder="ex: Manhã (09h às 10h) | Tarde (15h às 16h)" />
+                </div>
+                <div className="col-span-2">
+                  <label className="label-dash">Público-Alvo</label>
+                  <input value={form.publico || ''} onChange={e=>setForm({...form,publico:e.target.value})} className="input-field" placeholder="ex: Crianças assistidas pela rede (Foco: 4º e 5º ano...)" />
+                </div>
+                <div className="col-span-2">
+                  <label className="label-dash">Parceiros / Apoio</label>
+                  <input value={form.apoio || ''} onChange={e=>setForm({...form,apoio:e.target.value})} className="input-field" placeholder="ex: Sec. de Assistência Social / Sec. de Educação" />
+                </div>
+
+                <div className="col-span-2 pt-2 border-t border-gray-100 mt-2">
+                  <h4 className="font-bold text-sm text-carbono uppercase tracking-wider mb-2 text-gray-500">
+                    🖼️ Imagem e Métricas
+                  </h4>
+                </div>
+
                 <div className="col-span-2">
                   <label className="label-dash">Imagem do Projeto</label>
                   <input type="file" accept="image/*" onChange={e=>setImageFile(e.target.files?.[0]||null)} className="input-field file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-dourado/10 file:text-carbono hover:file:bg-dourado/20" />
@@ -633,7 +688,7 @@ function ProjetosTab() {
                   <input type="date" value={form.end_date} onChange={e=>setForm({...form,end_date:e.target.value})} className="input-field" />
                 </div>
                 <div className="col-span-2">
-                  <label className="label-dash">Descrição</label>
+                  <label className="label-dash">Descrição do Projeto</label>
                   <textarea rows={3} value={form.description} onChange={e=>setForm({...form,description:e.target.value})} className="input-field resize-none" placeholder="Descreva o projeto..." />
                 </div>
               </div>

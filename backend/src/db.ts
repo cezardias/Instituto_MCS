@@ -387,7 +387,12 @@ const projectColumns = [
   "ADD COLUMN end_date TEXT",
   "ADD COLUMN description TEXT",
   "ADD COLUMN impact TEXT DEFAULT ''",
-  "ADD COLUMN active INTEGER DEFAULT 0"
+  "ADD COLUMN active INTEGER DEFAULT 0",
+  "ADD COLUMN periodo TEXT DEFAULT ''",
+  "ADD COLUMN dias TEXT DEFAULT ''",
+  "ADD COLUMN horarios TEXT DEFAULT ''",
+  "ADD COLUMN publico TEXT DEFAULT ''",
+  "ADD COLUMN apoio TEXT DEFAULT ''"
 ];
 
 for (const col of projectColumns) {
@@ -512,7 +517,7 @@ try {
 
 // --- SEED PROJECTS ---
 try {
-  const insertProj = db.prepare('INSERT INTO projects (tenant_id, title, status, area, location, description, image_url, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+  const insertProj = db.prepare('INSERT INTO projects (tenant_id, title, status, area, location, description, image_url, active, periodo, dias, horarios, publico, apoio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
   
   const existing = db.prepare("SELECT title FROM projects").all() as any[];
   const existingTitles = existing.map(e => e.title);
@@ -521,10 +526,15 @@ try {
     {
       title: 'Contraturno Conexão Rima',
       area: 'Cultura',
-      location: 'Alto Paraíso de Goiás',
+      location: 'Polo UAB Alto Paraíso de Goiás',
       description: 'Linguagem, Respeito e Expressão Cultural. Uma iniciativa focada no desenvolvimento psicossocial, cidadania ativa e comunicação de forma criativa e acolhedora.',
       image_url: '/projeto_rima.png',
-      active: 1
+      active: 1,
+      periodo: 'Agosto a Dezembro',
+      dias: 'Terças e Quintas-feiras',
+      horarios: 'Manhã (09h às 10h) | Tarde (15h às 16h)',
+      publico: 'Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)',
+      apoio: 'Sec. de Assistência Social / Sec. de Educação'
     },
     {
       title: 'MCS em Movimento',
@@ -532,7 +542,12 @@ try {
       location: 'Alto Paraíso de Goiás',
       description: 'Você já imaginou um espaço onde a energia, o ritmo e o esporte se unem para construir disciplina, saúde e um futuro brilhante para o seu filho? Apresentamos o MCS em Movimento, uma iniciativa transformadora desenvolvida para elevar o potencial físico, mental e social dos estudantes no contraturno escolar.',
       image_url: '/hero.png',
-      active: 0
+      active: 0,
+      periodo: 'Anual',
+      dias: 'Encontros Semanais',
+      horarios: 'Contraturno Escolar',
+      publico: 'Crianças e Jovens da Comunidade',
+      apoio: 'Instituto MCS'
     },
     {
       title: 'MCS Digital',
@@ -540,7 +555,12 @@ try {
       location: 'Alto Paraíso de Goiás',
       description: 'Você já imaginou um ecossistema onde a tecnologia de ponta e a Inteligência Artificial entram na sala de aula para transformar a curiosidade do seu filho na ferramenta mais poderosa para o futuro? Apresentamos o MCS Digital, uma iniciativa pioneira para democratizar o acesso à tecnologia e formar a nova geração de criadores e empreendedores do Cerrado.',
       image_url: '/hero.png',
-      active: 0
+      active: 0,
+      periodo: 'Ciclos Contínuos',
+      dias: 'A definir',
+      horarios: 'A definir',
+      publico: 'Estudantes por Faixa Etária',
+      apoio: 'Instituto MCS'
     },
     {
       title: 'MCS Família',
@@ -548,18 +568,31 @@ try {
       location: 'Alto Paraíso de Goiás',
       description: 'Você já imaginou um espaço de acolhimento onde a comunidade encontra suporte jurídico, apoio psicossocial e trilhas de capacitação para transformar o potencial da nossa região em conquistas reais para dentro de casa? Apresentamos o MCS Família, a base de sustentação do nosso ecossistema de desenvolvimento.',
       image_url: '/hero.png',
-      active: 0
+      active: 0,
+      periodo: 'Contínuo',
+      dias: 'Segunda a Sexta',
+      horarios: 'Horário Comercial',
+      publico: 'Famílias e Comunidade Local',
+      apoio: 'Rede de Apoio Multidisciplinar'
     }
   ];
 
   for (const p of seedProjects) {
     if (!existingTitles.find((t:string) => t.toLowerCase().includes(p.title.split(' ')[1].toLowerCase()))) {
-      insertProj.run('mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url, p.active);
+      insertProj.run('mcs', p.title, 'em_execucao', p.area, p.location, p.description, p.image_url, p.active, p.periodo, p.dias, p.horarios, p.publico, p.apoio);
     }
   }
 
-  // Garantir que Conexão Rima esteja ATIVO (1) no banco existente
-  db.exec("UPDATE projects SET active = 1 WHERE title LIKE '%Rima%'");
+  // Garantir que Conexão Rima esteja ATIVO (1) e preenchido no banco existente
+  db.exec(`UPDATE projects SET 
+    active = 1,
+    location = CASE WHEN location IS NULL OR location = '' OR location = 'Alto Paraíso de Goiás' THEN 'Polo UAB Alto Paraíso de Goiás' ELSE location END,
+    periodo = CASE WHEN periodo IS NULL OR periodo = '' THEN 'Agosto a Dezembro' ELSE periodo END,
+    dias = CASE WHEN dias IS NULL OR dias = '' THEN 'Terças e Quintas-feiras' ELSE dias END,
+    horarios = CASE WHEN horarios IS NULL OR horarios = '' THEN 'Manhã (09h às 10h) | Tarde (15h às 16h)' ELSE horarios END,
+    publico = CASE WHEN publico IS NULL OR publico = '' THEN 'Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)' ELSE publico END,
+    apoio = CASE WHEN apoio IS NULL OR apoio = '' THEN 'Sec. de Assistência Social / Sec. de Educação' ELSE apoio END
+    WHERE title LIKE '%Rima%'`);
 } catch (e) {
   console.error('Seed projects error:', e)
 }

@@ -26,6 +26,33 @@ export default function ProjectsPage() {
     return p.image_url;
   };
 
+  const renderProgramDetails = (p: any, fallbackDetails: { periodo?: string; dias?: string; horarios?: string; publico?: string; apoio?: string }) => {
+    const loc = p?.location || 'Polo UAB Alto Paraíso de Goiás';
+    const per = p?.periodo || fallbackDetails.periodo || 'Agosto a Dezembro';
+    const dias = p?.dias || fallbackDetails.dias || 'Terças e Quintas-feiras';
+    const hor = p?.horarios || fallbackDetails.horarios || 'Manhã (09h às 10h) | Tarde (15h às 16h)';
+    const pub = p?.publico || fallbackDetails.publico || 'Crianças assistidas pela rede';
+    const apo = p?.apoio || fallbackDetails.apoio || 'Sec. de Assistência Social / Sec. de Educação';
+
+    return (
+      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
+        <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+          <div>
+            <p className="mb-2"><strong>Local:</strong> {loc}</p>
+            <p className="mb-2"><strong>Período:</strong> {per}</p>
+            <p className="mb-2"><strong>Dias:</strong> {dias}</p>
+          </div>
+          <div>
+            <p className="mb-2"><strong>Horários:</strong> {hor}</p>
+            <p className="mb-2"><strong>Público:</strong> {pub}</p>
+            <p className="mb-2"><strong>Apoio:</strong> {apo}</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-marfim min-h-screen pt-24 pb-20 font-sans">
       {/* Hero Banner */}
@@ -102,21 +129,13 @@ export default function ProjectsPage() {
                 </li>
               </ul>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> Polo UAB Alto Paraíso de Goiás</p>
-                    <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Agosto a Dezembro</p>
-                    <p className="text-gray-600 text-sm"><strong>Dias:</strong> Terças e Quintas-feiras</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 text-sm mb-2"><strong>Horários:</strong> Manhã (09h às 10h) | Tarde (15h às 16h)</p>
-                    <p className="text-gray-600 text-sm mb-2"><strong>Público:</strong> Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)</p>
-                    <p className="text-gray-600 text-sm"><strong>Apoio:</strong> Sec. de Assistência Social / Sec. de Educação</p>
-                  </div>
-                </div>
-              </div>
+              {renderProgramDetails(pRima, {
+                periodo: 'Agosto a Dezembro',
+                dias: 'Terças e Quintas-feiras',
+                horarios: 'Manhã (09h às 10h) | Tarde (15h às 16h)',
+                publico: 'Crianças assistidas pela rede (Foco: 4º e 5º ano, Escolas Ana Aguiar e Zeca de Faria)',
+                apoio: 'Sec. de Assistência Social / Sec. de Educação'
+              })}
 
               <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
                 Seu filho vai aprender a usar as palavras para construir conhecimento, respeito e confiança.
@@ -188,11 +207,13 @@ export default function ProjectsPage() {
                 </li>
               </ul>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-                <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS em Movimento acontece em um ambiente seguro e acolhedor nos Polos de Assistência e Cultura de Alto Paraíso de Goiás e região.</p>
-                <p className="text-gray-600 text-sm"><strong>Dias:</strong> Encontros semanais estruturados de convivência e fortalecimento de vínculos.</p>
-              </div>
+              {renderProgramDetails(pMovimento, {
+                periodo: 'Anual',
+                dias: 'Encontros semanais estruturados de convivência',
+                horarios: 'Contraturno Escolar',
+                publico: 'Crianças e Jovens da comunidade',
+                apoio: 'Polos de Assistência e Cultura de Alto Paraíso de Goiás'
+              })}
 
               <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
                 Seu filho vai aprender a usar o corpo, o ritmo e a disciplina para construir um futuro com mais saúde, respeito e confiança.
@@ -264,12 +285,13 @@ export default function ProjectsPage() {
                 </li>
               </ul>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-                <p className="text-gray-600 text-sm mb-2"><strong>Local:</strong> O MCS Digital acontece em um ambiente estruturado e conectado nos polos de atendimento.</p>
-                <p className="text-gray-600 text-sm mb-2"><strong>Período:</strong> Ciclos contínuos de aprendizado prático ao longo do ano.</p>
-                <p className="text-gray-600 text-sm"><strong>Estrutura:</strong> Turmas organizadas por faixa etária com foco em projetos reais.</p>
-              </div>
+              {renderProgramDetails(pDigital, {
+                periodo: 'Ciclos contínuos de aprendizado prático',
+                dias: 'Turmas organizadas por faixa etária',
+                horarios: 'Horários dos polos de atendimento',
+                publico: 'Estudantes e jovens da comunidade',
+                apoio: 'Polos de Atendimento MCS Digital'
+              })}
 
               <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
                 Seu filho vai aprender a usar a Inteligência Artificial e a inovação para construir conhecimento, autonomia e novas oportunidades profissionais.
@@ -341,12 +363,13 @@ export default function ProjectsPage() {
                 </li>
               </ul>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100 mb-8">
-                <h3 className="font-bold text-lg text-carbono mb-3">Detalhes do Programa</h3>
-                <p className="text-gray-600 text-sm mb-2"><strong>O MCS Família:</strong> Funciona como um ponto de apoio contínuo para a comunidade.</p>
-                <p className="text-gray-600 text-sm mb-2"><strong>Acompanhamento:</strong> Trilhas formativas, mentorias e suporte integrado.</p>
-                <p className="text-gray-600 text-sm"><strong>Foco:</strong> Desenvolvimento humano, sustentabilidade e autonomia financeira.</p>
-              </div>
+              {renderProgramDetails(pFamilia, {
+                periodo: 'Acompanhamento contínuo',
+                dias: 'Trilhas formativas e mentorias',
+                horarios: 'Horário comercial',
+                publico: 'Pais, responsáveis e comunidade local',
+                apoio: 'Rede multidisciplinar de suporte familiar'
+              })}
 
               <p className="text-carbono font-medium text-lg mb-8 italic border-l-4 border-dourado pl-4 py-2">
                 Sua família vai encontrar o suporte necessário para transformar desafios em oportunidades e construir um futuro mais próspero.
@@ -385,9 +408,18 @@ export default function ProjectsPage() {
                   <div className="p-8 flex-1 flex flex-col">
                     <div className="text-dourado text-sm font-bold tracking-widest uppercase mb-2">{p.area}</div>
                     <h3 className="font-serif text-2xl text-carbono mb-4 leading-tight group-hover:text-dourado transition-colors">{p.title}</h3>
-                    <p className="text-gray-600 text-sm leading-relaxed mb-8 flex-1 whitespace-pre-line line-clamp-4">
+                    <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1 whitespace-pre-line line-clamp-4">
                       {p.description}
                     </p>
+
+                    {renderProgramDetails(p, {
+                      periodo: 'A definir',
+                      dias: 'A definir',
+                      horarios: 'A definir',
+                      publico: 'Comunidade geral',
+                      apoio: 'Instituto MCS'
+                    })}
+
                     {p.active === 1 && (
                       <Link to={`/pre-cadastro?projeto=${p.id}`} className="inline-flex items-center gap-2 text-carbono font-bold text-sm uppercase tracking-wide hover:text-dourado transition-colors mt-auto">
                         Garanta Vaga do Seu Filho <span className="text-xl">→</span>
