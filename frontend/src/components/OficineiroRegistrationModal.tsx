@@ -54,70 +54,6 @@ export const TEST_BLOCKS: TestBlock[] = [
   }
 ]
 
-export interface ProfileGuide {
-  letter: 'A' | 'B' | 'C' | 'D'
-  title: string
-  shortTitle: string
-  summary: string
-  strengths: string
-  pointsOfAttention: string
-  color: string
-  badgeBg: string
-  badgeText: string
-  borderColor: string
-}
-
-export const PROFILE_GUIDES: Record<'A' | 'B' | 'C' | 'D', ProfileGuide> = {
-  A: {
-    letter: 'A',
-    title: 'Perfil Analítico / Processual',
-    shortTitle: 'Analítico / Processual',
-    summary: 'Altamente metódico, focado em conformidade, dados e cronogramas.',
-    strengths: 'Excelente para treinamentos técnicos, transferências de processos complexos e cenários que exigem governança rígida.',
-    pointsOfAttention: 'Pode demonstrar rigidez excessiva diante de públicos altamente disruptivos ou quando o cronograma estoura.',
-    color: '#3b82f6',
-    badgeBg: 'bg-blue-100',
-    badgeText: 'text-blue-800',
-    borderColor: 'border-blue-200'
-  },
-  B: {
-    letter: 'B',
-    title: 'Perfil Adaptativo / Inspirador',
-    shortTitle: 'Adaptativo / Inspirador',
-    summary: 'Criativo, focado em inovação, engajamento orgânico e quebra de padrões.',
-    strengths: 'Perfeito para workshops de ideação, design thinking, convenções e públicos desengajados.',
-    pointsOfAttention: 'Risco de perder o controle do tempo (timeboxing) ou deixar lacunas conceituais por focar excessivamente na dinâmica.',
-    color: '#ec4899',
-    badgeBg: 'bg-pink-100',
-    badgeText: 'text-pink-800',
-    borderColor: 'border-pink-200'
-  },
-  C: {
-    letter: 'C',
-    title: 'Perfil Facilitador Humanista / Mediador',
-    shortTitle: 'Humanista / Mediador',
-    summary: 'Centrado na segurança psicológica, escuta ativa e conexões interpessoais.',
-    strengths: 'Ideal para resolução de conflitos internos, construção de cultura, onboarding e dinâmicas de times (team building).',
-    pointsOfAttention: 'Dificuldade em confrontar participantes tóxicos de forma direta ou em cortar conversas improdutivas para focar na meta.',
-    color: '#10b981',
-    badgeBg: 'bg-emerald-100',
-    badgeText: 'text-emerald-800',
-    borderColor: 'border-emerald-200'
-  },
-  D: {
-    letter: 'D',
-    title: 'Perfil Direcional / Executivo',
-    shortTitle: 'Direcional / Executivo',
-    summary: 'Pragmático, focado em eficiência, planos de ação e alta produtividade.',
-    strengths: 'Excelente para reuniões de planejamento estratégico, alinhamento de lideranças e dinâmicas focadas em tomadas de decisão rápidas.',
-    pointsOfAttention: 'Pode atropelar o tempo de maturação do grupo ou parecer impaciente com participantes que precisam de mais contextualização.',
-    color: '#f59e0b',
-    badgeBg: 'bg-amber-100',
-    badgeText: 'text-amber-800',
-    borderColor: 'border-amber-200'
-  }
-}
-
 interface BlockAnswer {
   mais: 'A' | 'B' | 'C' | 'D' | null
   menos: 'A' | 'B' | 'C' | 'D' | null
@@ -154,7 +90,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  // Calculations
+  // Calculations (realizadas em segundo plano para envio à diretoria)
   const calculateScores = () => {
     const scores: Record<'A' | 'B' | 'C' | 'D', number> = { A: 0, B: 0, C: 0, D: 0 }
     
@@ -265,10 +201,6 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
     }
   }
 
-  const { scores, primary, secondary } = calculateScores()
-  const primaryGuide = PROFILE_GUIDES[primary]
-  const secondaryGuide = PROFILE_GUIDES[secondary]
-
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 md:p-4 overflow-y-auto">
       <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] flex flex-col relative overflow-hidden shadow-2xl my-auto">
@@ -284,8 +216,8 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
             </div>
             <p className="text-xs text-gray-300 mt-1">
               {step === 1 && 'Preencha suas informações pessoais e acadêmicas.'}
-              {step === 2 && 'Ficha do Facilitador: Responda ao Teste de Perfil Comportamental.'}
-              {step === 3 && 'Resultado do seu perfil de facilitação e confirmação.'}
+              {step === 2 && 'Ficha do Facilitador: Responda às situações práticas do teste.'}
+              {step === 3 && 'Confirmação e envio da sua candidatura.'}
             </p>
           </div>
           <button 
@@ -313,28 +245,13 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
               </div>
               <h3 className="font-serif text-3xl text-carbono">Inscrição Enviada com Sucesso!</h3>
               <p className="text-gray-600 max-w-md mx-auto text-sm leading-relaxed">
-                Seu cadastro e seu **Teste de Perfil Comportamental** foram gravados com sucesso. Nossa diretoria analisará seu perfil e entrará em contato em breve.
+                Seu cadastro e suas respostas do **Teste de Perfil Comportamental** foram gravados com sucesso. Nossa diretoria analisará sua candidatura e entrará em contato em breve.
               </p>
-              
-              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 max-w-md mx-auto text-left space-y-3">
-                <div className="flex justify-between items-center border-b border-gray-200 pb-2">
-                  <span className="text-xs text-gray-500 uppercase font-bold">Perfil Predominante</span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${primaryGuide.badgeBg} ${primaryGuide.badgeText}`}>
-                    {primaryGuide.title}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-500 uppercase font-bold">Perfil Secundário</span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${secondaryGuide.badgeBg} ${secondaryGuide.badgeText}`}>
-                    {secondaryGuide.title}
-                  </span>
-                </div>
-              </div>
 
               <div className="pt-4">
                 <button 
                   onClick={onClose}
-                  className="bg-carbono text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-colors shadow-md"
+                  className="bg-carbono text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-colors shadow-md text-sm uppercase tracking-wider"
                 >
                   Concluir e Fechar
                 </button>
@@ -421,7 +338,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
               {/* ── STEP 2: CANDIDATE PROFILE TEST (4 BLOCKS) ──────────── */}
               {step === 2 && (
                 <div className="space-y-6">
-                  {/* Instructions Callout */}
+                  {/* Instructions Callout - LIMPAS DE REGRAS DE PONTUAÇÃO INTERNAS */}
                   <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 md:p-5 text-amber-900 text-xs md:text-sm leading-relaxed space-y-2">
                     <h4 className="font-bold text-amber-950 flex items-center gap-2 text-sm md:text-base">
                       <span>📋</span> Instruções para o Candidato
@@ -431,15 +348,12 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
                     </p>
                     <div className="flex flex-wrap gap-3 font-semibold pt-1">
                       <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg border border-emerald-200">
-                        🟢 1 afirmação que MAIS (M) representa você (+2 pts)
+                        🟢 1 afirmação que MAIS (M) representa sua forma de agir
                       </span>
                       <span className="bg-rose-100 text-rose-800 px-3 py-1 rounded-lg border border-rose-200">
-                        🔴 1 afirmação que MENOS (L) representa você (0 pts)
+                        🔴 1 afirmação que MENOS (L) representa sua forma de agir
                       </span>
                     </div>
-                    <p className="text-[11px] text-amber-800">
-                      * As outras 2 opções não marcadas contarão automaticamente como neutras (+1 pt cada).
-                    </p>
                   </div>
 
                   {/* 4 Blocks */}
@@ -500,8 +414,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
                                           : 'bg-white text-gray-600 border-gray-200 hover:bg-emerald-50 hover:text-emerald-700'
                                       }`}
                                     >
-                                      <span>M</span>
-                                      <span className="text-[10px] opacity-80">(MAIS +2)</span>
+                                      <span>🟢</span> {isMais ? 'MAIS (M) Selecionado' : 'Marcar MAIS (M)'}
                                     </button>
 
                                     <button
@@ -513,8 +426,7 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
                                           : 'bg-white text-gray-600 border-gray-200 hover:bg-rose-50 hover:text-rose-700'
                                       }`}
                                     >
-                                      <span>L</span>
-                                      <span className="text-[10px] opacity-80">(MENOS 0)</span>
+                                      <span>🔴</span> {isMenos ? 'MENOS (L) Selecionado' : 'Marcar MENOS (L)'}
                                     </button>
                                   </div>
                                 </div>
@@ -540,90 +452,36 @@ export default function OficineiroRegistrationModal({ onClose }: Props) {
                       disabled={!isTestComplete()}
                       className="w-2/3 bg-dourado text-carbono py-3 rounded-xl font-bold hover:bg-yellow-500 transition-colors text-sm shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      Ver Apuração & Resultado →
+                      Revisar e Concluir →
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* ── STEP 3: RESULT & FINAL CONFIRMATION ─────────────────── */}
+              {/* ── STEP 3: CANDIDATE FINAL CONFIRMATION (SEM EXIBIR PONTUAÇÃO OU REGRAS INTERNAS) ─ */}
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="text-center space-y-1">
-                    <h3 className="font-serif text-2xl text-carbono">Apuração do Seu Perfil de Facilitador</h3>
-                    <p className="text-xs text-gray-500">Confira a tabulação das suas respostas antes de enviar seu formulário final.</p>
+                    <h3 className="font-serif text-2xl text-carbono">Confirmação da Candidatura</h3>
+                    <p className="text-xs text-gray-500">Revise seus dados antes de enviar a inscrição para a diretoria.</p>
                   </div>
 
-                  {/* Primary & Secondary Profile Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Primary Profile */}
-                    <div className={`p-5 rounded-2xl border ${primaryGuide.borderColor} bg-white shadow-sm space-y-3 relative overflow-hidden`}>
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Perfil Predominante</span>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${primaryGuide.badgeBg} ${primaryGuide.badgeText}`}>
-                          [{primaryGuide.letter}] {scores[primary]} Pontos
-                        </span>
-                      </div>
-                      <h4 className="font-serif text-lg font-bold text-carbono">{primaryGuide.title}</h4>
-                      <p className="text-xs text-gray-600 leading-relaxed font-medium">{primaryGuide.summary}</p>
-                      
-                      <div className="space-y-2 pt-2 border-t border-gray-100 text-xs">
-                        <div>
-                          <strong className="text-emerald-700 block mb-0.5">💪 Pontos Fortes:</strong>
-                          <p className="text-gray-600">{primaryGuide.strengths}</p>
-                        </div>
-                        <div>
-                          <strong className="text-amber-700 block mb-0.5">⚠️ Pontos de Atenção:</strong>
-                          <p className="text-gray-600">{primaryGuide.pointsOfAttention}</p>
-                        </div>
-                      </div>
+                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 space-y-4">
+                    <h4 className="font-bold text-xs uppercase text-gray-500 tracking-wider border-b border-gray-200 pb-2">
+                      📋 Dados do Candidato
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div><span className="text-gray-400 font-bold block">Nome Completo:</span> <span className="text-carbono font-semibold">{form.name}</span></div>
+                      <div><span className="text-gray-400 font-bold block">E-mail:</span> <span className="text-carbono font-semibold">{form.email}</span></div>
+                      <div><span className="text-gray-400 font-bold block">Telefone / WhatsApp:</span> <span className="text-carbono font-semibold">{form.phone}</span></div>
+                      <div><span className="text-gray-400 font-bold block">CPF:</span> <span className="text-carbono font-semibold">{form.cpf}</span></div>
                     </div>
 
-                    {/* Secondary Profile */}
-                    <div className={`p-5 rounded-2xl border ${secondaryGuide.borderColor} bg-white shadow-sm space-y-3 relative overflow-hidden`}>
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Perfil Secundário</span>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${secondaryGuide.badgeBg} ${secondaryGuide.badgeText}`}>
-                          [{secondaryGuide.letter}] {scores[secondary]} Pontos
-                        </span>
-                      </div>
-                      <h4 className="font-serif text-lg font-bold text-carbono">{secondaryGuide.title}</h4>
-                      <p className="text-xs text-gray-600 leading-relaxed font-medium">{secondaryGuide.summary}</p>
-
-                      <div className="space-y-2 pt-2 border-t border-gray-100 text-xs">
-                        <div>
-                          <strong className="text-emerald-700 block mb-0.5">💪 Pontos Fortes:</strong>
-                          <p className="text-gray-600">{secondaryGuide.strengths}</p>
-                        </div>
-                        <div>
-                          <strong className="text-amber-700 block mb-0.5">⚠️ Pontos de Atenção:</strong>
-                          <p className="text-gray-600">{secondaryGuide.pointsOfAttention}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pontuação Consolidada */}
-                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 space-y-3">
-                    <h4 className="font-bold text-xs uppercase text-gray-500 tracking-wider">Pontuação Geral por Perfil (Máx. 8 Pts cada)</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {(['A', 'B', 'C', 'D'] as const).map(letter => {
-                        const guide = PROFILE_GUIDES[letter]
-                        const score = scores[letter]
-                        const pct = (score / 8) * 100
-
-                        return (
-                          <div key={letter} className="bg-white p-3 rounded-xl border border-gray-200">
-                            <div className="flex justify-between items-center text-xs font-bold mb-1">
-                              <span className="text-carbono">[{letter}] {guide.shortTitle}</span>
-                              <span style={{ color: guide.color }}>{score} pts</span>
-                            </div>
-                            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                              <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: guide.color }} />
-                            </div>
-                          </div>
-                        )
-                      })}
+                    <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-emerald-900 text-xs leading-relaxed space-y-1">
+                      <p className="font-bold">✓ Teste de Perfil Comportamental Concluído!</p>
+                      <p className="text-emerald-800">
+                        Suas opções dos 4 blocos foram salvas e serão enviadas sigilosamente para análise pedagógica da diretoria do Instituto MCS.
+                      </p>
                     </div>
                   </div>
 
