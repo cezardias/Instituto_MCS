@@ -26,6 +26,7 @@ import assessmentsRoutes from './routes/assessments'
 import jornadaRoutes from './routes/jornada'
 import oficineirosRoutes from './routes/oficineiros'
 import associadosRoutes from './routes/associados'
+import assignmentsRoutes from './routes/assignments'
 import { graphqlHTTP } from 'express-graphql'
 import { schema, rootValue } from './graphql/schema'
 import tenantMiddleware from './middleware/tenant'
@@ -60,6 +61,7 @@ app.use('/api/accountability', accountabilityRoutes)
 app.use('/api/documents', documentsRoutes)
 app.use('/api/denuncias', denunciasRoutes)
 app.use('/api/associados', associadosRoutes)
+app.use('/api/assignments', assignmentsRoutes)
 app.use('/api/videos', videosRoutes)
 app.use('/api/comunicados', comunicadosRoutes)
 app.use('/api/passaporte', passaporteRoutes)

@@ -14,6 +14,7 @@ import AssociadosPage from './pages/AssociadosPage'
 import ContatoPage from './pages/ContatoPage'
 import RifaPage from './pages/RifaPage'
 import PreCadastroPage from './pages/PreCadastroPage'
+import TrabalhosPage from './pages/TrabalhosPage'
 
 // Layout wrapper com NavBar + Footer (site público)
 function PublicLayout({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,7 @@ function App() {
       <Route path="/compliance" element={<PublicLayout><CompliancePage /></PublicLayout>} />
       <Route path="/noticias" element={<PublicLayout><NoticiasPage /></PublicLayout>} />
       <Route path="/pre-cadastro" element={<PublicLayout><PreCadastroPage /></PublicLayout>} />
+      <Route path="/trabalhos" element={<PublicLayout><TrabalhosPage /></PublicLayout>} />
       <Route path="/associados" element={<PublicLayout><AssociadosPage /></PublicLayout>} />
       <Route path="/contato" element={<PublicLayout><ContatoPage /></PublicLayout>} />
       <Route path="/rifa" element={<PublicLayout><RifaPage /></PublicLayout>} />

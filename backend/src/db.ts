@@ -345,6 +345,27 @@ try { db.exec("ALTER TABLE users ADD COLUMN positive_points TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE users ADD COLUMN negative_points TEXT") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_type TEXT DEFAULT 'all'") } catch(e) {}
 try { db.exec("ALTER TABLE authorizations ADD COLUMN target_id INTEGER") } catch(e) {}
+const createAssignments = `
+CREATE TABLE IF NOT EXISTS assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tenant_id TEXT NOT NULL DEFAULT 'mcs',
+  student_id INTEGER,
+  student_name TEXT NOT NULL,
+  student_email TEXT,
+  parent_email TEXT,
+  turma TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  file_url TEXT NOT NULL,
+  file_name TEXT,
+  file_type TEXT,
+  status TEXT DEFAULT 'enviado',
+  feedback TEXT,
+  grade TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
 db.exec(createProjects)
 db.exec(createAlunos)
 db.exec(createNews)
@@ -352,6 +373,7 @@ db.exec(createTransactions)
 db.exec(createAccountability)
 db.exec(createPreRegistrations)
 db.exec(createOficineiroRegistrations)
+db.exec(createAssignments)
 
 // Migrations
 try {

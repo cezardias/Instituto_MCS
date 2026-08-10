@@ -33,6 +33,7 @@ const SIDEBAR = [
     { id:'alunos', label:'Alunos', icon:'🎓', roles:['admin', 'coordenacao', 'oficineiro', 'responsavel'] },
     { id:'precadastros', label:'Pré-Cadastros', icon:'📝', roles:['admin', 'coordenacao'] },
     { id:'avaliacoes', label:'Avaliações e Atividades', icon:'📝', roles:['admin', 'coordenacao', 'oficineiro', 'diretoria', 'aluno', 'responsavel'] },
+    { id:'trabalhos', label:'Trabalhos dos Alunos', icon:'📁', roles:['admin', 'coordenacao', 'oficineiro', 'diretoria', 'aluno', 'responsavel'] },
     { id:'comunicados', label:'Comunicados', icon:'📢', roles:['admin', 'aluno', 'responsavel', 'oficineiro', 'coordenacao', 'diretoria'] },
     { id:'news', label:'Notícias do Site', icon:'📰', roles:['admin'] },
     { id:'associados', label:'Associados', icon:'🤝', roles:['admin'] },
@@ -255,9 +256,21 @@ export default function AdminDashboard() {
           {tab === 'autorizacoes' && <AutorizacoesTab />}
           {tab === 'turmas'      && <TurmasTab />}
           {tab === 'avaliacoes'  && <AvaliacoesTab />}
+          {tab === 'trabalhos'   && (
+            <div className="bg-white rounded-3xl p-10 border border-gray-100 shadow-sm text-center">
+              <span className="text-5xl mb-3 block">📁</span>
+              <h3 className="font-serif text-3xl text-carbono mb-2">Portal de Trabalhos dos Alunos</h3>
+              <p className="text-gray-500 text-sm max-w-lg mx-auto mb-6 leading-relaxed">
+                Consulte, baixe e avalie todas as pesquisas e atividades manuais enviadas pelos alunos (.pdf, .doc, .docx, .jpg, .png).
+              </p>
+              <a href="/trabalhos" className="bg-carbono text-marfim font-bold px-8 py-3.5 rounded-full hover:bg-gray-800 transition-all shadow-md inline-block text-xs uppercase tracking-wider">
+                Abrir Portal Completo de Trabalhos →
+              </a>
+            </div>
+          )}
           {tab === 'oficineiros_registrations' && <OficineirosRegistrationTab />}
           {tab === 'associados'   && <AssociadosTab />}
-          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','oficineiros_registrations','associados'].includes(tab) && <ComingSoon label={currentLabel} />}
+          {!['overview','projetos','alunos','news','users','financeiro','despesas','prestacao','indicadores','relatorios','impacto','documentos','compliance','canal','ead','gestao_ead','comunicados','passaporte','autorizacoes','turmas','avaliacoes','trabalhos','oficineiros_registrations','associados'].includes(tab) && <ComingSoon label={currentLabel} />}
         </main>
       </div>
     </div>
