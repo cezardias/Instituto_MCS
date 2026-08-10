@@ -195,6 +195,10 @@ const createOficineiroRegistrations = `CREATE TABLE IF NOT EXISTS oficineiro_reg
   education TEXT NOT NULL,
   experience TEXT NOT NULL,
   contribution TEXT NOT NULL,
+  test_answers TEXT,
+  scores TEXT,
+  primary_profile TEXT,
+  secondary_profile TEXT,
   status TEXT NOT NULL DEFAULT 'pendente',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`
@@ -432,6 +436,21 @@ try {
 try {
   db.exec(`ALTER TABLE pre_registrations ADD COLUMN student_name TEXT`)
 } catch (err) {}
+
+const oficineiroColumns = [
+  "ADD COLUMN test_answers TEXT",
+  "ADD COLUMN scores TEXT",
+  "ADD COLUMN primary_profile TEXT",
+  "ADD COLUMN secondary_profile TEXT"
+];
+
+for (const col of oficineiroColumns) {
+  try {
+    db.exec(`ALTER TABLE oficineiro_registrations ${col};`);
+  } catch (e: any) {
+    if (!e.message.includes('duplicate column name')) console.error(`Migration error (oficineiro_registrations ${col}):`, e.message);
+  }
+}
 
 // Migrações para transformar parceiros em associados
 const parceirosColumns = [

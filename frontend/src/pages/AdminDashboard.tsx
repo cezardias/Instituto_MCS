@@ -22,7 +22,7 @@ interface VideoComment { id:number; user_name:string; comment:string; created_at
 interface Video { id:number; title:string; description:string; author:string; youtube_url:string; category:string; likes:number; userLiked:boolean; comments:VideoComment[]; created_at:string }
 interface Comunicado { id:number; title:string; message:string; author_name:string; created_at:string }
 interface PassaporteItem { id:number; user_name?:string; badge_name:string; description:string; points:number; created_at:string }
-interface OficineiroRegistration { id:number; tenant_id:string; name:string; email:string; phone:string; cpf:string; birth_date:string; education:string; experience:string; contribution:string; status:string; created_at:string }
+interface OficineiroRegistration { id:number; tenant_id:string; name:string; email:string; phone:string; cpf:string; birth_date:string; education:string; experience:string; contribution:string; test_answers?:any; scores?:any; primary_profile?:'A'|'B'|'C'|'D'; secondary_profile?:'A'|'B'|'C'|'D'; status:string; created_at:string }
 
 // ─── sidebar config ───────────────────────────────────────────────────
 const SIDEBAR = [
@@ -3922,6 +3922,7 @@ function TurmasTab() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
 // Facilitadores MCS Registrations Tab
 // ═══════════════════════════════════════════════════════════════════
 function OficineirosRegistrationTab() {
@@ -3961,12 +3962,56 @@ function OficineirosRegistrationTab() {
 
   const canEdit = user.role === 'admin'
 
+  const profileGuidesMap: Record<string, { title: string; summary: string; strengths: string; pointsOfAttention: string; color: string; bg: string; text: string }> = {
+    A: {
+      title: 'Perfil Analítico / Processual',
+      summary: 'Altamente metódico, focado em conformidade, dados e cronogramas.',
+      strengths: 'Excelente para treinamentos técnicos, transferências de processos complexos e cenários que exigem governança rígida.',
+      pointsOfAttention: 'Pode demonstrar rigidez excessiva diante de públicos altamente disruptivos ou quando o cronograma estoura.',
+      color: '#3b82f6', bg: 'bg-blue-100', text: 'text-blue-800'
+    },
+    B: {
+      title: 'Perfil Adaptativo / Inspirador',
+      summary: 'Criativo, focado em inovação, engajamento orgânico e quebra de padrões.',
+      strengths: 'Perfeito para workshops de ideação, design thinking, convenções e públicos desengajados.',
+      pointsOfAttention: 'Risco de perder o controle do tempo (timeboxing) ou deixar lacunas conceituais por focar excessivamente na dinâmica.',
+      color: '#ec4899', bg: 'bg-pink-100', text: 'text-pink-800'
+    },
+    C: {
+      title: 'Perfil Facilitador Humanista / Mediador',
+      summary: 'Centrado na segurança psicológica, escuta ativa e conexões interpessoais.',
+      strengths: 'Ideal para resolução de conflitos internos, construção de cultura, onboarding e dinâmicas de times (team building).',
+      pointsOfAttention: 'Dificuldade em confrontar participantes tóxicos de forma direta ou em cortar conversas improdutivas para focar na meta.',
+      color: '#10b981', bg: 'bg-emerald-100', text: 'text-emerald-800'
+    },
+    D: {
+      title: 'Perfil Direcional / Executivo',
+      summary: 'Pragmático, focado em eficiência, planos de ação e alta produtividade.',
+      strengths: 'Excelente para reuniões de planejamento estratégico, alinhamento de lideranças e dinâmicas focadas em tomadas de decisão rápidas.',
+      pointsOfAttention: 'Pode atropelar o tempo de maturação do grupo ou parecer impaciente com participantes que precisam de mais contextualização.',
+      color: '#f59e0b', bg: 'bg-amber-100', text: 'text-amber-800'
+    }
+  }
+
+  const blockTitles: Record<number, string> = {
+    1: 'Bloco 1: Gestão de Imprevistos e Crises',
+    2: 'Bloco 2: Foco de Energia e Motivação',
+    3: 'Bloco 3: Postura Diante da Resistência',
+    4: 'Bloco 4: Estilo de Preparação e Planejamento'
+  }
+
+  const parseJsonField = (field: any) => {
+    if (!field) return null
+    if (typeof field === 'object') return field
+    try { return JSON.parse(field) } catch { return null }
+  }
+
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-2xl text-carbono">Inscrições de Facilitadores MCS</h2>
-          <p className="text-sm text-gray-400">Gerencie as candidaturas feitas pelo site</p>
+          <p className="text-sm text-gray-400">Gerencie as candidaturas e os testes de perfil comportamental efetuados pelo site</p>
         </div>
       </div>
 
@@ -3980,7 +4025,8 @@ function OficineirosRegistrationTab() {
                 <th className="p-4 font-semibold">Data</th>
                 <th className="p-4 font-semibold">Nome</th>
                 <th className="p-4 font-semibold">E-mail</th>
-                <th className="p-4 font-semibold">Telefone</th>
+                <th className="p-4 font-semibold">Perfil Predominante</th>
+                <th className="p-4 font-semibold">Perfil Secundário</th>
                 <th className="p-4 font-semibold">Status</th>
                 <th className="p-4 font-semibold"></th>
               </tr>
@@ -3988,88 +4034,239 @@ function OficineirosRegistrationTab() {
             <tbody>
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-gray-400">Nenhuma inscrição encontrada.</td>
+                  <td colSpan={7} className="text-center py-12 text-gray-400">Nenhuma inscrição encontrada.</td>
                 </tr>
               )}
-              {items.map(item => (
-                <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                  <td className="p-4 text-gray-500 whitespace-nowrap">
-                    {new Date(item.created_at).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="p-4 font-bold text-carbono">{item.name}</td>
-                  <td className="p-4 text-gray-500">{item.email}</td>
-                  <td className="p-4 text-gray-500">{item.phone}</td>
-                  <td className="p-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      item.status === 'aprovado' ? 'bg-green-100 text-green-700' :
-                      item.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {item.status.toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => setSelectedItem(item)} className="text-dourado font-bold text-xs hover:underline">
-                      ANALISAR
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {items.map(item => {
+                const prim = item.primary_profile ? profileGuidesMap[item.primary_profile] : null
+                const sec = item.secondary_profile ? profileGuidesMap[item.secondary_profile] : null
+
+                return (
+                  <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                    <td className="p-4 text-gray-500 whitespace-nowrap">
+                      {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                    </td>
+                    <td className="p-4 font-bold text-carbono">{item.name}</td>
+                    <td className="p-4 text-gray-500">{item.email}</td>
+                    <td className="p-4">
+                      {prim ? (
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${prim.bg} ${prim.text}`}>
+                          [{item.primary_profile}] {prim.title.split('/')[0]}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      {sec ? (
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${sec.bg} ${sec.text}`}>
+                          [{item.secondary_profile}] {sec.title.split('/')[0]}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        item.status === 'aprovado' ? 'bg-green-100 text-green-700' :
+                        item.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {item.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <button onClick={() => setSelectedItem(item)} className="text-dourado font-bold text-xs hover:underline">
+                        ANALISAR
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {selectedItem && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-8 relative">
-            <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl">×</button>
-            <h3 className="font-serif text-2xl text-carbono mb-6">Análise de Candidato</h3>
-            
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div><p className="text-xs text-gray-400 uppercase font-bold">Nome</p><p className="font-semibold text-carbono">{selectedItem.name}</p></div>
-              <div><p className="text-xs text-gray-400 uppercase font-bold">Data Nasc.</p><p className="text-carbono">{new Date(selectedItem.birth_date+'T00:00:00').toLocaleDateString('pt-BR')}</p></div>
-              <div><p className="text-xs text-gray-400 uppercase font-bold">E-mail</p><p className="text-carbono">{selectedItem.email}</p></div>
-              <div><p className="text-xs text-gray-400 uppercase font-bold">Telefone</p><p className="text-carbono">{selectedItem.phone}</p></div>
-              <div><p className="text-xs text-gray-400 uppercase font-bold">CPF</p><p className="text-carbono">{selectedItem.cpf}</p></div>
-            </div>
+      {selectedItem && (() => {
+        const primGuide = selectedItem.primary_profile ? profileGuidesMap[selectedItem.primary_profile] : null
+        const secGuide = selectedItem.secondary_profile ? profileGuidesMap[selectedItem.secondary_profile] : null
+        const scoresObj = parseJsonField(selectedItem.scores)
+        const answersObj = parseJsonField(selectedItem.test_answers)
 
-            <div className="space-y-6">
-              <div>
-                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Formação Escolar/Acadêmica</p>
-                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.education}</div>
+        return (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
+              <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl z-10">×</button>
+              
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-dourado">Ficha do Facilitador MCS</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    selectedItem.status === 'aprovado' ? 'bg-green-100 text-green-700' :
+                    selectedItem.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
+                    'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {selectedItem.status.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="font-serif text-3xl text-carbono">{selectedItem.name}</h3>
+                <p className="text-xs text-gray-400">Inscrição realizada em {new Date(selectedItem.created_at).toLocaleDateString('pt-BR')}</p>
               </div>
-              <div>
-                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Experiência Profissional</p>
-                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.experience}</div>
-              </div>
-              <div>
-                <p className="text-xs text-gray-400 uppercase font-bold mb-1">Como pode agregar</p>
-                <div className="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 whitespace-pre-wrap">{selectedItem.contribution}</div>
-              </div>
-            </div>
 
-            {canEdit && selectedItem.status === 'pendente' && (
-              <div className="mt-8 flex gap-4">
-                <button 
-                  disabled={statusSaving}
-                  onClick={() => updateStatus(selectedItem.id, 'rejeitado')} 
-                  className="flex-1 bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 disabled:opacity-50"
-                >
-                  REJEITAR
-                </button>
-                <button 
-                  disabled={statusSaving}
-                  onClick={() => updateStatus(selectedItem.id, 'aprovado')} 
-                  className="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 disabled:opacity-50"
-                >
-                  APROVAR
-                </button>
+              {/* Grid de Dados Pessoais */}
+              <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div><p className="text-[10px] text-gray-400 uppercase font-bold">E-mail</p><p className="text-xs font-semibold text-carbono truncate">{selectedItem.email}</p></div>
+                <div><p className="text-[10px] text-gray-400 uppercase font-bold">Telefone / WhatsApp</p><p className="text-xs font-semibold text-carbono">{selectedItem.phone}</p></div>
+                <div><p className="text-[10px] text-gray-400 uppercase font-bold">CPF</p><p className="text-xs font-semibold text-carbono">{selectedItem.cpf}</p></div>
+                <div><p className="text-[10px] text-gray-400 uppercase font-bold">Data Nasc.</p><p className="text-xs font-semibold text-carbono">{new Date(selectedItem.birth_date+'T00:00:00').toLocaleDateString('pt-BR')}</p></div>
               </div>
-            )}
+
+              {/* RELATÓRIO DE PERFIL COMPORTAMENTAL DO TESTE */}
+              {(primGuide || scoresObj) && (
+                <div className="mb-6 space-y-4">
+                  <div className="border-b border-gray-100 pb-2">
+                    <h4 className="font-serif text-xl font-bold text-carbono flex items-center gap-2">
+                      <span>📊</span> Relatório de Perfil Comportamental
+                    </h4>
+                    <p className="text-xs text-gray-500">Resultado tabulado com base nas escolhas de atitudes do candidato (Guia de Interpretação MCS).</p>
+                  </div>
+
+                  {/* Cartões dos Perfis */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Perfil Predominante */}
+                    {primGuide && (
+                      <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/30 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] uppercase font-bold text-blue-600 tracking-wider">Perfil Predominante</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${primGuide.bg} ${primGuide.text}`}>
+                            [{selectedItem.primary_profile}] {scoresObj?.[selectedItem.primary_profile!] || ''} Pts
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-sm text-carbono">{primGuide.title}</h5>
+                        <p className="text-xs text-gray-600">{primGuide.summary}</p>
+                        
+                        <div className="pt-2 text-[11px] space-y-1 border-t border-blue-100">
+                          <p><strong className="text-emerald-700">Pontos Fortes:</strong> {primGuide.strengths}</p>
+                          <p><strong className="text-amber-700">Pontos de Atenção:</strong> {primGuide.pointsOfAttention}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Perfil Secundário */}
+                    {secGuide && (
+                      <div className="p-4 rounded-2xl border border-purple-200 bg-purple-50/30 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] uppercase font-bold text-purple-600 tracking-wider">Perfil Secundário</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${secGuide.bg} ${secGuide.text}`}>
+                            [{selectedItem.secondary_profile}] {scoresObj?.[selectedItem.secondary_profile!] || ''} Pts
+                          </span>
+                        </div>
+                        <h5 className="font-bold text-sm text-carbono">{secGuide.title}</h5>
+                        <p className="text-xs text-gray-600">{secGuide.summary}</p>
+
+                        <div className="pt-2 text-[11px] space-y-1 border-t border-purple-100">
+                          <p><strong className="text-emerald-700">Pontos Fortes:</strong> {secGuide.strengths}</p>
+                          <p><strong className="text-amber-700">Pontos de Atenção:</strong> {secGuide.pointsOfAttention}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Barras de Pontuação Geral */}
+                  {scoresObj && (
+                    <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">Distribuição de Pontos (Máximo 8 Pts por Letra)</p>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {(['A', 'B', 'C', 'D'] as const).map(l => {
+                          const guide = profileGuidesMap[l]
+                          const score = scoresObj[l] || 0
+                          const pct = (score / 8) * 100
+
+                          return (
+                            <div key={l} className="bg-white p-2.5 rounded-xl border border-gray-200">
+                              <div className="flex justify-between items-center text-xs font-bold mb-1">
+                                <span>[{l}] {guide.title.split('/')[0]}</span>
+                                <span style={{ color: guide.color }}>{score} pts</span>
+                              </div>
+                              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                <div className="h-full" style={{ width: `${pct}%`, backgroundColor: guide.color }} />
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Respostas Bloco a Bloco */}
+                  {answersObj && (
+                    <div className="bg-white p-4 rounded-2xl border border-gray-200 space-y-2">
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">Detalhamento das Escolhas do Candidato</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                        {[1, 2, 3, 4].map(bId => {
+                          const ans = answersObj[bId] || answersObj[String(bId)]
+                          if (!ans) return null
+
+                          return (
+                            <div key={bId} className="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex items-center justify-between">
+                              <span className="font-semibold text-gray-700">{blockTitles[bId]}</span>
+                              <div className="flex gap-2">
+                                <span className="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[11px]">
+                                  MAIS: [{ans.mais}]
+                                </span>
+                                <span className="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded text-[11px]">
+                                  MENOS: [{ans.menos}]
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Informações Qualitativas do Form */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Formação Escolar/Acadêmica</p>
+                  <div className="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 whitespace-pre-wrap">{selectedItem.education}</div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Experiência Profissional</p>
+                  <div className="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 whitespace-pre-wrap">{selectedItem.experience}</div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">O que pode agregar aos projetos MCS</p>
+                  <div className="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 whitespace-pre-wrap">{selectedItem.contribution}</div>
+                </div>
+              </div>
+
+              {/* Botões de Ação para Diretoria */}
+              {canEdit && selectedItem.status === 'pendente' && (
+                <div className="mt-8 flex gap-4 pt-4 border-t border-gray-100">
+                  <button 
+                    disabled={statusSaving}
+                    onClick={() => updateStatus(selectedItem.id, 'rejeitado')} 
+                    className="flex-1 bg-red-50 text-red-600 font-bold py-3 rounded-xl hover:bg-red-100 disabled:opacity-50 text-sm transition-colors"
+                  >
+                    REJEITAR CANDIDATURA
+                  </button>
+                  <button 
+                    disabled={statusSaving}
+                    onClick={() => updateStatus(selectedItem.id, 'aprovado')} 
+                    className="flex-1 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600 disabled:opacity-50 text-sm shadow-md transition-colors"
+                  >
+                    APROVAR FACILITADOR MCS
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
