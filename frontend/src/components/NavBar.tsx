@@ -44,24 +44,26 @@ export default function NavBar() {
     <>
       <header className={`absolute w-full z-50 transition-all duration-300 ${
         isHomePage 
-          ? 'bg-slate-950/70 backdrop-blur-md border-b border-white/10 text-white' 
+          ? 'bg-[#0a0d14]/85 backdrop-blur-md border-b border-white/10 text-white' 
           : 'bg-marfim/95 backdrop-blur-sm border-b border-gray-200 text-carbono'
       }`}>
-        <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-20 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-24 flex items-center justify-between">
 
-          {/* Logo */}
+          {/* Logo - Enlarged and adapted to dark background with transparent background */}
           <Link to="/" className="shrink-0 flex items-center">
             <img
               src="/logo.png"
               alt="Instituto MCS"
-              className={`h-11 xl:h-12 w-auto transition-all ${
-                isHomePage ? 'filter brightness-0 invert' : 'mix-blend-multiply'
+              className={`h-12 xl:h-16 w-auto transition-all ${
+                isHomePage 
+                  ? 'filter invert brightness-125 mix-blend-screen' 
+                  : 'mix-blend-multiply'
               }`}
             />
           </Link>
 
           {/* ── Desktop Nav (xl+) ────────────────────── */}
-          <nav className="hidden xl:flex items-center gap-1 text-[0.7rem] font-bold tracking-[0.14em]">
+          <nav className="hidden xl:flex items-center gap-1.5 text-[0.72rem] font-bold tracking-[0.14em]">
             {links.map((link) => (
               <NavLink
                 key={link.label}
@@ -70,10 +72,10 @@ export default function NavBar() {
                   `px-3 py-2 transition-colors whitespace-nowrap ${
                     isHomePage
                       ? isActive
-                        ? 'text-amber-400 border-b-2 border-amber-400 font-extrabold'
+                        ? 'text-amber-400 font-black'
                         : 'text-gray-200 hover:text-amber-300'
                       : isActive
-                        ? 'text-dourado border-b-2 border-dourado'
+                        ? 'text-dourado font-black'
                         : 'text-carbono hover:text-dourado'
                   }`
                 }
@@ -150,7 +152,7 @@ export default function NavBar() {
                   to={link.to}
                   className={({ isActive }) =>
                     `px-6 py-4 text-xs font-bold tracking-widest hover:bg-white/5 transition-colors ${
-                      isActive ? 'text-amber-400' : isHomePage ? 'text-gray-200' : 'text-carbono'
+                      isActive ? 'text-amber-400 font-extrabold' : isHomePage ? 'text-gray-200' : 'text-carbono'
                     }`
                   }
                 >

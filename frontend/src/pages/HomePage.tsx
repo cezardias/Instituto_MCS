@@ -19,114 +19,99 @@ export default function HomePage() {
 
   return (
     <div className="bg-marfim text-carbono min-h-screen">
-      {/* Hero Section with Full Dark Background Image */}
-      <section className="relative min-h-[90vh] lg:min-h-screen pt-32 pb-16 flex flex-col justify-between overflow-hidden bg-slate-950 text-white">
-        {/* Background Image with Dark Vignette & Gradient Overlay */}
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="/hero_bg.jpg" 
-            alt="Crianças aprendendo no Instituto MCS" 
-            className="w-full h-full object-cover object-center filter contrast-[1.08] brightness-[0.82]"
-          />
-          {/* Dark Overlay Layer 1: Left heavy gradient for typography contrast */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/85 to-slate-950/40"></div>
-          {/* Dark Overlay Layer 2: Top to bottom gradient for header & bottom integration */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-transparent to-slate-950"></div>
-          {/* Radial vignette for cinematic depth */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(2,6,23,0.65)_100%)] pointer-events-none"></div>
-        </div>
+      {/* Hero Section with Split Layout & Clear Right Image */}
+      <section className="relative min-h-[90vh] lg:min-h-screen pt-28 pb-12 flex flex-col justify-between overflow-hidden bg-[#0a0d14] text-white">
+        {/* Subtle Background Glow & Grid Texture */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.08)_0%,transparent_60%)] pointer-events-none"></div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-8 lg:pt-16 pb-12 flex-1 flex flex-col justify-center">
-          <div className="max-w-2xl text-left">
+        {/* Hero Content Grid */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-10 lg:pt-16 pb-8 flex-1 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
             
-            {/* Main Headline matching reference print */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.18] mb-6 text-white font-sans">
-              Transformamos realidades através da{' '}
-              <span className="text-amber-400 font-extrabold block sm:inline">
-                cultura, educação e oportunidades.
-              </span>
-            </h1>
+            {/* Left Column (Text Content) */}
+            <div className="lg:col-span-7 text-left z-10">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.18] mb-6 text-white font-sans">
+                Transformamos realidades através da{' '}
+                <span className="text-amber-400 font-extrabold block sm:inline">
+                  cultura, educação e oportunidades.
+                </span>
+              </h1>
 
-            {/* Subheadline matching reference print */}
-            <p className="text-gray-300 text-base sm:text-lg lg:text-xl leading-relaxed mb-10 font-normal max-w-xl">
-              Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
-            </p>
+              <p className="text-gray-300 text-base sm:text-lg lg:text-xl leading-relaxed mb-10 font-normal max-w-xl">
+                Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
+              </p>
 
-            {/* Primary Action Button */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Link 
-                to="/projetos" 
-                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
-              >
-                CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
-              </Link>
+              <div className="flex flex-wrap items-center gap-4">
+                <Link 
+                  to="/projetos" 
+                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
+                >
+                  CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+            </div>
 
-              <button 
-                onClick={() => setShowOficineiroModal(true)}
-                className="bg-slate-900/60 hover:bg-slate-900 border border-amber-400/60 text-amber-300 hover:text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 backdrop-blur-sm text-sm tracking-wider uppercase"
-              >
-                CADASTRO FACILITADOR MCS
-              </button>
+            {/* Right Column (Right-aligned Scaled Image) */}
+            <div className="lg:col-span-5 relative z-0 flex justify-center lg:justify-end">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl w-full max-w-lg lg:max-w-none aspect-[4/3] lg:aspect-[4/3.2] border border-white/10 group">
+                <img 
+                  src="/hero_bg.jpg" 
+                  alt="Crianças no Instituto MCS" 
+                  className="w-full h-full object-cover object-center filter contrast-[1.05] brightness-[0.95] transform group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0d14]/60 via-transparent to-transparent pointer-events-none"></div>
+              </div>
             </div>
 
           </div>
         </div>
 
-        {/* Floating Glassmorphic Stats Bar (Matching reference print) */}
+        {/* Floating Glassmorphic Stats Bar (Clean layout without icon background boxes) */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pb-4">
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl">
+          <div className="bg-[#111622]/85 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6 shadow-2xl">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center divide-y sm:divide-y-0 sm:divide-x divide-white/10">
               
               {/* Stat 1: Impacted people */}
-              <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:pl-0">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-400">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3.5 pt-4 sm:pt-0 sm:pl-0">
+                <svg className="w-6 h-6 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
                 <div>
-                  <div className="text-xl sm:text-3xl font-extrabold text-white font-serif tracking-tight">+3.200</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white font-serif tracking-tight">+3.200</div>
                   <div className="text-xs sm:text-sm text-gray-300 font-medium">Pessoas impactadas</div>
                 </div>
               </div>
 
               {/* Stat 2: Municipalities */}
-              <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:pl-6">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-400">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3.5 pt-4 sm:pt-0 sm:pl-6">
+                <svg className="w-6 h-6 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
                 <div>
-                  <div className="text-xl sm:text-3xl font-extrabold text-white font-serif tracking-tight">07</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white font-serif tracking-tight">07</div>
                   <div className="text-xs sm:text-sm text-gray-300 font-medium">Municípios atendidos</div>
                 </div>
               </div>
 
               {/* Stat 3: Partners */}
-              <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:pl-6">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-400">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                  </svg>
-                </div>
+              <div className="flex items-center gap-3.5 pt-4 sm:pt-0 sm:pl-6">
+                <svg className="w-6 h-6 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                </svg>
                 <div>
-                  <div className="text-xl sm:text-3xl font-extrabold text-white font-serif tracking-tight">23</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white font-serif tracking-tight">23</div>
                   <div className="text-xs sm:text-sm text-gray-300 font-medium">Parceiros institucionais</div>
                 </div>
               </div>
 
-              {/* Stat 4: Projects in execution */}
-              <div className="flex items-center gap-4 pt-4 sm:pt-0 sm:pl-6">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center shrink-0 text-amber-400">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
+              {/* Stat 4: Projects */}
+              <div className="flex items-center gap-3.5 pt-4 sm:pt-0 sm:pl-6">
+                <svg className="w-6 h-6 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
                 <div>
-                  <div className="text-xl sm:text-3xl font-extrabold text-white font-serif tracking-tight">12</div>
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white font-serif tracking-tight">12</div>
                   <div className="text-xs sm:text-sm text-gray-300 font-medium">Projetos em execução</div>
                 </div>
               </div>
