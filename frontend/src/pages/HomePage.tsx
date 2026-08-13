@@ -61,11 +61,11 @@ export default function HomePage() {
                 />
                 
                 {/* Efeito Degradê Cinema nas bordas (Vignette & Edge Dissolve) */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(10,13,20,0.85)_100%)] pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_35%_50%,transparent_45%,rgba(10,13,20,0.75)_100%)] pointer-events-none"></div>
                 <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/50 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/30 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#0a0d14]/40 to-transparent pointer-events-none"></div>
               </div>
             </div>
 
