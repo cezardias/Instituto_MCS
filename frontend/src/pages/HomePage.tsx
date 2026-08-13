@@ -19,25 +19,25 @@ export default function HomePage() {
 
   return (
     <div className="bg-marfim text-carbono min-h-screen">
-      {/* Hero Section with Split Layout & Clear Right Image with Cinematic Fade */}
-      <section className="relative min-h-[85vh] lg:min-h-screen pt-32 pb-20 flex flex-col justify-center overflow-hidden bg-[#0a0d14] text-white">
+      {/* Hero Section with Split Layout & Expanded Right Image with Cinematic Fade */}
+      <section className="relative min-h-[85vh] lg:min-h-screen pt-32 pb-16 flex flex-col justify-center overflow-hidden bg-[#0a0d14] text-white">
         {/* Subtle Background Glow & Grid Texture */}
         <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.08)_0%,transparent_60%)] pointer-events-none"></div>
 
         {/* Hero Content Grid */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-6 lg:pt-12 pb-8 flex-1 flex items-center">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-4 lg:pt-8 pb-8 flex-1 flex items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
             
-            {/* Left Column (Text Content) */}
-            <div className="lg:col-span-7 text-left z-10">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.18] mb-6 text-white font-sans">
+            {/* Left Column (Text Content - 5 cols) */}
+            <div className="lg:col-span-5 text-left z-10">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.16] mb-6 text-white font-sans">
                 Transformamos realidades através da{' '}
                 <span className="text-amber-400 font-extrabold block sm:inline">
                   cultura, educação e oportunidades.
                 </span>
               </h1>
 
-              <p className="text-gray-300 text-base sm:text-lg lg:text-xl leading-relaxed mb-10 font-normal max-w-xl">
+              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-lg">
                 Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
               </p>
 
@@ -51,9 +51,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column (Cinematic Image with Edge Degradê Fade) */}
-            <div className="lg:col-span-5 relative z-0 flex justify-center lg:justify-end">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl w-full max-w-lg lg:max-w-none aspect-[4/3] lg:aspect-[4/3.2] group">
+            {/* Right Column (Expanded Scaled Photo - 7 cols) */}
+            <div className="lg:col-span-7 relative z-0 flex justify-center lg:justify-end">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl w-full h-[420px] sm:h-[500px] lg:h-[580px] xl:h-[640px] group">
                 <img 
                   src="/hero_bg.jpg" 
                   alt="Crianças no Instituto MCS" 
@@ -61,11 +61,11 @@ export default function HomePage() {
                 />
                 
                 {/* Efeito Degradê Cinema nas bordas (Vignette & Edge Dissolve) */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_25%,rgba(10,13,20,0.85)_100%)] pointer-events-none"></div>
-                <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(10,13,20,0.85)_100%)] pointer-events-none"></div>
+                <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
               </div>
             </div>
 
