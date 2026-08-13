@@ -19,54 +19,45 @@ export default function HomePage() {
 
   return (
     <div className="bg-marfim text-carbono min-h-screen">
-      {/* Hero Section with Split Layout & Expanded Right Image with Cinematic Fade */}
-      <section className="relative min-h-[85vh] lg:min-h-screen pt-32 pb-16 flex flex-col justify-center overflow-hidden bg-[#0a0d14] text-white">
-        {/* Subtle Background Glow & Grid Texture */}
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.08)_0%,transparent_60%)] pointer-events-none"></div>
+      {/* Hero Section with Full-Bleed Background Photo & Left Dark Gradient Overlay */}
+      <section className="relative min-h-[90vh] lg:min-h-screen pt-32 pb-20 flex flex-col justify-center overflow-hidden bg-[#0a0d14] text-white">
+        {/* Full-Bleed Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/hero_bg.jpg" 
+            alt="Crianças aprendendo no Instituto MCS" 
+            className="w-full h-full object-cover object-[75%_center] lg:object-right filter contrast-[1.08] brightness-[0.92]"
+          />
+          
+          {/* Gradient Overlay Layer 1: Left heavy gradient for text contrast */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/85 via-45% to-transparent"></div>
+          
+          {/* Gradient Overlay Layer 2: Top and bottom gradients for seamless header and section transition */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d14]/90 via-transparent to-[#0a0d14]"></div>
+        </div>
 
-        {/* Hero Content Grid */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-4 lg:pt-8 pb-8 flex-1 flex items-center">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
+        {/* Hero Content - Text on Left Overlaying Dark Background */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-8 lg:pt-16 pb-8 flex-1 flex items-center">
+          <div className="max-w-2xl text-left">
             
-            {/* Left Column (Text Content - 5 cols) */}
-            <div className="lg:col-span-5 text-left z-10">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.16] mb-6 text-white font-sans">
-                Transformamos realidades através da{' '}
-                <span className="text-amber-400 font-extrabold block sm:inline">
-                  cultura, educação e oportunidades.
-                </span>
-              </h1>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.16] mb-6 text-white font-sans">
+              Transformamos realidades através da{' '}
+              <span className="text-amber-400 font-extrabold block sm:inline">
+                cultura, educação e oportunidades.
+              </span>
+            </h1>
 
-              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-lg">
-                Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
-              </p>
+            <p className="text-gray-300 text-base sm:text-lg lg:text-xl leading-relaxed mb-10 font-normal max-w-xl">
+              Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
+            </p>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <Link 
-                  to="/projetos" 
-                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
-                >
-                  CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Column (Expanded Scaled Photo - 7 cols) */}
-            <div className="lg:col-span-7 relative z-0 flex justify-center lg:justify-end">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl w-full h-[420px] sm:h-[500px] lg:h-[580px] xl:h-[640px] group">
-                <img 
-                  src="/hero_bg.jpg" 
-                  alt="Crianças no Instituto MCS" 
-                  className="w-full h-full object-cover object-center filter contrast-[1.08] brightness-[0.95] transform group-hover:scale-105 transition-transform duration-700"
-                />
-                
-                {/* Efeito Degradê Cinema nas bordas (Vignette & Edge Dissolve) */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_35%_50%,transparent_45%,rgba(10,13,20,0.75)_100%)] pointer-events-none"></div>
-                <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/60 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/50 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/30 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-[#0a0d14]/40 to-transparent pointer-events-none"></div>
-              </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link 
+                to="/projetos" 
+                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
+              >
+                CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
 
           </div>
