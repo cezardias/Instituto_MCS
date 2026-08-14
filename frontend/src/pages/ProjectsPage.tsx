@@ -55,34 +55,14 @@ export default function ProjectsPage() {
 
   return (
     <div className="bg-marfim min-h-screen pt-24 pb-20 font-sans">
-      {/* Hero Banner */}
+      {/* Hero Banner — Foto em destaque estilo horizontal paisagem */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
-        <div className="relative rounded-[2.5rem] overflow-hidden bg-[#0c0f17] text-marfim flex items-center min-h-[360px] lg:min-h-[420px] shadow-2xl border border-gray-800 group">
-          {/* Background Image across entire banner */}
-          <div className="absolute inset-0 z-0">
-            <img 
-              src="/hero_projetos.jpg" 
-              alt="Jovens pintando mural do Instituto MCS" 
-              className="w-full h-full object-cover object-[center_30%] transform group-hover:scale-105 transition-transform duration-1000" 
-            />
-            {/* Elegant dark gradient so text is crisp and readable */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0c0f17] via-[#0c0f17]/85 sm:via-[#0c0f17]/70 to-[#0c0f17]/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0c0f17]/90 via-transparent to-transparent" />
-          </div>
-
-          {/* Hero Content Overlay */}
-          <div className="relative z-10 p-8 sm:p-12 lg:p-16 max-w-2xl">
-            <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-3 block flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-dourado animate-pulse"></span>
-              Nossos Projetos —
-            </span>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl leading-tight mb-6 text-white drop-shadow-md">
-              Iniciativas que transformam realidades.
-            </h1>
-            <p className="text-gray-200 text-base sm:text-lg leading-relaxed max-w-xl font-normal drop-shadow">
-              Conheça os projetos apoiados e realizados pelo Instituto MCS. Explore as causas que constroem um futuro mais justo e consciente no nosso território.
-            </p>
-          </div>
+        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-200 aspect-[16/7] sm:aspect-[16/6] md:aspect-[21/8] bg-slate-950 group">
+          <img 
+            src="/hero_projetos.jpg" 
+            alt="Jovens pintando mural do Instituto MCS Voz Consciente" 
+            className="w-full h-full object-cover object-[center_35%] transform group-hover:scale-102 transition-transform duration-700" 
+          />
         </div>
       </div>
 
