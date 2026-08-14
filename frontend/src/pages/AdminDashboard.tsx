@@ -13,6 +13,12 @@ const getAvatarUrl = (url?: string | null) => {
   if (url.startsWith('/api')) return url
   return `/api${url.startsWith('/') ? '' : '/'}${url}`
 }
+const fileToBase64 = (file: File): Promise<string> => new Promise((res, rej) => {
+  const reader = new FileReader()
+  reader.onload = () => res(reader.result as string)
+  reader.onerror = (e) => rej(e)
+  reader.readAsDataURL(file)
+})
 
 // ─── types ───────────────────────────────────────────────────────────
 interface Stats { 
@@ -619,18 +625,25 @@ function ProjetosTab() {
     e.preventDefault(); setSaving(true); setError('')
     let imageUrl = form.image_url
     if (imageFile) {
-      const fd = new FormData(); fd.append('image', imageFile)
       try { 
+        const fd = new FormData(); fd.append('image', imageFile)
         const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); 
-        if (!r.ok) {
-          const txt = await r.text();
-          let msg = 'Falha no upload';
-          try { const d = JSON.parse(txt); msg = d.error || msg; } catch {}
-          setError(msg); setSaving(false); return;
+        if (r.ok) {
+          const d = await r.json(); 
+          if (d.url) imageUrl = d.url
+          else imageUrl = await fileToBase64(imageFile)
+        } else {
+          imageUrl = await fileToBase64(imageFile)
         }
-        const d = await r.json(); 
-        if(d.url) imageUrl = d.url 
-      } catch (err: any) { setError('Falha no upload: ' + (err.message || 'Erro no envio')); setSaving(false); return }
+      } catch { 
+        try {
+          imageUrl = await fileToBase64(imageFile)
+        } catch {
+          setError('Erro ao processar imagem')
+          setSaving(false)
+          return
+        }
+      }
     }
     const method = editing ? 'PUT' : 'POST'
     const url = editing ? `/api/projects/${editing.id}` : '/api/projects'
@@ -1056,8 +1069,25 @@ function NewsTab() {
     e.preventDefault(); setSaving(true); setError('')
     let imageUrl = form.image_url
     if (imageFile) {
-      const fd = new FormData(); fd.append('image', imageFile)
-      try { const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); const d = await r.json(); if(d.url) imageUrl = d.url } catch { setError('Falha no upload'); setSaving(false); return }
+      try { 
+        const fd = new FormData(); fd.append('image', imageFile)
+        const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); 
+        if (r.ok) {
+          const d = await r.json(); 
+          if (d.url) imageUrl = d.url
+          else imageUrl = await fileToBase64(imageFile)
+        } else {
+          imageUrl = await fileToBase64(imageFile)
+        }
+      } catch { 
+        try {
+          imageUrl = await fileToBase64(imageFile)
+        } catch {
+          setError('Erro ao processar imagem')
+          setSaving(false)
+          return
+        }
+      }
     }
     const method = editing ? 'PUT' : 'POST'
     const url = editing ? `/api/news/${editing.id}` : '/api/news'
