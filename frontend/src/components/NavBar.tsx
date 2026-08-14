@@ -42,19 +42,19 @@ export default function NavBar() {
 
   return (
     <>
-      <header className={`absolute w-full z-50 transition-all duration-300 ${
+      <header className={`absolute top-0 left-0 w-full z-50 transition-all duration-300 ${
         isHomePage 
-          ? 'bg-[#0a0d14]/85 backdrop-blur-md border-b border-white/10 text-white' 
+          ? 'bg-transparent text-white' 
           : 'bg-marfim/95 backdrop-blur-sm border-b border-gray-200 text-carbono'
       }`}>
-        <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-24 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-28 flex items-center justify-between">
 
-          {/* Logo - Enlarged and adapted to dark background with transparent background */}
+          {/* Logo - Enlarged and adapted to dark background */}
           <Link to="/" className="shrink-0 flex items-center">
             <img
               src="/logo.png"
               alt="Instituto MCS"
-              className={`h-12 xl:h-16 w-auto transition-all ${
+              className={`h-16 xl:h-20 w-auto transition-all ${
                 isHomePage 
                   ? 'filter invert brightness-125 mix-blend-screen' 
                   : 'mix-blend-multiply'
@@ -63,7 +63,7 @@ export default function NavBar() {
           </Link>
 
           {/* ── Desktop Nav (xl+) ────────────────────── */}
-          <nav className="hidden xl:flex items-center gap-1.5 text-[0.72rem] font-bold tracking-[0.14em]">
+          <nav className="hidden xl:flex items-center gap-2 text-[0.75rem] font-bold tracking-[0.14em]">
             {links.map((link) => (
               <NavLink
                 key={link.label}
@@ -72,10 +72,10 @@ export default function NavBar() {
                   `px-3 py-2 transition-colors whitespace-nowrap ${
                     isHomePage
                       ? isActive
-                        ? 'text-amber-400 font-black'
-                        : 'text-gray-200 hover:text-amber-300'
+                        ? 'text-amber-400 font-black border-b-2 border-amber-400'
+                        : 'text-gray-100 hover:text-amber-300'
                       : isActive
-                        ? 'text-dourado font-black'
+                        ? 'text-dourado font-black border-b-2 border-dourado'
                         : 'text-carbono hover:text-dourado'
                   }`
                 }
@@ -86,38 +86,34 @@ export default function NavBar() {
           </nav>
 
           {/* ── CTA Buttons ──────────────────────────── */}
-          <div className="hidden xl:flex items-center gap-2.5 shrink-0">
+          <div className="hidden xl:flex items-center gap-3 shrink-0">
             <button
               onClick={() => setShowModal(true)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[0.65rem] font-bold transition-colors ${
-                isHomePage
-                  ? 'border border-red-500/80 text-red-400 hover:bg-red-600 hover:text-white'
-                  : 'border border-red-500 text-red-600 hover:bg-red-500 hover:text-white'
-              }`}
+              className="flex items-center gap-1.5 bg-red-600 border border-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-full text-xs font-bold transition-all uppercase tracking-wider shadow-md"
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               DENÚNCIA
             </button>
             <Link
               to="/login"
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[0.65rem] font-bold transition-colors ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-colors ${
                 isHomePage
-                  ? 'border border-white/30 text-white hover:bg-white/10'
+                  ? 'border border-white/40 text-white hover:bg-white/10'
                   : 'border border-carbono text-carbono hover:bg-carbono hover:text-marfim'
               }`}
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               ENTRAR
             </Link>
             <Link
               to="/doe"
-              className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-full text-[0.65rem] font-bold transition-transform transform hover:scale-105 shadow-md"
+              className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 px-5 py-2 rounded-full text-xs font-bold transition-all transform hover:scale-105 uppercase tracking-wider shadow-md"
             >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               DOE AGORA

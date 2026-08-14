@@ -19,61 +19,43 @@ export default function HomePage() {
 
   return (
     <div className="bg-marfim text-carbono min-h-screen">
-      {/* Hero Section with Split Layout & Complete Uncropped Photo */}
-      <section className="relative min-h-[85vh] lg:min-h-[90vh] pt-32 pb-16 flex flex-col justify-center overflow-hidden bg-[#0a0d14] text-white">
-        {/* Ambient background glow */}
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_left,rgba(212,175,55,0.06)_0%,transparent_60%)] pointer-events-none"></div>
+      {/* Hero Section — Full Bleed Widescreen Background Photo under Header */}
+      <section className="relative min-h-[92vh] pt-36 pb-20 flex flex-col justify-center overflow-hidden bg-[#080a0f] text-white">
+        {/* Full-bleed Widescreen Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/hero_bg.jpg" 
+            alt="Crianças aprendendo no Instituto MCS" 
+            className="w-full h-full object-cover object-[center_30%] filter contrast-[1.05] brightness-[0.95]"
+          />
+          {/* Subtle dark gradient overlay on left for crisp readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#080a0f] via-[#080a0f]/85 sm:via-[#080a0f]/75 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#080a0f]/80 via-[#080a0f]/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080a0f] via-transparent to-transparent pointer-events-none" />
+        </div>
 
-        {/* Hero Content Grid */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-4 lg:pt-8 pb-4 flex-1 flex items-center">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center w-full">
-            
-            {/* Left Column (Text Content - 5 cols) */}
-            <div className="lg:col-span-5 text-left z-10">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight leading-[1.16] mb-6 text-white font-sans">
-                Transformamos realidades através da{' '}
-                <span className="text-amber-400 font-extrabold block sm:inline">
-                  cultura, educação e oportunidades.
-                </span>
-              </h1>
+        {/* Hero Text Content Container */}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-8 pb-4 flex-1 flex items-center">
+          <div className="max-w-2xl text-left">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.14] mb-6 text-white font-sans drop-shadow-md">
+              Transformamos realidades através da{' '}
+              <span className="text-amber-400 font-extrabold block mt-1">
+                cultura, educação e oportunidades.
+              </span>
+            </h1>
 
-              <p className="text-gray-300 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-lg">
-                Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
-              </p>
+            <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-xl drop-shadow">
+              Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
+            </p>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <Link 
-                  to="/projetos" 
-                  className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
-                >
-                  CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Column (Complete Photo showing Mountains, Children, Desk & Pencils - 7 cols) */}
-            <div className="lg:col-span-7 relative z-0 flex justify-center lg:justify-end">
-              <div 
-                className="relative w-full max-w-2xl lg:max-w-none aspect-[16/10] sm:aspect-[16/9.5] group overflow-hidden"
-                style={{
-                  maskImage: 'radial-gradient(ellipse 94% 92% at 50% 50%, black 65%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 94% 92% at 50% 50%, black 65%, transparent 100%)'
-                }}
+            <div className="flex flex-wrap items-center gap-4">
+              <Link 
+                to="/projetos" 
+                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
               >
-                <img 
-                  src="/hero_bg.jpg" 
-                  alt="Crianças aprendendo no Instituto MCS" 
-                  className="w-full h-full object-contain lg:object-cover object-center filter contrast-[1.05] brightness-[0.96] transform group-hover:scale-102 transition-transform duration-700"
-                />
-                
-                {/* Subtle dissolution overlays for zero hard box lines */}
-                <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#0a0d14] via-[#0a0d14]/40 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#0a0d14] via-[#0a0d14]/30 to-transparent pointer-events-none"></div>
-                <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-[#0a0d14] via-[#0a0d14]/30 to-transparent pointer-events-none"></div>
-              </div>
+                CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
+              </Link>
             </div>
-
           </div>
         </div>
       </section>
