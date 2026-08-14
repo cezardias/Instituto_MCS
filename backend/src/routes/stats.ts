@@ -6,13 +6,18 @@ const router = express.Router()
 
 router.get('/', authMiddleware, (req, res) => {
   try {
-    // 1. Alunos Ativos & Famílias Apoiadas (cada aluno conta uma família)
-    const countUsersAlunos: any = db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'aluno'").get()
-    const countAlunosTable: any = db.prepare("SELECT COUNT(*) as count FROM alunos WHERE status = 'ativo'").get()
-    const alunos_ativos = Math.max(countUsersAlunos?.count || 0, countAlunosTable?.count || 0)
+    // 1. Alunos Ativos & Famílias Apoiadas (cada aluno conta exatamente uma família)
+    const countUniqueAlunos: any = db.prepare(`
+      SELECT COUNT(DISTINCT LOWER(TRIM(COALESCE(NULLIF(email, ''), name)))) as count 
+      FROM (
+        SELECT email, name FROM users WHERE role = 'aluno'
+        UNION ALL
+        SELECT email, name FROM alunos WHERE status = 'ativo'
+      )
+    `).get()
 
-    // Cada aluno conta uma família
-    const familias_apoiadas = alunos_ativos > 0 ? alunos_ativos : (countUsersAlunos?.count || 0)
+    const alunos_ativos = countUniqueAlunos?.count || 0
+    const familias_apoiadas = alunos_ativos
 
     // Pessoas beneficiadas = Famílias + soma de beneficiados cadastrados nos projetos
     const totalBeneficiadosProjetos: any = db.prepare("SELECT COALESCE(SUM(beneficiados), 0) as total FROM projects").get()

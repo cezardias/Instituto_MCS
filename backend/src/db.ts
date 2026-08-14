@@ -573,18 +573,29 @@ try {
     }
   }
 
-  // Ensure all approved oficineiros in oficineiro_registrations exist in users table as 'oficineiro'
+  // Ensure all approved oficineiros in oficineiro_registrations exist in users table as 'oficineiro' with their full data
   const approvedOficineiros: any[] = db.prepare("SELECT * FROM oficineiro_registrations WHERE status = 'aprovado'").all()
   for (const reg of approvedOficineiros) {
+    const eduCombined = (reg.education || reg.experience) ? `${reg.education || ''}${reg.experience ? '\n\nExperiência: ' + reg.experience : ''}`.trim() : null
+    const availVal = reg.availability || reg.availability_schedule || null
+    const contribVal = reg.contribution || null
+
     const usr: any = db.prepare("SELECT id FROM users WHERE email = ?").get(reg.email)
     if (!usr) {
       const defaultPasswordHash = '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQOEg6Lruj3vjPGga31lW' // 123456
       db.prepare(`
-        INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
-        VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
-      `).run(reg.name, reg.email, defaultPasswordHash, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+        INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, education, availability_schedule, positive_points, must_change_password)
+        VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, ?, ?, ?, 1)
+      `).run(reg.name, reg.email, defaultPasswordHash, reg.cpf || null, reg.phone || null, reg.birth_date || null, eduCombined, availVal, contribVal)
     } else {
-      db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(reg.email)
+      db.prepare(`
+        UPDATE users 
+        SET role = 'oficineiro',
+            education = COALESCE(?, education),
+            availability_schedule = COALESCE(?, availability_schedule),
+            positive_points = COALESCE(?, positive_points)
+        WHERE email = ?
+      `).run(eduCombined, availVal, contribVal, reg.email)
     }
   }
 } catch (e: any) {

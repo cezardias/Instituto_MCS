@@ -51,15 +51,23 @@ router.post('/admin', authMiddleware, async (req, res) => {
     )
 
     if (finalStatus === 'aprovado') {
+      const eduCombined = (education || experience) ? `${education || ''}${experience ? '\n\nExperiência: ' + experience : ''}`.trim() : null
       const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email)
       if (!existingUser) {
         const defaultPassword = await hashPassword('123456')
         db.prepare(`
-          INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
-          VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
-        `).run(name, email, defaultPassword, cpf || null, phone || null, birth_date || null)
+          INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, education, availability_schedule, positive_points, must_change_password)
+          VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, ?, ?, ?, 1)
+        `).run(name, email, defaultPassword, cpf || null, phone || null, birth_date || null, eduCombined, availability || null, contribution || null)
       } else {
-        db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(email)
+        db.prepare(`
+          UPDATE users 
+          SET role = 'oficineiro',
+              education = COALESCE(?, education),
+              availability_schedule = COALESCE(?, availability_schedule),
+              positive_points = COALESCE(?, positive_points)
+          WHERE email = ?
+        `).run(eduCombined, availability || null, contribution || null, email)
       }
     }
 
@@ -95,15 +103,26 @@ router.put('/:id', authMiddleware, async (req, res) => {
     if (status === 'aprovado') {
       const reg: any = db.prepare('SELECT * FROM oficineiro_registrations WHERE id = ?').get(id)
       if (reg) {
+        const eduCombined = (reg.education || reg.experience) ? `${reg.education || ''}${reg.experience ? '\n\nExperiência: ' + reg.experience : ''}`.trim() : null
+        const availVal = reg.availability || reg.availability_schedule || null
+        const contribVal = reg.contribution || null
+
         const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(reg.email)
         if (!existingUser) {
           const defaultPassword = await hashPassword('123456')
           db.prepare(`
-            INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
-            VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
-          `).run(reg.name, reg.email, defaultPassword, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+            INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, education, availability_schedule, positive_points, must_change_password)
+            VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, ?, ?, ?, 1)
+          `).run(reg.name, reg.email, defaultPassword, reg.cpf || null, reg.phone || null, reg.birth_date || null, eduCombined, availVal, contribVal)
         } else {
-          db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(reg.email)
+          db.prepare(`
+            UPDATE users 
+            SET role = 'oficineiro',
+                education = COALESCE(?, education),
+                availability_schedule = COALESCE(?, availability_schedule),
+                positive_points = COALESCE(?, positive_points)
+            WHERE email = ?
+          `).run(eduCombined, availVal, contribVal, reg.email)
         }
       }
     }
