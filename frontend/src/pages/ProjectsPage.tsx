@@ -57,18 +57,29 @@ export default function ProjectsPage() {
     <div className="bg-marfim min-h-screen pt-24 pb-20 font-sans">
       {/* Hero Banner */}
       <div className="max-w-[1400px] mx-auto px-6 lg:px-8 mb-12">
-        <div className="relative rounded-[2rem] overflow-hidden bg-carbono text-marfim flex flex-col md:flex-row items-center min-h-[360px]">
-          <div className="absolute inset-0">
-            <img src="/hero_instituto_mcs.png" alt="Crianças" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
-          </div>
-          <div className="relative z-10 p-10 lg:p-16 md:w-1/2">
-            <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-4 block">Nossos Projetos —</span>
-            <h1 className="font-serif text-4xl lg:text-5xl leading-tight mb-6">
-              Iniciativas que transformam realidades.
-            </h1>
-            <p className="text-gray-300 text-sm leading-relaxed max-w-md">
-              Conheça os projetos apoiados e realizados pelo Instituto MCS. Explore as causas que constroem um futuro mais justo e consciente no nosso território.
-            </p>
+        <div className="relative rounded-[2.5rem] overflow-hidden bg-[#0c0f17] text-marfim border border-gray-800 shadow-2xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 lg:p-12">
+            
+            {/* Left Content (Text) */}
+            <div className="lg:col-span-5 z-10 py-2">
+              <span className="text-dourado font-bold tracking-widest text-xs uppercase mb-3 block">Nossos Projetos —</span>
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl leading-tight mb-6 text-white">
+                Iniciativas que transformam realidades.
+              </h1>
+              <p className="text-gray-300 text-base leading-relaxed max-w-lg">
+                Conheça os projetos apoiados e realizados pelo Instituto MCS. Explore as causas que constroem um futuro mais justo e consciente no nosso território.
+              </p>
+            </div>
+
+            {/* Right Content (Full Horizontal Proportional Photo) */}
+            <div className="lg:col-span-7 relative z-10 rounded-2xl overflow-hidden shadow-xl aspect-[16/10] sm:aspect-[16/9] bg-slate-950 border border-white/10 group">
+              <img 
+                src="/hero_projetos.jpg" 
+                alt="Jovens pintando mural do Instituto MCS Voz Consciente" 
+                className="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700" 
+              />
+            </div>
+
           </div>
         </div>
       </div>
