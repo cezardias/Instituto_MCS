@@ -20,15 +20,23 @@ const storage = multer.diskStorage({
   }
 })
 
-const upload = multer({ storage: storage })
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+})
 
-router.post('/', upload.single('image'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No image uploaded' })
-  }
-  
-  const imageUrl = `/uploads/${req.file.filename}`
-  res.json({ url: imageUrl })
+router.post('/', (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('Multer upload error:', err)
+      return res.status(400).json({ error: err.message || 'Erro no processamento da imagem' })
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhuma imagem foi enviada' })
+    }
+    const imageUrl = `/uploads/${req.file.filename}`
+    return res.json({ url: imageUrl })
+  })
 })
 
 export default router

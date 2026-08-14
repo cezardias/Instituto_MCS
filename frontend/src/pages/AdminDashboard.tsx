@@ -620,7 +620,17 @@ function ProjetosTab() {
     let imageUrl = form.image_url
     if (imageFile) {
       const fd = new FormData(); fd.append('image', imageFile)
-      try { const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); const d = await r.json(); if(d.url) imageUrl = d.url } catch { setError('Falha no upload'); setSaving(false); return }
+      try { 
+        const r = await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${getToken()}`},body:fd}); 
+        if (!r.ok) {
+          const txt = await r.text();
+          let msg = 'Falha no upload';
+          try { const d = JSON.parse(txt); msg = d.error || msg; } catch {}
+          setError(msg); setSaving(false); return;
+        }
+        const d = await r.json(); 
+        if(d.url) imageUrl = d.url 
+      } catch (err: any) { setError('Falha no upload: ' + (err.message || 'Erro no envio')); setSaving(false); return }
     }
     const method = editing ? 'PUT' : 'POST'
     const url = editing ? `/api/projects/${editing.id}` : '/api/projects'
