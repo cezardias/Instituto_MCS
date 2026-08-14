@@ -36,12 +36,13 @@ export default function QuemSomos() {
             <div className="w-12 h-[1px] bg-dourado mt-8 lg:mt-10 mx-auto lg:mx-0"></div>
           </div>
           
-          <div className="relative rounded-2xl overflow-hidden shadow-xl aspect-[4/3]">
+          <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] group">
             <img 
-              src="/quemsomos.png" 
-              alt="Jovens participando de atividades do Instituto MCS" 
-              className="w-full h-full object-cover"
+              src="/nossa_essencia.jpg" 
+              alt="Facilitadora e alunos em atividades do Instituto MCS" 
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
+            <div className="absolute inset-0 ring-1 ring-black/10 rounded-3xl pointer-events-none" />
           </div>
         </div>
       </section>
