@@ -20,38 +20,38 @@ export default function HomePage() {
   return (
     <div className="bg-marfim text-carbono min-h-screen">
       {/* Hero Section — Full Bleed Widescreen Background Photo under Header */}
-      <section className="relative min-h-[92vh] pt-36 pb-20 flex flex-col justify-center overflow-hidden bg-[#06080d] text-white">
+      <section className="relative min-h-[85vh] lg:min-h-[90vh] pt-32 pb-16 flex flex-col justify-center overflow-hidden bg-[#06080d] text-white">
         {/* Full-bleed Widescreen Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
             src="/hero_bg.jpg" 
             alt="Crianças aprendendo no Instituto MCS" 
-            className="w-full h-full object-cover object-[80%_35%] filter contrast-[1.05] brightness-[0.98]"
+            className="w-full h-full object-cover object-center filter contrast-[1.03] brightness-[0.98]"
           />
-          {/* Elegant dark gradient overlay on left so text is crisp and right side remains bright */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#06080d] via-[#06080d]/80 sm:via-[#06080d]/65 to-transparent pointer-events-none" />
+          {/* Subtle dark gradient overlay on left so text is readable while keeping all 3 kids visible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#06080d]/95 via-[#06080d]/60 sm:via-[#06080d]/40 to-transparent pointer-events-none" />
           <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#06080d]/80 via-[#06080d]/30 to-transparent pointer-events-none" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06080d] via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Hero Text Content Container */}
-        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-8 pb-4 flex-1 flex items-center">
-          <div className="max-w-2xl text-left">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.12] mb-6 text-white font-sans drop-shadow-md">
-              Transformamos<br className="hidden sm:inline" /> realidades através da{' '}
+        <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-6 pb-4 flex-1 flex items-center">
+          <div className="max-w-xl text-left">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.18] mb-5 text-white font-sans drop-shadow-md">
+              Transformamos realidades através da{' '}
               <span className="text-amber-400 font-extrabold block mt-1">
-                cultura, educação e<br className="hidden sm:inline" /> oportunidades.
+                cultura, educação e oportunidades.
               </span>
             </h1>
 
-            <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-lg drop-shadow">
+            <p className="text-gray-200 text-sm sm:text-base leading-relaxed mb-8 font-normal max-w-md drop-shadow">
               Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
               <Link 
                 to="/projetos" 
-                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-3 text-sm tracking-wider uppercase"
+                className="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold py-3.5 px-7 rounded-xl transition-all duration-300 transform hover:-translate-y-0.5 shadow-xl flex items-center gap-2.5 text-xs sm:text-sm tracking-wider uppercase"
               >
                 CONHEÇA NOSSOS PROJETOS <span aria-hidden="true">&rarr;</span>
               </Link>
