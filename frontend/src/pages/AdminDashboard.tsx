@@ -360,7 +360,6 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tabKey: string) => void }) 
               <p className="font-serif text-xl md:text-2xl font-bold text-carbono leading-tight">{k.value}</p>
               <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{k.label}</p>
             </div>
-            <span className="text-[10px] font-bold text-emerald-600 mt-2 block">✓ Dados reais do banco</span>
           </div>
         ))}
       </div>
@@ -371,8 +370,7 @@ function OverviewTab({ onNavigate }: { onNavigate?: (tabKey: string) => void }) 
         <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
           <div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-              <h3 className="font-bold text-sm text-carbono">Resumo Financeiro Real</h3>
-              <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">Ao Vivo</span>
+              <h3 className="font-bold text-sm text-carbono">Resumo Financeiro</h3>
             </div>
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div>
