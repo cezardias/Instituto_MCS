@@ -117,11 +117,13 @@ export default function AssociadosPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {dbAssociados.map(a => (
                 <div key={a.id} className="bg-gray-50 border border-gray-100 rounded-3xl p-6 flex flex-col items-center text-center hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
-                  <div className="h-24 flex items-center justify-center mb-4 w-full bg-white rounded-xl">
+                  <div className="flex items-center justify-center mb-4 w-full">
                     {a.logo_url ? (
-                      <img src={a.logo_url.startsWith('http') ? a.logo_url : `/api${a.logo_url}`} alt={a.name} className="max-h-full max-w-full object-contain p-2" />
+                      <img src={a.logo_url.startsWith('http') ? a.logo_url : `/api${a.logo_url}`} alt={a.name} className="w-20 h-20 rounded-full object-cover border-2 border-dourado/40 shadow-sm" />
                     ) : (
-                      <div className="text-4xl">🤝</div>
+                      <div className="w-20 h-20 rounded-full bg-amber-100 text-amber-900 font-bold flex items-center justify-center text-2xl shadow-sm">
+                        {a.name?.[0]?.toUpperCase()}
+                      </div>
                     )}
                   </div>
                   <h3 className="font-bold text-carbono text-lg mb-1">{a.name}</h3>

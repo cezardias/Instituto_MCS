@@ -569,7 +569,7 @@ try {
         luanaParceiro.phone || '61982084706'
       )
     } else {
-      db.prepare("UPDATE users SET role = 'oficineiro' WHERE id = ?").run(existingUser.id)
+      db.prepare("UPDATE users SET role = 'oficineiro', photo_url = COALESCE(?, photo_url) WHERE id = ?").run(luanaParceiro.logo_url || null, existingUser.id)
     }
   }
 

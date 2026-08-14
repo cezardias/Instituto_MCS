@@ -7,6 +7,12 @@ const getToken = () => localStorage.getItem('mcs_token') || ''
 const getUser = (): any => { try { return JSON.parse(localStorage.getItem('mcs_user') || '{}') } catch { return {} } }
 const authH = () => ({ 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` })
 const TENANT = 'instituto-mcs'
+const getAvatarUrl = (url?: string | null) => {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  if (url.startsWith('/api')) return url
+  return `/api${url.startsWith('/') ? '' : '/'}${url}`
+}
 
 // ─── types ───────────────────────────────────────────────────────────
 interface Stats { alunos_ativos: number; projetos_em_execucao: number; total_noticias: number; total_usuarios: number; pessoas_beneficiadas: number; recursos_captados: number; alunos_por_area: {area:string,count:number}[]; projetos_por_status: {status:string,count:number}[] }
@@ -1365,8 +1371,8 @@ function UsersTab() {
                   <tr key={u.id} className="hover:bg-gray-50/30 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        {u.photo_url ? (
-                          <img src={u.photo_url} alt={u.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                        {u.photo_url || (u as any).logo_url ? (
+                          <img src={getAvatarUrl(u.photo_url || (u as any).logo_url)!} alt={u.name} className="w-10 h-10 rounded-full object-cover shrink-0 border border-gray-200 shadow-sm" />
                         ) : (
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 flex items-center justify-center font-bold text-sm shrink-0">{u.name[0]?.toUpperCase()}</div>
                         )}
@@ -1430,10 +1436,10 @@ function UsersTab() {
             <button onClick={() => setViewingUser(null)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 text-2xl font-bold">×</button>
             
             <div className="flex items-center gap-4 mb-6 border-b border-gray-100 pb-5">
-              {viewingUser.photo_url ? (
-                <img src={viewingUser.photo_url} alt={viewingUser.name} className="w-16 h-16 rounded-full object-cover border-2 border-dourado" />
+              {viewingUser.photo_url || (viewingUser as any).logo_url ? (
+                <img src={getAvatarUrl(viewingUser.photo_url || (viewingUser as any).logo_url)!} alt={viewingUser.name} className="w-16 h-16 rounded-full object-cover border-2 border-dourado shadow-md shrink-0" />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-carbono to-gray-800 text-marfim flex items-center justify-center font-serif text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-carbono to-gray-800 text-marfim flex items-center justify-center font-serif text-2xl font-bold shrink-0 shadow-md">
                   {viewingUser.name?.[0]?.toUpperCase()}
                 </div>
               )}
@@ -4199,19 +4205,28 @@ function OficineirosRegistrationTab() {
             <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
               <button onClick={() => setSelectedItem(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl z-10">×</button>
               
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold uppercase tracking-wider text-dourado">Ficha do Facilitador MCS</span>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    selectedItem.status === 'aprovado' ? 'bg-green-100 text-green-700' :
-                    selectedItem.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
-                    'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {selectedItem.status.toUpperCase()}
-                  </span>
+              <div className="mb-6 flex items-center gap-4 border-b border-gray-100 pb-4">
+                {(selectedItem as any).photo_url || (selectedItem as any).logo_url ? (
+                  <img src={getAvatarUrl((selectedItem as any).photo_url || (selectedItem as any).logo_url)!} alt={selectedItem.name} className="w-16 h-16 rounded-full object-cover border-2 border-dourado shadow-md shrink-0" />
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-carbono to-gray-800 text-marfim flex items-center justify-center font-serif text-2xl font-bold shrink-0 shadow-md">
+                    {selectedItem.name?.[0]?.toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-dourado">Ficha do Facilitador MCS</span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      selectedItem.status === 'aprovado' ? 'bg-green-100 text-green-700' :
+                      selectedItem.status === 'rejeitado' ? 'bg-red-100 text-red-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {selectedItem.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-3xl text-carbono">{selectedItem.name}</h3>
+                  <p className="text-xs text-gray-400">Inscrição realizada em {new Date(selectedItem.created_at).toLocaleDateString('pt-BR')}</p>
                 </div>
-                <h3 className="font-serif text-3xl text-carbono">{selectedItem.name}</h3>
-                <p className="text-xs text-gray-400">Inscrição realizada em {new Date(selectedItem.created_at).toLocaleDateString('pt-BR')}</p>
               </div>
 
               {/* Grid de Dados Pessoais */}
@@ -4777,7 +4792,13 @@ function AssociadosTab() {
               {items.map(p => (
                 <tr key={p.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell">
-                    {p.logo_url ? <img src={p.logo_url.startsWith('http') ? p.logo_url : `/api${p.logo_url}`} alt={p.name} className="h-10 w-auto object-contain rounded" /> : <div className="h-10 w-10 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">Sem foto</div>}
+                    {p.logo_url ? (
+                      <img src={getAvatarUrl(p.logo_url)!} alt={p.name} className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-100 to-amber-200 text-amber-900 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                        {p.name?.[0]?.toUpperCase()}
+                      </div>
+                    )}
                   </td>
                   <td className="td-cell">
                     <div className="font-semibold text-carbono">{p.name}</div>
