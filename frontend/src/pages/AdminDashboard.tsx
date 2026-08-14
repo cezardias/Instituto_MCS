@@ -4647,7 +4647,10 @@ function AssociadosTab() {
       const method = editing ? 'PUT' : 'POST'
       const url = editing ? `/api/associados/${editing}` : '/api/associados'
       const res = await fetch(url, { method, headers: authH(), body: JSON.stringify(payload) })
-      if (!res.ok) throw new Error('Erro ao salvar')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Erro ao salvar associado')
+      }
       setShowForm(false)
       load()
     } catch(err:any) { setError(err.message) }
