@@ -4624,7 +4624,17 @@ function AssociadosTab() {
 
   const load = useCallback(async () => {
     setLoading(true)
-    try { const r = await fetch(`/api/associados?tenant_id=${TENANT}`, {headers:authH()}); setItems(await r.json()) } catch { setItems([]) }
+    try {
+      const r = await fetch(`/api/associados?tenant_id=${TENANT}`, { headers: authH() })
+      if (r.ok) {
+        const data = await r.json()
+        setItems(Array.isArray(data) ? data : [])
+      } else {
+        setItems([])
+      }
+    } catch {
+      setItems([])
+    }
     setLoading(false)
   }, [])
   useEffect(() => { load() }, [load])

@@ -7,10 +7,10 @@ const router = express.Router()
 // Rota pública para submissão de formulário pelo site
 router.post('/public', (req, res) => {
   const { tenant_id, name, email, phone, cpf_cnpj, tipo, aceitou_termos } = req.body
-  if (!tenant_id) return res.status(400).json({ error: 'tenant_id required' })
-  if (!name) return res.status(400).json({ error: 'name required' })
+  if (!name) return res.status(400).json({ error: 'Nome é obrigatório' })
   
   try {
+    const targetTenant = tenant_id || 'instituto-mcs'
     const info = db.prepare(`
       INSERT INTO parceiros (
         tenant_id, name, email, phone, cpf_cnpj, tipo, aceitou_termos, 
@@ -18,7 +18,7 @@ router.post('/public', (req, res) => {
       )
       VALUES (?, ?, ?, ?, ?, ?, ?, 'pendente', 0, 0)
     `).run(
-      tenant_id, name, email || '', phone || '', cpf_cnpj || '', 
+      targetTenant, name, email || '', phone || '', cpf_cnpj || '', 
       tipo || 'Voluntário', aceitou_termos ? 1 : 0
     )
     
@@ -31,10 +31,8 @@ router.post('/public', (req, res) => {
 
 // Lista todos os associados (admin vê todos)
 router.get('/', (req, res) => {
-  const { tenant_id } = req.query
   try {
-    const targetTenant = tenant_id || 'instituto-mcs'
-    const rows = db.prepare('SELECT * FROM parceiros WHERE tenant_id = ? OR tenant_id = "mcs" OR tenant_id = "instituto-mcs" ORDER BY created_at DESC').all(targetTenant)
+    const rows = db.prepare("SELECT * FROM parceiros WHERE tenant_id = 'instituto-mcs' OR tenant_id = 'mcs' OR tenant_id IS NULL ORDER BY created_at DESC").all()
     res.json(rows)
   } catch (e: any) { 
     console.error('Error listing associados:', e)
