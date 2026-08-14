@@ -26,11 +26,11 @@ export default function HomePage() {
           <img 
             src="/hero_bg.jpg" 
             alt="Crianças aprendendo no Instituto MCS" 
-            className="w-full h-full object-cover object-[75%_center] lg:object-right filter contrast-[1.08] brightness-[0.92]"
+            className="w-full h-full object-cover object-[52%_center] filter contrast-[1.06] brightness-[0.94]"
           />
           
-          {/* Gradient Overlay Layer 1: Left heavy gradient for text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/85 via-45% to-transparent"></div>
+          {/* Gradient Overlay Layer 1: Left heavy gradient for text contrast, fading earlier to reveal all children */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0d14] via-[#0a0d14]/80 via-32% to-transparent"></div>
           
           {/* Gradient Overlay Layer 2: Top and bottom gradients for seamless header and section transition */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d14]/90 via-transparent to-[#0a0d14]"></div>
