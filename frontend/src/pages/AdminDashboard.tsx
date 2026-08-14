@@ -13,12 +13,42 @@ const getAvatarUrl = (url?: string | null) => {
   if (url.startsWith('/api')) return url
   return `/api${url.startsWith('/') ? '' : '/'}${url}`
 }
-const fileToBase64 = (file: File): Promise<string> => new Promise((res, rej) => {
-  const reader = new FileReader()
-  reader.onload = () => res(reader.result as string)
-  reader.onerror = (e) => rej(e)
-  reader.readAsDataURL(file)
-})
+const compressImageFile = (file: File, maxWidth = 1280, maxHeight = 1280, quality = 0.82): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let w = img.width
+        let h = img.height
+        if (w > maxWidth || h > maxHeight) {
+          if (w > h) {
+            h = Math.round((h * maxWidth) / w)
+            w = maxWidth
+          } else {
+            w = Math.round((w * maxHeight) / h)
+            h = maxHeight
+          }
+        }
+        canvas.width = w
+        canvas.height = h
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h)
+          resolve(canvas.toDataURL('image/jpeg', quality))
+        } else {
+          resolve(e.target?.result as string || '')
+        }
+      }
+      img.onerror = () => resolve(e.target?.result as string || '')
+      img.src = e.target?.result as string
+    }
+    reader.onerror = () => resolve('')
+    reader.readAsDataURL(file)
+  })
+}
+const fileToBase64 = compressImageFile
 
 // ─── types ───────────────────────────────────────────────────────────
 interface Stats { 
