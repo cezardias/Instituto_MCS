@@ -2,12 +2,12 @@ import { NavLink, Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
 const links = [
-  { label: 'INÍCIO', to: '/' },
-  { label: 'QUEM SOMOS', to: '/quem-somos' },
-  { label: 'PROJETOS', to: '/projetos' },
-  { label: 'TRANSPARÊNCIA', to: '/transparencia' },
-  { label: 'PARCEIROS', to: '/associados' },
+  { label: 'PROPÓSITO', to: '/' },
+  { label: 'NOSSA ESSÊNCIA', to: '/quem-somos' },
+  { label: 'ECOSSISTEMA DE ATUAÇÃO', to: '/projetos' },
+  { label: 'ASSOCIADOS', to: '/associados' },
   { label: 'CONTATO', to: '/contato' },
+  { label: 'RIFA MCS', to: '/rifa' },
 ]
 
 export default function NavBar() {
