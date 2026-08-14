@@ -78,21 +78,27 @@ export default function ProjectsPage() {
         
         {/* Project 4: Conexão Rima */}
         {pRima && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
-            <div className="lg:w-1/2 relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] bg-slate-900 overflow-hidden">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12 p-6 lg:p-8 gap-8 items-start">
+            <div className="w-full lg:w-1/2 lg:sticky lg:top-28 aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-slate-950 overflow-hidden relative shadow-md shrink-0">
+              {/* Ambient blurred backdrop for 100% full view */}
+              <img 
+                src={getImg(pRima, "/projeto_rima.png")} 
+                alt="" 
+                className="w-full h-full object-cover filter blur-md opacity-40 absolute inset-0 scale-110" 
+              />
               <img 
                 src={getImg(pRima, "/projeto_rima.png")} 
                 alt={pRima.title} 
-                className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105" 
+                className="w-full h-full object-contain relative z-10 p-2" 
               />
-              <div className={`absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
+              <div className={`absolute top-4 right-4 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
                 pRima.active === 1 ? 'bg-green-100/90 text-green-800 border-green-200' : 'bg-gray-100/90 text-gray-600 border-gray-200'
               }`}>
                 {pRima.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
               </div>
             </div>
             
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-between">
+            <div className="w-full lg:w-1/2 flex flex-col justify-between">
               <div>
                 <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
                   Contraturno Conexão Rima
@@ -159,21 +165,27 @@ export default function ProjectsPage() {
 
         {/* Project 1: MCS em Movimento */}
         {pMovimento && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
-            <div className="lg:w-1/2 relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] bg-slate-900 overflow-hidden">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12 p-6 lg:p-8 gap-8 items-start">
+            <div className="w-full lg:w-1/2 lg:sticky lg:top-28 aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-slate-950 overflow-hidden relative shadow-md shrink-0">
+              {/* Ambient blurred backdrop for 100% full view */}
+              <img 
+                src={getImg(pMovimento, "/projeto_movimento.png")} 
+                alt="" 
+                className="w-full h-full object-cover filter blur-md opacity-40 absolute inset-0 scale-110" 
+              />
               <img 
                 src={getImg(pMovimento, "/projeto_movimento.png")} 
                 alt={pMovimento.title} 
-                className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105" 
+                className="w-full h-full object-contain relative z-10 p-2" 
               />
-              <div className={`absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
+              <div className={`absolute top-4 left-4 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
                 pMovimento.active === 1 ? 'bg-green-100/90 text-green-800 border-green-200' : 'bg-gray-100/90 text-gray-600 border-gray-200'
               }`}>
                 {pMovimento.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
               </div>
             </div>
             
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-between">
+            <div className="w-full lg:w-1/2 flex flex-col justify-between">
               <div>
                 <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
                   {pMovimento.title}
@@ -243,21 +255,27 @@ export default function ProjectsPage() {
 
         {/* Project 2: MCS Digital */}
         {pDigital && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12">
-            <div className="lg:w-1/2 relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] bg-slate-900 overflow-hidden">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row-reverse mb-12 p-6 lg:p-8 gap-8 items-start">
+            <div className="w-full lg:w-1/2 lg:sticky lg:top-28 aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-slate-950 overflow-hidden relative shadow-md shrink-0">
+              {/* Ambient blurred backdrop for 100% full view */}
+              <img 
+                src={getImg(pDigital, "/projeto_digital.png")} 
+                alt="" 
+                className="w-full h-full object-cover filter blur-md opacity-40 absolute inset-0 scale-110" 
+              />
               <img 
                 src={getImg(pDigital, "/projeto_digital.png")} 
                 alt={pDigital.title} 
-                className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105" 
+                className="w-full h-full object-contain relative z-10 p-2" 
               />
-              <div className={`absolute top-6 right-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
+              <div className={`absolute top-4 right-4 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
                 pDigital.active === 1 ? 'bg-green-100/90 text-green-800 border-green-200' : 'bg-gray-100/90 text-gray-600 border-gray-200'
               }`}>
                 {pDigital.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
               </div>
             </div>
             
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-between">
+            <div className="w-full lg:w-1/2 flex flex-col justify-between">
               <div>
                 <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
                   {pDigital.title}
@@ -327,21 +345,27 @@ export default function ProjectsPage() {
 
         {/* Project 3: MCS Família */}
         {pFamilia && (
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12">
-            <div className="lg:w-1/2 relative min-h-[340px] sm:min-h-[420px] lg:min-h-[500px] bg-slate-900 overflow-hidden">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex flex-col lg:flex-row mb-12 p-6 lg:p-8 gap-8 items-start">
+            <div className="w-full lg:w-1/2 lg:sticky lg:top-28 aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-slate-950 overflow-hidden relative shadow-md shrink-0">
+              {/* Ambient blurred backdrop for 100% full view */}
+              <img 
+                src={getImg(pFamilia, "/projeto_familia.png")} 
+                alt="" 
+                className="w-full h-full object-cover filter blur-md opacity-40 absolute inset-0 scale-110" 
+              />
               <img 
                 src={getImg(pFamilia, "/projeto_familia.png")} 
                 alt={pFamilia.title} 
-                className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105" 
+                className="w-full h-full object-contain relative z-10 p-2" 
               />
-              <div className={`absolute top-6 left-6 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
+              <div className={`absolute top-4 left-4 z-20 px-4 py-1.5 text-xs font-bold tracking-wider rounded-full border shadow-md backdrop-blur-md ${
                 pFamilia.active === 1 ? 'bg-green-100/90 text-green-800 border-green-200' : 'bg-gray-100/90 text-gray-600 border-gray-200'
               }`}>
                 {pFamilia.active === 1 ? '🟢 PROJETO ATIVO' : '⚪ EM BREVE'}
               </div>
             </div>
             
-            <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-between">
+            <div className="w-full lg:w-1/2 flex flex-col justify-between">
               <div>
                 <h2 className="font-serif text-3xl lg:text-4xl text-carbono mb-4 leading-tight">
                   {pFamilia.title}
