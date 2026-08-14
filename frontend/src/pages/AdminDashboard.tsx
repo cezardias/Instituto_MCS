@@ -15,7 +15,23 @@ const getAvatarUrl = (url?: string | null) => {
 }
 
 // ─── types ───────────────────────────────────────────────────────────
-interface Stats { alunos_ativos: number; projetos_em_execucao: number; total_noticias: number; total_usuarios: number; pessoas_beneficiadas: number; recursos_captados: number; alunos_por_area: {area:string,count:number}[]; projetos_por_status: {status:string,count:number}[] }
+interface Stats { 
+  alunos_ativos: number; 
+  familias_apoiadas?: number; 
+  projetos_em_execucao: number; 
+  total_noticias?: number; 
+  total_usuarios?: number; 
+  pessoas_beneficiadas: number; 
+  recursos_captados: number; 
+  taxa_execucao?: number; 
+  receitas?: number; 
+  despesas?: number; 
+  saldo?: number; 
+  distribuicao_recursos?: { label: string; value: number }[]; 
+  alunos_por_area: { area: string; count: number }[]; 
+  projetos_por_status: { status: string; count: number }[]; 
+  alertas?: { type: string; icon: string; text: string; sub: string; link: string }[];
+}
 interface News { id:number; title:string; category:string; content:string; image_url:string|null; created_at:string }
 interface Project { id:number; title:string; status:string; area:string; location:string; beneficiados:number; budget:number; start_date:string; end_date:string; description:string; image_url?:string; active?:number; periodo?:string; dias?:string; horarios?:string; publico?:string; apoio?:string; created_at:string }
 interface Aluno { id:number; name:string; email:string; phone:string; area:string; status:string; birth_date:string; created_at:string }
@@ -240,7 +256,7 @@ export default function AdminDashboard() {
 
         {/* Content */}
         <main className="flex-1 overflow-y-auto p-6">
-          {tab === 'overview'    && <OverviewTab />}
+          {tab === 'overview'    && <OverviewTab onNavigate={t => setTab(t)} />}
           {tab === 'projetos'    && <ProjetosTab />}
           {tab === 'alunos'      && <AlunosTab />}
           {tab === 'news'        && <NewsTab />}
@@ -248,7 +264,7 @@ export default function AdminDashboard() {
           {tab === 'financeiro'  && <FinanceiroTab />}
           {tab === 'despesas'    && <DespesasTab />}
           {tab === 'prestacao'   && <AccountabilityTab />}
-          {tab === 'indicadores' && <IndicadoresTab />}
+          {tab === 'indicadores' && <IndicadoresTab onNavigate={t => setTab(t)} />}
           {tab === 'relatorios'  && <RelatoriosTab />}
           {tab === 'impacto'     && <ImpactoTab />}
           {tab === 'documentos'  && <DocumentosTab />}
@@ -297,7 +313,10 @@ function ComingSoon({ label }: { label:string }) {
 // ═══════════════════════════════════════════════════════════════════
 // OVERVIEW TAB
 // ═══════════════════════════════════════════════════════════════════
-function OverviewTab() {
+// ═══════════════════════════════════════════════════════════════════
+// OVERVIEW TAB
+// ═══════════════════════════════════════════════════════════════════
+function OverviewTab({ onNavigate }: { onNavigate?: (tabKey: string) => void }) {
   const [stats, setStats] = useState<Stats|null>(null)
 
   useEffect(() => {
@@ -306,30 +325,28 @@ function OverviewTab() {
   }, [])
 
   const kpis = [
-    { label:'Pessoas Beneficiadas', value: stats?.pessoas_beneficiadas ? stats.pessoas_beneficiadas.toLocaleString('pt-BR') : '15.000+', delta:'+12,4%', icon:'👥', color:'bg-blue-50 text-blue-600', border:'border-blue-100' },
-    { label:'Alunos Ativos', value: stats?.alunos_ativos?.toLocaleString('pt-BR') || '3.842', delta:'+8,7%', icon:'🎓', color:'bg-emerald-50 text-emerald-600', border:'border-emerald-100' },
-    { label:'Projetos em Execução', value: stats?.projetos_em_execucao?.toString() || '18', delta:'+2', icon:'🚀', color:'bg-orange-50 text-orange-600', border:'border-orange-100' },
-    { label:'Recursos Captados', value: stats?.recursos_captados ? `R$ ${(stats.recursos_captados/1e6).toFixed(2)} mi` : 'R$ 8,75 mi', delta:'+18,6%', icon:'💰', color:'bg-yellow-50 text-yellow-600', border:'border-yellow-100' },
-    { label:'Taxa de Execução', value:'78,3%', delta:'+6,2 p.p.', icon:'✅', color:'bg-purple-50 text-purple-600', border:'border-purple-100' },
+    { label:'Pessoas Beneficiadas', value: stats?.pessoas_beneficiadas !== undefined ? stats.pessoas_beneficiadas.toLocaleString('pt-BR') : '0', delta:'Real', icon:'👥', color:'bg-blue-50 text-blue-600', border:'border-blue-100' },
+    { label:'Alunos Ativos (Famílias)', value: stats?.alunos_ativos !== undefined ? stats.alunos_ativos.toLocaleString('pt-BR') : '0', delta:'Real', icon:'🎓', color:'bg-emerald-50 text-emerald-600', border:'border-emerald-100' },
+    { label:'Projetos em Execução', value: stats?.projetos_em_execucao !== undefined ? stats.projetos_em_execucao.toString() : '0', delta:'Real', icon:'🚀', color:'bg-orange-50 text-orange-600', border:'border-orange-100' },
+    { label:'Recursos Captados', value: stats?.recursos_captados !== undefined ? `R$ ${stats.recursos_captados.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : 'R$ 0,00', delta:'Real', icon:'💰', color:'bg-yellow-50 text-yellow-600', border:'border-yellow-100' },
+    { label:'Taxa de Execução', value: stats?.taxa_execucao !== undefined ? `${stats.taxa_execucao}%` : '0%', delta:'Real', icon:'✅', color:'bg-purple-50 text-purple-600', border:'border-purple-100' },
   ]
 
-  const donutColors = ['#22c55e','#3b82f6','#f59e0b','#ef4444']
-  const projStatus = stats?.projetos_por_status || [
-    {status:'em_execucao',count:12},{status:'em_planejamento',count:3},{status:'concluido',count:2},{status:'suspenso',count:1}
-  ]
-  const projTotal = projStatus.reduce((s,p)=>s+p.count,0) || 18
+  const projStatus = stats?.projetos_por_status || []
+  const projTotal = projStatus.reduce((s,p)=>s+p.count,0) || 1
 
   const areaData = stats?.alunos_por_area?.length
     ? stats.alunos_por_area.map(a=>({label:a.area, value:a.count}))
-    : [
-        {label:'Ação Social',value:1682},{label:'Cultura',value:1208},{label:'Esporte',value:642},{label:'Formação Profissional',value:310}
-      ]
+    : [{label:'Ação Social', value: stats?.alunos_ativos || 0}]
 
-  const alertas = [
-    { icon:'⚠️', text:'3 prestações de contas vencem nos próximos 15 dias', sub:'Acesse para regularizar' },
-    { icon:'📋', text:'2 relatórios aguardando aprovação', sub:'Acesse para revisar' },
-    { icon:'📅', text:'7 documentos próximos do vencimento', sub:'Acesse para atualizar' },
-    { icon:'🔔', text:'1 denúncia em análise', sub:'Acompanhe no Canal de Denúncias' },
+  const distRecursos = stats?.distribuicao_recursos?.length
+    ? stats.distribuicao_recursos
+    : [{label: 'Doações / Projetos', value: stats?.recursos_captados || 0}]
+
+  const totalDistRecursos = distRecursos.reduce((acc, curr) => acc + curr.value, 0) || 1
+
+  const alertas = stats?.alertas || [
+    { icon:'✅', text:'Sistema em conformidade! Nenhuma pendência urgente.', sub:'Tudo atualizado', link:'overview' }
   ]
 
   return (
@@ -337,11 +354,13 @@ function OverviewTab() {
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {kpis.map(k => (
-          <div key={k.label} className={`bg-white rounded-2xl p-5 border ${k.border} shadow-sm`}>
-            <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl text-xl mb-3 ${k.color}`}>{k.icon}</div>
-            <p className="font-serif text-2xl font-bold text-carbono leading-tight">{k.value}</p>
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{k.label}</p>
-            <span className="text-[10px] font-bold text-emerald-500">{k.delta} vs. período anterior</span>
+          <div key={k.label} className={`bg-white rounded-2xl p-5 border ${k.border} shadow-sm flex flex-col justify-between`}>
+            <div>
+              <div className={`inline-flex items-center justify-center w-9 h-9 rounded-xl text-xl mb-3 ${k.color}`}>{k.icon}</div>
+              <p className="font-serif text-xl md:text-2xl font-bold text-carbono leading-tight">{k.value}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{k.label}</p>
+            </div>
+            <span className="text-[10px] font-bold text-emerald-600 mt-2 block">✓ Dados reais do banco</span>
           </div>
         ))}
       </div>
@@ -349,108 +368,128 @@ function OverviewTab() {
       {/* Row 2: Resumo Financeiro | Donut Recursos | Alunos por Área */}
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Resumo Financeiro */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-1">
-            <h3 className="font-bold text-sm text-carbono">Resumo Financeiro</h3>
-            <span className="text-[10px] text-gray-400">ⓘ</span>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+              <h3 className="font-bold text-sm text-carbono">Resumo Financeiro Real</h3>
+              <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">Ao Vivo</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest">Receitas</p>
+                <p className="font-bold text-emerald-600 text-xs md:text-sm">R$ {(stats?.receitas || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest">Despesas</p>
+                <p className="font-bold text-red-500 text-xs md:text-sm">R$ {(stats?.despesas || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-widest">Saldo</p>
+                <p className="font-bold text-carbono text-xs md:text-sm">R$ {(stats?.saldo || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+              </div>
+            </div>
+            <Sparkline points={[1, (stats?.receitas || 1) / 2, stats?.receitas || 2]} color="#22c55e" />
           </div>
-          <div className="flex gap-6 mb-4">
-            <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Receitas</p><p className="font-bold text-emerald-600">R$ 8,75 mi</p><span className="text-[10px] text-emerald-500">+18,5%</span></div>
-            <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Despesas</p><p className="font-bold text-red-500">R$ 6,32 mi</p><span className="text-[10px] text-red-400">+14,3%</span></div>
-            <div><p className="text-[10px] text-gray-400 uppercase tracking-widest">Saldo</p><p className="font-bold text-carbono">R$ 2,43 mi</p><span className="text-[10px] text-emerald-500">+25,9%</span></div>
-          </div>
-          <Sparkline points={[2,3,5,4,6,5,7,8,7,9]} color="#22c55e" />
-          <Sparkline points={[1,2,3,3,4,3,5,5,6,7]} color="#ef4444" />
-          <p className="text-[10px] text-dourado font-bold mt-2 cursor-pointer hover:underline">VER RELATÓRIO FINANCEIRO →</p>
+          <button onClick={() => onNavigate?.('financeiro')} className="text-[10px] text-dourado font-bold mt-4 hover:underline text-left uppercase">VER MÓDULO FINANCEIRO →</button>
         </div>
 
         {/* Distribuição Recursos */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h3 className="font-bold text-sm text-carbono">Distribuição dos Recursos</h3>
-          </div>
-          <div className="flex items-center gap-6">
-            <DonutChart
-              data={[{label:'Públicos',value:4.68},{label:'Privados',value:2.91},{label:'Patrocínio',value:0.94},{label:'Convênios',value:0.22}]}
-              total={8.75} colors={donutColors} />
-            <div className="space-y-2 flex-1">
-              {[
-                {label:'Rec. Públicos',valor:'R$ 4,68 mi',pct:'53,4%',cor:'bg-green-500'},
-                {label:'Rec. Privados',valor:'R$ 2,91 mi',pct:'33,3%',cor:'bg-blue-500'},
-                {label:'Patrocínios',valor:'R$ 0,94 mi',pct:'10,7%',cor:'bg-yellow-400'},
-                {label:'Convênios',valor:'R$ 0,22 mi',pct:'2,5%',cor:'bg-red-400'},
-              ].map(d => (
-                <div key={d.label} className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${d.cor}`} />
-                  <span className="text-[10px] text-gray-500 flex-1">{d.label}</span>
-                  <span className="text-[10px] font-bold text-carbono">{d.pct}</span>
-                </div>
-              ))}
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-carbono mb-4">Distribuição dos Recursos (Categorias)</h3>
+            <div className="space-y-3">
+              {distRecursos.map((d, i) => {
+                const pct = Math.round((d.value / totalDistRecursos) * 100)
+                return (
+                  <div key={d.label}>
+                    <div className="flex justify-between text-xs font-bold text-carbono mb-1">
+                      <span>{d.label}</span>
+                      <span>R$ {d.value.toLocaleString('pt-BR', {minimumFractionDigits:2})} ({pct}%)</span>
+                    </div>
+                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                      <div className="bg-dourado h-full rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
+          <button onClick={() => onNavigate?.('financeiro')} className="text-[10px] text-dourado font-bold mt-4 hover:underline text-left uppercase">VER DETALHAMENTO DE RECEITAS →</button>
         </div>
 
         {/* Alunos por Área */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h3 className="font-bold text-sm text-carbono mb-4">Alunos por Área de Atuação</h3>
-          <BarChart data={areaData} />
-          <p className="text-[10px] text-dourado font-bold mt-4 cursor-pointer hover:underline">VER RELATÓRIO DE ALUNOS →</p>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-carbono mb-4">Alunos por Área de Atuação</h3>
+            <BarChart data={areaData} />
+          </div>
+          <button onClick={() => onNavigate?.('users')} className="text-[10px] text-dourado font-bold mt-4 hover:underline text-left uppercase">VER GESTÃO DE USUÁRIOS E ALUNOS →</button>
         </div>
       </div>
 
       {/* Row 3: Impacto Social | Projetos por Status | Alertas */}
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Impacto Social */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h3 className="font-bold text-sm text-carbono mb-3">Evolução de Impacto Social</h3>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="text-center"><p className="font-bold text-carbono">1.284</p><p className="text-[9px] text-gray-400 uppercase">Empregos Gerados</p></div>
-            <div className="text-center"><p className="font-bold text-carbono">R$ 3,21 mi</p><p className="text-[9px] text-gray-400 uppercase">Renda Gerada</p></div>
-            <div className="text-center"><p className="font-bold text-carbono">2.193</p><p className="text-[9px] text-gray-400 uppercase">Certif. Emitidos</p></div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-carbono mb-3">Evolução de Impacto Social</h3>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="text-center"><p className="font-bold text-carbono text-lg">{stats?.familias_apoiadas || 0}</p><p className="text-[9px] text-gray-400 uppercase">Famílias Apoiadas</p></div>
+              <div className="text-center"><p className="font-bold text-carbono text-lg">{stats?.alunos_ativos || 0}</p><p className="text-[9px] text-gray-400 uppercase">Alunos Ativos</p></div>
+              <div className="text-center"><p className="font-bold text-carbono text-lg">{stats?.pessoas_beneficiadas || 0}</p><p className="text-[9px] text-gray-400 uppercase">Pessoas Beneficiadas</p></div>
+            </div>
+            <Sparkline points={[1, Math.max(1, (stats?.alunos_ativos||1)/2), stats?.alunos_ativos||1]} color="#C9A84C" />
           </div>
-          <Sparkline points={[2,2.5,3,3.5,3,4,4.5,4,5,5.5]} color="#C9A84C" />
-          <p className="text-[10px] text-dourado font-bold mt-2 cursor-pointer hover:underline">VER RELATÓRIO DE IMPACTO →</p>
+          <button onClick={() => onNavigate?.('impacto')} className="text-[10px] text-dourado font-bold mt-2 hover:underline text-left uppercase">VER RELATÓRIO DE IMPACTO →</button>
         </div>
 
         {/* Projetos por Status */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <h3 className="font-bold text-sm text-carbono mb-4">Projetos por Status</h3>
-          <div className="flex items-center gap-6">
-            <DonutChart
-              data={projStatus.map(p=>({label:STATUS_LABELS[p.status]||p.status, value:p.count}))}
-              total={projTotal}
-              colors={['#22c55e','#3b82f6','#6b7280','#ef4444']}
-            />
-            <div className="space-y-2 flex-1">
-              {projStatus.map((p,i) => (
-                <div key={p.status} className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full`} style={{backgroundColor:['#22c55e','#3b82f6','#6b7280','#ef4444'][i%4]}} />
-                  <span className="text-[10px] text-gray-500 flex-1">{STATUS_LABELS[p.status]||p.status}</span>
-                  <span className="text-[10px] font-bold text-carbono">{p.count}</span>
-                </div>
-              ))}
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-sm text-carbono mb-4">Projetos por Status</h3>
+            <div className="flex items-center gap-6">
+              <DonutChart
+                data={projStatus.map(p=>({label:STATUS_LABELS[p.status]||p.status, value:p.count}))}
+                total={projTotal}
+                colors={['#22c55e','#3b82f6','#6b7280','#ef4444']}
+              />
+              <div className="space-y-2 flex-1">
+                {projStatus.map((p,i) => (
+                  <div key={p.status} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full" style={{backgroundColor:['#22c55e','#3b82f6','#6b7280','#ef4444'][i%4]}} />
+                    <span className="text-[10px] text-gray-500 flex-1">{STATUS_LABELS[p.status]||p.status}</span>
+                    <span className="text-[10px] font-bold text-carbono">{p.count}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <p className="text-[10px] text-dourado font-bold mt-4 cursor-pointer hover:underline">VER TODOS OS PROJETOS →</p>
+          <button onClick={() => onNavigate?.('projetos')} className="text-[10px] text-dourado font-bold mt-4 hover:underline text-left uppercase">VER TODOS OS PROJETOS →</button>
         </div>
 
         {/* Alertas */}
-        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h3 className="font-bold text-sm text-carbono">Alertas e Pendências</h3>
-            <span className="text-[10px] text-dourado font-bold cursor-pointer hover:underline">VER TODOS</span>
-          </div>
-          <div className="space-y-3">
-            {alertas.map((a,i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-colors cursor-pointer">
-                <span className="text-lg shrink-0">{a.icon}</span>
-                <div>
-                  <p className="text-[11px] font-semibold text-carbono leading-tight">{a.text}</p>
-                  <p className="text-[10px] text-dourado mt-0.5">{a.sub}</p>
+        <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <h3 className="font-bold text-sm text-carbono">Alertas e Pendências do Sistema</h3>
+              <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">Tempo Real</span>
+            </div>
+            <div className="space-y-3">
+              {alertas.map((a: any, i: number) => (
+                <div 
+                  key={i} 
+                  onClick={() => onNavigate?.(a.link || 'overview')}
+                  className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-colors cursor-pointer border border-gray-100"
+                >
+                  <span className="text-lg shrink-0">{a.icon}</span>
+                  <div className="flex-1">
+                    <p className="text-[11px] font-semibold text-carbono leading-tight">{a.text}</p>
+                    <p className="text-[10px] text-dourado font-bold mt-0.5">{a.sub}</p>
+                  </div>
+                  <span className="text-gray-300 shrink-0">›</span>
                 </div>
-                <span className="text-gray-300 ml-auto">›</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1858,36 +1897,85 @@ function AccountabilityTab() {
 // ═══════════════════════════════════════════════════════════════════
 // INDICADORES TAB
 // ═══════════════════════════════════════════════════════════════════
-function IndicadoresTab() {
+// ═══════════════════════════════════════════════════════════════════
+// INDICADORES TAB
+// ═══════════════════════════════════════════════════════════════════
+function IndicadoresTab({ onNavigate }: { onNavigate?: (tabKey: string) => void }) {
+  const [stats, setStats] = useState<Stats|null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/stats', { headers: authH() })
+      .then(r => r.json())
+      .then(data => { setStats(data); setLoading(false); })
+      .catch(() => setLoading(false))
+  }, [])
+
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="font-serif text-2xl text-carbono">Indicadores de Desempenho</h2>
-        <p className="text-sm text-gray-400">Acompanhamento das principais métricas</p>
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div>
+        <h2 className="font-serif text-3xl text-carbono">Indicadores de Desempenho Institucional</h2>
+        <p className="text-sm text-gray-500">Métricas, alertas e KPIs atualizados em tempo real diretamente do banco de dados.</p>
       </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Engajamento Mensal</p>
-          <p className="text-3xl font-bold text-dourado">+ 45%</p>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Taxa de Conclusão (Projetos)</p>
-          <p className="text-3xl font-bold text-dourado">92%</p>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Novos Voluntários</p>
-          <p className="text-3xl font-bold text-dourado">128</p>
-        </div>
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Satisfação</p>
-          <p className="text-3xl font-bold text-dourado">9.8/10</p>
-        </div>
-      </div>
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-center h-64 text-gray-400 flex-col">
-        <div className="text-4xl mb-4">📊</div>
-        <p className="font-semibold">Módulo de Gráficos Avançados</p>
-        <p className="text-sm">Em breve (Integração com BI)</p>
-      </div>
+
+      {loading ? (
+        <div className="text-center py-20 text-gray-400">Carregando indicadores do sistema...</div>
+      ) : (
+        <>
+          {/* Top KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Famílias & Alunos Atendidos</p>
+              <p className="text-4xl font-serif font-bold text-dourado">{stats?.familias_apoiadas || stats?.alunos_ativos || 0}</p>
+              <p className="text-xs text-gray-400 mt-2">1 aluno = 1 família apoiada</p>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Taxa de Execução Financeira</p>
+              <p className="text-4xl font-serif font-bold text-emerald-600">{stats?.taxa_execucao || 0}%</p>
+              <p className="text-xs text-gray-400 mt-2">Despesas / Orçamento Captado</p>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Projetos Ativos</p>
+              <p className="text-4xl font-serif font-bold text-blue-600">{stats?.projetos_em_execucao || 0}</p>
+              <p className="text-xs text-gray-400 mt-2">Em execução no ecossistema</p>
+            </div>
+            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Recursos Captados</p>
+              <p className="text-3xl font-serif font-bold text-carbono">R$ {(stats?.recursos_captados || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+              <p className="text-xs text-gray-400 mt-2">Entradas financeiras registradas</p>
+            </div>
+          </div>
+
+          {/* Painel Real de Pendências */}
+          <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+              <div>
+                <h3 className="font-serif text-2xl text-carbono font-bold">Resumo de Pendências & Auditoria do Banco</h3>
+                <p className="text-xs text-gray-400">Clique em qualquer item para acessar o módulo correspondente e regularizar</p>
+              </div>
+              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold shrink-0">Dados Reais</span>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {stats?.alertas?.map((a: any, idx: number) => (
+                <div 
+                  key={idx} 
+                  onClick={() => onNavigate?.(a.link)} 
+                  className="p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:border-dourado hover:bg-yellow-50/50 transition-all cursor-pointer flex items-center justify-between group"
+                >
+                  <div className="flex items-center gap-4">
+                    <span className="text-3xl">{a.icon}</span>
+                    <div>
+                      <p className="font-bold text-carbono text-sm group-hover:text-dourado transition-colors">{a.text}</p>
+                      <p className="text-xs text-dourado font-bold mt-1">{a.sub}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-gray-400 group-hover:text-dourado transition-colors">Acessar →</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
