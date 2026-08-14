@@ -20,31 +20,31 @@ export default function HomePage() {
   return (
     <div className="bg-marfim text-carbono min-h-screen">
       {/* Hero Section — Full Bleed Widescreen Background Photo under Header */}
-      <section className="relative min-h-[92vh] pt-36 pb-20 flex flex-col justify-center overflow-hidden bg-[#080a0f] text-white">
+      <section className="relative min-h-[92vh] pt-36 pb-20 flex flex-col justify-center overflow-hidden bg-[#06080d] text-white">
         {/* Full-bleed Widescreen Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
             src="/hero_bg.jpg" 
             alt="Crianças aprendendo no Instituto MCS" 
-            className="w-full h-full object-cover object-[center_30%] filter contrast-[1.05] brightness-[0.95]"
+            className="w-full h-full object-cover object-[80%_35%] filter contrast-[1.05] brightness-[0.98]"
           />
-          {/* Subtle dark gradient overlay on left for crisp readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#080a0f] via-[#080a0f]/85 sm:via-[#080a0f]/75 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#080a0f]/80 via-[#080a0f]/30 to-transparent pointer-events-none" />
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080a0f] via-transparent to-transparent pointer-events-none" />
+          {/* Elegant dark gradient overlay on left so text is crisp and right side remains bright */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#06080d] via-[#06080d]/80 sm:via-[#06080d]/65 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#06080d]/80 via-[#06080d]/30 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#06080d] via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Hero Text Content Container */}
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full pt-8 pb-4 flex-1 flex items-center">
           <div className="max-w-2xl text-left">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.14] mb-6 text-white font-sans drop-shadow-md">
-              Transformamos realidades através da{' '}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.12] mb-6 text-white font-sans drop-shadow-md">
+              Transformamos<br className="hidden sm:inline" /> realidades através da{' '}
               <span className="text-amber-400 font-extrabold block mt-1">
-                cultura, educação e oportunidades.
+                cultura, educação e<br className="hidden sm:inline" /> oportunidades.
               </span>
             </h1>
 
-            <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-xl drop-shadow">
+            <p className="text-gray-200 text-base sm:text-lg leading-relaxed mb-8 font-normal max-w-lg drop-shadow">
               Promovemos o desenvolvimento humano e social por meio de projetos que geram impacto positivo e constroem um futuro mais justo e consciente.
             </p>
 

@@ -49,16 +49,12 @@ export default function NavBar() {
       }`}>
         <div className="max-w-[1600px] mx-auto px-4 xl:px-8 h-28 flex items-center justify-between">
 
-          {/* Logo - Enlarged and adapted to dark background */}
-          <Link to="/" className="shrink-0 flex items-center">
+          {/* Logo - Large & 100% Transparent */}
+          <Link to="/" className="shrink-0 flex items-center py-2">
             <img
-              src="/logo.png"
+              src="/logo_transparent.png"
               alt="Instituto MCS"
-              className={`h-16 xl:h-20 w-auto transition-all ${
-                isHomePage 
-                  ? 'filter invert brightness-125 mix-blend-screen' 
-                  : 'mix-blend-multiply'
-              }`}
+              className="h-16 lg:h-20 xl:h-24 w-auto object-contain transition-transform hover:scale-105"
             />
           </Link>
 
