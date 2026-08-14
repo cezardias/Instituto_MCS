@@ -537,6 +537,60 @@ try {
   console.error('Migration error updating old parceiros:', e.message);
 }
 
+// Sync/Migration for Facilitadora Luana Pessoa Barbosa and all approved oficineiros into users table & oficineiro_registrations
+try {
+  const luanaParceiro: any = db.prepare("SELECT * FROM parceiros WHERE email LIKE '%luanapessoabarbosa%' OR name LIKE '%Luana%'").get()
+  if (luanaParceiro) {
+    const existingOficineiro: any = db.prepare("SELECT * FROM oficineiro_registrations WHERE email LIKE '%luanapessoabarbosa%' OR name LIKE '%Luana%'").get()
+    if (!existingOficineiro) {
+      db.prepare(`
+        INSERT INTO oficineiro_registrations 
+        (tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, status)
+        VALUES ('instituto-mcs', ?, ?, ?, ?, '1995-01-01', 'Graduação / Facilitadora MCS', 'Facilitadora de Projetos MCS', 'Contribuição com oficinas e desenvolvimento humano', 'aprovado')
+      `).run(
+        luanaParceiro.name || 'Luana Pessoa Barbosa',
+        luanaParceiro.email || 'luanapessoabarbosa@gmail.com',
+        luanaParceiro.phone || '61982084706',
+        luanaParceiro.cpf_cnpj || '05854001136'
+      )
+    }
+
+    const existingUser: any = db.prepare("SELECT * FROM users WHERE email LIKE '%luanapessoabarbosa%' OR name LIKE '%Luana%'").get()
+    if (!existingUser) {
+      const defaultPasswordHash = '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQOEg6Lruj3vjPGga31lW' // 123456
+      db.prepare(`
+        INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, must_change_password)
+        VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, 1)
+      `).run(
+        luanaParceiro.name || 'Luana Pessoa Barbosa',
+        luanaParceiro.email || 'luanapessoabarbosa@gmail.com',
+        defaultPasswordHash,
+        luanaParceiro.cpf_cnpj || '05854001136',
+        luanaParceiro.phone || '61982084706'
+      )
+    } else {
+      db.prepare("UPDATE users SET role = 'oficineiro' WHERE id = ?").run(existingUser.id)
+    }
+  }
+
+  // Ensure all approved oficineiros in oficineiro_registrations exist in users table as 'oficineiro'
+  const approvedOficineiros: any[] = db.prepare("SELECT * FROM oficineiro_registrations WHERE status = 'aprovado'").all()
+  for (const reg of approvedOficineiros) {
+    const usr: any = db.prepare("SELECT id FROM users WHERE email = ?").get(reg.email)
+    if (!usr) {
+      const defaultPasswordHash = '$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQOEg6Lruj3vjPGga31lW' // 123456
+      db.prepare(`
+        INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
+        VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
+      `).run(reg.name, reg.email, defaultPasswordHash, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+    } else {
+      db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(reg.email)
+    }
+  }
+} catch (e: any) {
+  console.error('Migration error syncing Facilitadores into users:', e.message)
+}
+
 
 // --- SEED PROJECTS ---
 try {

@@ -32,12 +32,47 @@ router.post('/', (req, res) => {
   }
 })
 
+// POST /api/oficineiros/admin (Admin directly creating/registering a Facilitador)
+router.post('/admin', authMiddleware, async (req, res) => {
+  const { name, email, phone, cpf, birth_date, education, experience, contribution, availability, status } = req.body
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Nome e E-mail são obrigatórios.' })
+  }
+
+  try {
+    const finalStatus = status || 'aprovado'
+    const info = db.prepare(
+      `INSERT INTO oficineiro_registrations 
+       (tenant_id, name, email, phone, cpf, birth_date, education, experience, contribution, availability, status) 
+       VALUES ('instituto-mcs', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      name, email, phone || '', cpf || '', birth_date || '', education || 'Formação MCS', experience || 'Facilitadora MCS', contribution || '', availability || '', finalStatus
+    )
+
+    if (finalStatus === 'aprovado') {
+      const existingUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email)
+      if (!existingUser) {
+        const defaultPassword = await hashPassword('123456')
+        db.prepare(`
+          INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
+          VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
+        `).run(name, email, defaultPassword, cpf || null, phone || null, birth_date || null)
+      } else {
+        db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(email)
+      }
+    }
+
+    res.status(201).json({ id: info.lastInsertRowid, success: true })
+  } catch (e: any) {
+    res.status(500).json({ error: e.message })
+  }
+})
+
 // GET /api/oficineiros (Protected - used by admin dashboard)
 router.get('/', authMiddleware, (req, res) => {
-  const tenant_id = (req as any).user.tenant_id
-  
   try {
-    const rows = db.prepare('SELECT * FROM oficineiro_registrations WHERE tenant_id = ? ORDER BY created_at DESC').all(tenant_id)
+    const rows = db.prepare("SELECT * FROM oficineiro_registrations WHERE tenant_id = 'instituto-mcs' OR tenant_id = 'mcs' OR tenant_id IS NULL ORDER BY created_at DESC").all()
     res.json(rows)
   } catch (e: any) {
     res.status(500).json({ error: e.message })
@@ -46,7 +81,6 @@ router.get('/', authMiddleware, (req, res) => {
 
 // PUT /api/oficineiros/:id (Protected - used to update status)
 router.put('/:id', authMiddleware, async (req, res) => {
-  const tenant_id = (req as any).user.tenant_id
   const { id } = req.params
   const { status } = req.body
 
@@ -55,7 +89,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
   }
 
   try {
-    const info = db.prepare('UPDATE oficineiro_registrations SET status = ? WHERE id = ? AND tenant_id = ?').run(status, id, tenant_id)
+    const info = db.prepare('UPDATE oficineiro_registrations SET status = ? WHERE id = ?').run(status, id)
     if (info.changes === 0) return res.status(404).json({ error: 'Inscrição não encontrada' })
 
     if (status === 'aprovado') {
@@ -66,8 +100,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
           const defaultPassword = await hashPassword('123456')
           db.prepare(`
             INSERT INTO users (tenant_id, name, email, password_hash, role, cpf, phone, birth_date, must_change_password)
-            VALUES (?, ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
-          `).run(tenant_id, reg.name, reg.email, defaultPassword, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+            VALUES ('instituto-mcs', ?, ?, ?, 'oficineiro', ?, ?, ?, 1)
+          `).run(reg.name, reg.email, defaultPassword, reg.cpf || null, reg.phone || null, reg.birth_date || null)
+        } else {
+          db.prepare("UPDATE users SET role = 'oficineiro' WHERE email = ?").run(reg.email)
         }
       }
     }
