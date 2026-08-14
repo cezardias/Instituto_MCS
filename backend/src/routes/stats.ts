@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.get('/', authMiddleware, (req, res) => {
   try {
-    // 1. Alunos Ativos & Famílias Apoiadas (cada aluno conta exatamente uma família)
+    // 1. Alunos Ativos & Famílias Apoiadas (cada aluno conta exatamente uma família e uma pessoa beneficiada direta)
     const countUniqueAlunos: any = db.prepare(`
       SELECT COUNT(DISTINCT LOWER(TRIM(COALESCE(NULLIF(email, ''), name)))) as count 
       FROM (
@@ -18,10 +18,7 @@ router.get('/', authMiddleware, (req, res) => {
 
     const alunos_ativos = countUniqueAlunos?.count || 0
     const familias_apoiadas = alunos_ativos
-
-    // Pessoas beneficiadas = Famílias + soma de beneficiados cadastrados nos projetos
-    const totalBeneficiadosProjetos: any = db.prepare("SELECT COALESCE(SUM(beneficiados), 0) as total FROM projects").get()
-    const pessoas_beneficiadas = familias_apoiadas + (totalBeneficiadosProjetos?.total || 0)
+    const pessoas_beneficiadas = familias_apoiadas
 
     // 2. Projetos em Execução e Distribuição por Status
     const countProjetosExecucao: any = db.prepare("SELECT COUNT(*) as count FROM projects WHERE status = 'em_execucao'").get()
