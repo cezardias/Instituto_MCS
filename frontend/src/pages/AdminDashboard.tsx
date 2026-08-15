@@ -862,8 +862,16 @@ function AlunosTab() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
-  const blank = { name:'', email:'', phone:'', area:'Ação Social', status:'ativo', birth_date:'' }
+  const blank = { 
+    name:'', email:'', phone:'', area:'Educação', status:'ativo', birth_date:'',
+    student_name:'', student_email:'', student_cpf:'', student_rg:'', gender:'Feminino', rnm:'', address:'',
+    school_name:'', school_shift:'Matutino', school_grade:'',
+    health_allergies:'', blood_type:'Não sei', weight:'', height:'', medications:'', health_conditions:'',
+    parent_name:'', parent_email:'', parent_cpf:'', parent_rg:'', emergency_phone:'', family_kinship:'Mãe',
+    parents_profession:'', workplace:'', family_income:'1 a 2 salários mínimos', safety_word:''
+  }
   const [form, setForm] = useState<any>(blank)
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -884,9 +892,10 @@ function AlunosTab() {
       listUsers.forEach((u: any) => {
         const key = (u.email || u.name).toLowerCase().trim()
         combinedMap.set(key, {
+          ...u,
           id: u.id,
-          name: u.name,
-          email: u.email || '',
+          name: u.student_name || u.name,
+          email: u.email || u.student_email || '',
           phone: u.phone || u.personal_email || '',
           area: 'Educação',
           status: 'ativo',
@@ -901,9 +910,10 @@ function AlunosTab() {
         const key = (a.email || a.name).toLowerCase().trim()
         if (!combinedMap.has(key)) {
           combinedMap.set(key, {
+            ...a,
             id: a.id,
-            name: a.name,
-            email: a.email || '',
+            name: a.student_name || a.name,
+            email: a.email || a.student_email || '',
             phone: a.phone || '',
             area: a.area || 'Educação',
             status: a.status || 'ativo',
@@ -924,7 +934,7 @@ function AlunosTab() {
   useEffect(() => { load() }, [load])
 
   const openNew = () => { setEditing(null); setForm(blank); setError(''); setShowForm(true) }
-  const openEdit = (a: any) => { setEditing(a); setForm({...a}); setError(''); setShowForm(true) }
+  const openEdit = (a: any) => { setEditing(a); setForm({ ...blank, ...a, name: a.student_name || a.name, parent_name: a.parent_name || a.name }); setError(''); setShowForm(true) }
   const del = async (a: any) => {
     if (!confirm('Excluir aluno?')) return;
     const url = a.source === 'users' ? `/api/users/${a.id}` : `/api/alunos/${a.id}`
@@ -934,12 +944,19 @@ function AlunosTab() {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError('')
+    const payload = {
+      ...form,
+      name: form.student_name || form.name,
+      student_name: form.student_name || form.name,
+      parent_name: form.parent_name || form.name
+    }
+
     if (editing && editing.source === 'users') {
       try {
         const r = await fetch(`/api/users/${editing.id}`, {
           method: 'PUT',
           headers: authH(),
-          body: JSON.stringify({ name: form.name, email: form.email, phone: form.phone, birth_date: form.birth_date })
+          body: JSON.stringify(payload)
         })
         if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro') } else { setShowForm(false); load() }
       } catch { setError('Erro de conexão') }
@@ -947,7 +964,7 @@ function AlunosTab() {
       const method = editing ? 'PUT' : 'POST'
       const url = editing ? `/api/alunos/${editing.id}` : '/api/alunos'
       try {
-        const r = await fetch(url, { method, headers: authH(), body: JSON.stringify(form) })
+        const r = await fetch(url, { method, headers: authH(), body: JSON.stringify(payload) })
         if (!r.ok) { const d = await r.json(); setError(d.error || 'Erro') } else { setShowForm(false); load() }
       } catch { setError('Erro de conexão') }
     }
@@ -964,67 +981,284 @@ function AlunosTab() {
       if (myRole === 'responsavel') return a.parent_id === myId || (a.email && user?.email && a.email.toLowerCase() === user.email.toLowerCase())
       return false
     })
-    .filter(a => a.name.toLowerCase().includes(search.toLowerCase()) || (a.area||'').toLowerCase().includes(search.toLowerCase()))
+    .filter(a => (a.name || '').toLowerCase().includes(search.toLowerCase()) || (a.area||'').toLowerCase().includes(search.toLowerCase()) || (a.school_name||'').toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-2xl text-carbono">Alunos</h2>
-          <p className="text-sm text-gray-400">{filtered.length} alunos cadastrados</p>
+          <p className="text-sm text-gray-400">{filtered.length} alunos cadastrados com dados pessoais, saúde e responsável</p>
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar aluno..." className="border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-dourado w-48" />
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar aluno, escola..." className="border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-dourado w-48" />
           {canEdit && <button onClick={openNew} className="bg-carbono text-marfim px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 flex items-center gap-2">+ Novo Aluno</button>}
         </div>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-lg p-8">
-            <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-              <h3 className="font-serif text-xl text-carbono">{editing ? 'Editar Aluno' : 'Novo Aluno'}</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 text-2xl">×</button>
-            </div>
-            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl">{error}</div>}
-            <form onSubmit={save} className="space-y-4">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
+            <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-3">
               <div>
-                <label className="label-dash">Nome *</label>
-                <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} className="input-field" placeholder="Nome completo" />
+                <span className="text-xs font-bold text-dourado uppercase tracking-wider block">Ficha do Estudante</span>
+                <h3 className="font-serif text-2xl text-carbono">{editing ? 'Editar Ficha do Aluno' : 'Cadastrar Novo Aluno'}</h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <button onClick={() => setShowForm(false)} className="text-gray-400 text-3xl font-light hover:text-carbono">×</button>
+            </div>
+
+            {error && <div className="mb-4 bg-red-50 text-red-600 text-sm px-4 py-3 rounded-2xl border border-red-100 font-medium">{error}</div>}
+
+            <form onSubmit={save} className="space-y-6">
+              
+              {/* 🎓 1. DADOS DO ALUNO */}
+              <div className="space-y-3 bg-gray-50/60 p-4 md:p-5 rounded-2xl border border-gray-100">
+                <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-dourado">
+                  <span>🎓</span> 1. Dados Pessoais e Escolares do Aluno
+                </h4>
+                
                 <div>
-                  <label className="label-dash">E-mail</label>
-                  <input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} className="input-field" />
+                  <label className="label-dash">Nome Completo do Aluno *</label>
+                  <input required value={form.student_name || form.name} onChange={e=>setForm({...form, student_name: e.target.value, name: e.target.value})} className="input-field" placeholder="Nome completo do estudante" />
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">Data de Nascimento</label>
+                    <input type="date" value={form.birth_date || ''} onChange={e=>setForm({...form, birth_date: e.target.value})} className="input-field" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Sexo</label>
+                    <select value={form.gender || 'Feminino'} onChange={e=>setForm({...form, gender: e.target.value})} className="input-field">
+                      <option value="Feminino">Feminino</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Outro">Outro / Prefiro não declarar</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label-dash">E-mail do Aluno</label>
+                    <input type="email" value={form.student_email || form.email} onChange={e=>setForm({...form, student_email: e.target.value, email: e.target.value})} className="input-field" placeholder="aluno@email.com" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">CPF do Aluno</label>
+                    <input value={form.student_cpf || ''} onChange={e=>setForm({...form, student_cpf: e.target.value})} className="input-field" placeholder="000.000.000-00" />
+                  </div>
+                  <div>
+                    <label className="label-dash">RG do Aluno</label>
+                    <input value={form.student_rg || ''} onChange={e=>setForm({...form, student_rg: e.target.value})} className="input-field" placeholder="Nº do Documento" />
+                  </div>
+                  <div>
+                    <label className="label-dash">RNM (Registro Migratório)</label>
+                    <input value={form.rnm || ''} onChange={e=>setForm({...form, rnm: e.target.value})} className="input-field" placeholder="Caso estrangeiro" />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="label-dash">Telefone</label>
-                  <input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} className="input-field" />
+                  <label className="label-dash">Endereço Residencial Completo</label>
+                  <input value={form.address || ''} onChange={e=>setForm({...form, address: e.target.value})} className="input-field" placeholder="Rua, número, bairro, cidade..." />
                 </div>
-                <div>
-                  <label className="label-dash">Área</label>
-                  <select value={form.area} onChange={e=>setForm({...form,area:e.target.value})} className="input-field">
-                    {AREAS.map(a => <option key={a}>{a}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label-dash">Status</label>
-                  <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})} className="input-field">
-                    <option value="ativo">Ativo</option>
-                    <option value="inativo">Inativo</option>
-                    <option value="formado">Formado</option>
-                  </select>
-                </div>
-                <div className="col-span-2">
-                  <label className="label-dash">Data de Nascimento</label>
-                  <input type="date" value={form.birth_date} onChange={e=>setForm({...form,birth_date:e.target.value})} className="input-field" />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">Escola onde Estuda</label>
+                    <input value={form.school_name || ''} onChange={e=>setForm({...form, school_name: e.target.value})} className="input-field" placeholder="Nome da escola" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Turno Escolar</label>
+                    <select value={form.school_shift || 'Matutino'} onChange={e=>setForm({...form, school_shift: e.target.value})} className="input-field">
+                      <option value="Matutino">Matutino (Manhã)</option>
+                      <option value="Vespertino">Vespertino (Tarde)</option>
+                      <option value="Noturno">Noturno (Noite)</option>
+                      <option value="Integral">Integral</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label-dash">Turma / Ano Escolar</label>
+                    <input value={form.school_grade || ''} onChange={e=>setForm({...form, school_grade: e.target.value})} className="input-field" placeholder="Ex: 6º Ano B" />
+                  </div>
                 </div>
               </div>
+
+              {/* 🏥 2. INFORMAÇÕES DE SAÚDE */}
+              <div className="space-y-3 bg-rose-50/40 p-4 md:p-5 rounded-2xl border border-rose-100">
+                <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-rose-600">
+                  <span>🏥</span> 2. Ficha e Informações de Saúde
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">Tipo Sanguíneo</label>
+                    <select value={form.blood_type || 'Não sei'} onChange={e=>setForm({...form, blood_type: e.target.value})} className="input-field">
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Não sei'].map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label-dash">Peso (kg)</label>
+                    <input value={form.weight || ''} onChange={e=>setForm({...form, weight: e.target.value})} className="input-field" placeholder="Ex: 35 kg" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Altura (cm)</label>
+                    <input value={form.height || ''} onChange={e=>setForm({...form, height: e.target.value})} className="input-field" placeholder="Ex: 142 cm" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="label-dash">Alergias (Alimentos, Remédios, Outros)</label>
+                  <input value={form.health_allergies || ''} onChange={e=>setForm({...form, health_allergies: e.target.value})} className="input-field" placeholder="Descreva se o aluno possui alergias" />
+                </div>
+
+                <div>
+                  <label className="label-dash">Uso de Medicamento Contínuo ou Prescrito</label>
+                  <textarea rows={2} value={form.medications || ''} onChange={e=>setForm({...form, medications: e.target.value})} className="input-field resize-none" placeholder="Medicamentos, dosagens e horários..." />
+                </div>
+
+                <div>
+                  <label className="label-dash">Patologia / Diagnóstico / Suspeita Médica</label>
+                  <textarea rows={2} value={form.health_conditions || ''} onChange={e=>setForm({...form, health_conditions: e.target.value})} className="input-field resize-none" placeholder="Ex: Asma, Bronquite, TDAH, TEA, Restrição Física..." />
+                </div>
+              </div>
+
+              {/* 👨‍👩‍👧 3. DADOS DO RESPONSÁVEL */}
+              <div className="space-y-3 bg-blue-50/40 p-4 md:p-5 rounded-2xl border border-blue-100">
+                <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-blue-600">
+                  <span>👨‍👩‍👧</span> 3. Informações do Responsável Legal
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="label-dash">Nome Completo do Responsável</label>
+                    <input value={form.parent_name || ''} onChange={e=>setForm({...form, parent_name: e.target.value})} className="input-field" placeholder="Ex: Maria da Silva" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Vínculo Familiar</label>
+                    <select value={form.family_kinship || 'Mãe'} onChange={e=>setForm({...form, family_kinship: e.target.value})} className="input-field">
+                      {['Mãe', 'Pai', 'Avó/Avô', 'Tio/Tia', 'Irmão/Irmã', 'Tutor Legal', 'Outro'].map(v => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="label-dash">CPF do Responsável</label>
+                    <input value={form.parent_cpf || ''} onChange={e=>setForm({...form, parent_cpf: e.target.value})} className="input-field" placeholder="000.000.000-00" />
+                  </div>
+                  <div>
+                    <label className="label-dash">RG do Responsável</label>
+                    <input value={form.parent_rg || ''} onChange={e=>setForm({...form, parent_rg: e.target.value})} className="input-field" placeholder="Nº do Documento" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">Telefone Principal (WhatsApp)</label>
+                    <input value={form.phone || ''} onChange={e=>setForm({...form, phone: e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Contato de Emergência</label>
+                    <input value={form.emergency_phone || ''} onChange={e=>setForm({...form, emergency_phone: e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
+                  </div>
+                  <div>
+                    <label className="label-dash">E-mail do Responsável</label>
+                    <input type="email" value={form.parent_email || ''} onChange={e=>setForm({...form, parent_email: e.target.value})} className="input-field" placeholder="responsavel@email.com" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label-dash">Profissão</label>
+                    <input value={form.parents_profession || ''} onChange={e=>setForm({...form, parents_profession: e.target.value})} className="input-field" placeholder="Ocupação / Cargo" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Local de Trabalho</label>
+                    <input value={form.workplace || ''} onChange={e=>setForm({...form, workplace: e.target.value})} className="input-field" placeholder="Empresa / Cidade" />
+                  </div>
+                  <div>
+                    <label className="label-dash">Palavra Segura (Retirada)</label>
+                    <input value={form.safety_word || ''} onChange={e=>setForm({...form, safety_word: e.target.value})} className="input-field" placeholder="Código familiar" />
+                  </div>
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-gray-200 text-gray-600 py-3 rounded-full text-sm font-bold hover:bg-gray-50">Cancelar</button>
-                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editing ? 'Salvar' : 'Cadastrar Aluno'}</button>
+                <button type="submit" disabled={saving} className="flex-1 bg-carbono text-marfim py-3 rounded-full text-sm font-bold hover:bg-gray-800 disabled:opacity-60">{saving ? 'Salvando...' : editing ? 'Salvar Ficha do Aluno' : 'Cadastrar Aluno'}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DETALHADO PARA VISUALIZAÇÃO DA FICHA COMPLETA */}
+      {selectedStudent && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-6 md:p-8 relative">
+            <button onClick={() => setSelectedStudent(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl z-10">×</button>
+
+            <div className="mb-6 border-b border-gray-100 pb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-dourado block mb-1">Ficha Técnica Completa do Aluno</span>
+              <h3 className="font-serif text-3xl text-carbono">{selectedStudent.student_name || selectedStudent.name}</h3>
+            </div>
+
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-dourado">
+                <span>🎓</span> Dados Pessoais e Escolares do Estudante
+              </h4>
+              <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Data de Nasc.</p><p className="font-semibold text-carbono">{selectedStudent.birth_date ? new Date(selectedStudent.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Sexo</p><p className="font-semibold text-carbono">{selectedStudent.gender || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RNM (Migratório)</p><p className="font-semibold text-carbono">{selectedStudent.rnm || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">CPF Aluno</p><p className="font-semibold text-carbono">{selectedStudent.student_cpf || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RG Aluno</p><p className="font-semibold text-carbono">{selectedStudent.student_rg || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Aluno</p><p className="font-semibold text-carbono truncate">{selectedStudent.student_email || selectedStudent.email || '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Endereço Residencial</p><p className="font-semibold text-carbono">{selectedStudent.address || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Escola</p><p className="font-semibold text-carbono">{selectedStudent.school_name || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Turno Escolar</p><p className="font-semibold text-carbono">{selectedStudent.school_shift || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Turma / Ano</p><p className="font-semibold text-carbono">{selectedStudent.school_grade || '—'}</p></div>
+              </div>
+            </div>
+
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-rose-600">
+                <span>🏥</span> Ficha e Informações de Saúde
+              </h4>
+              <div className="bg-rose-50/40 p-4 rounded-2xl border border-rose-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Tipo Sanguíneo</p><p className="font-bold text-rose-700">{selectedStudent.blood_type || 'Não informado'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Peso</p><p className="font-semibold text-carbono">{selectedStudent.weight ? `${selectedStudent.weight}` : '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Altura</p><p className="font-semibold text-carbono">{selectedStudent.height ? `${selectedStudent.height}` : '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Alergias</p><p className="font-semibold text-carbono">{selectedStudent.health_allergies || 'Nenhuma informada'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Uso de Medicamento</p><p className="font-semibold text-carbono">{selectedStudent.medications || 'Nenhum informado'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Patologia / Diagnóstico / Suspeita</p><p className="font-semibold text-carbono">{selectedStudent.health_conditions || 'Nenhuma informada'}</p></div>
+              </div>
+            </div>
+
+            <div className="mb-6 space-y-3">
+              <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-blue-600">
+                <span>👨‍👩‍👧</span> Responsável Legal & Documentos
+              </h4>
+              <div className="bg-blue-50/40 p-4 rounded-2xl border border-blue-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Nome do Responsável</p><p className="font-bold text-carbono">{selectedStudent.parent_name || selectedStudent.name}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">CPF Responsável</p><p className="font-semibold text-carbono">{selectedStudent.parent_cpf || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RG Responsável</p><p className="font-semibold text-carbono">{selectedStudent.parent_rg || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Vínculo Familiar</p><p className="font-semibold text-carbono">{selectedStudent.family_kinship || 'Responsável'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone / WhatsApp</p><p className="font-semibold text-carbono">{selectedStudent.phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Contato Emergência</p><p className="font-bold text-rose-600">{selectedStudent.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedStudent.parent_email || selectedStudent.email || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Palavra Segura</p><p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block">{selectedStudent.safety_word || '—'}</p></div>
+              </div>
+            </div>
+
+            <div className="pt-2 text-right">
+              <button onClick={() => setSelectedStudent(null)} className="bg-carbono text-white px-6 py-2.5 rounded-full font-bold text-xs hover:bg-gray-800">
+                Fechar Ficha
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1033,8 +1267,8 @@ function AlunosTab() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="border-b border-gray-100">
-              <th className="th-cell">Nome</th><th className="th-cell">E-mail</th><th className="th-cell">Área</th>
-              <th className="th-cell">Status</th><th className="th-cell">Nascimento</th><th className="th-cell" />
+              <th className="th-cell">Aluno</th><th className="th-cell">Saúde / Tipo Sang.</th><th className="th-cell">Responsável / Contato</th>
+              <th className="th-cell">Escola / Turno</th><th className="th-cell">Status</th><th className="th-cell text-right">Ações</th>
             </tr></thead>
             <tbody>
               {filtered.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-gray-400">Nenhum aluno encontrado</td></tr>}
@@ -1042,25 +1276,36 @@ function AlunosTab() {
                 <tr key={`${a.source}-${a.id}`} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                   <td className="td-cell">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-dourado/20 text-dourado flex items-center justify-center font-bold text-sm shrink-0">{a.name[0]}</div>
-                      <span className="font-semibold text-carbono">{a.name}</span>
+                      <div className="w-9 h-9 rounded-full bg-dourado/20 text-dourado flex items-center justify-center font-bold text-sm shrink-0">{(a.student_name || a.name || 'A')[0].toUpperCase()}</div>
+                      <div>
+                        <div className="font-semibold text-carbono">{a.student_name || a.name}</div>
+                        {a.student_cpf && <div className="text-[11px] text-gray-400">CPF: {a.student_cpf}</div>}
+                      </div>
                     </div>
                   </td>
-                  <td className="td-cell text-gray-500">{a.email||'—'}</td>
-                  <td className="td-cell text-gray-500">{a.area}</td>
                   <td className="td-cell">
-                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${a.status==='ativo'?'bg-green-100 text-green-700':a.status==='formado'?'bg-blue-100 text-blue-700':'bg-gray-100 text-gray-600'}`}>
-                      {a.status.charAt(0).toUpperCase()+a.status.slice(1)}
+                    <div className="text-xs font-bold text-rose-600">{a.blood_type ? `Tipo: ${a.blood_type}` : '—'}</div>
+                    {a.health_allergies && <div className="text-[11px] text-gray-500 truncate max-w-[140px]">Alergias: {a.health_allergies}</div>}
+                  </td>
+                  <td className="td-cell">
+                    <div className="font-medium text-carbono">{a.parent_name || a.name}</div>
+                    <div className="text-xs text-gray-500">{a.phone || '—'}</div>
+                  </td>
+                  <td className="td-cell text-xs text-gray-500">
+                    <div>{a.school_name || '—'}</div>
+                    {a.school_shift && <div className="text-[11px] text-gray-400">{a.school_shift} {a.school_grade ? `(${a.school_grade})` : ''}</div>}
+                  </td>
+                  <td className="td-cell">
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${a.status === 'ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {(a.status || 'ativo').toUpperCase()}
                     </span>
                   </td>
-                  <td className="td-cell text-gray-500">{a.birth_date ? new Date(a.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
-                  <td className="td-cell">
-                    {canEdit && (
-                      <div className="flex gap-2">
-                        <button onClick={() => openEdit(a)} className="text-xs font-bold border border-gray-200 px-3 py-1.5 rounded-full hover:bg-gray-50">Editar</button>
-                        <button onClick={() => del(a)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1.5 rounded-full hover:bg-red-50">Excluir</button>
-                      </div>
-                    )}
+                  <td className="td-cell text-right">
+                    <div className="flex gap-2 justify-end">
+                      <button onClick={() => setSelectedStudent(a)} className="text-xs font-bold text-dourado hover:underline">Ficha</button>
+                      {canEdit && <button onClick={() => openEdit(a)} className="text-xs font-bold border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50">Editar</button>}
+                      {canEdit && <button onClick={() => del(a)} className="text-xs font-bold border border-red-200 text-red-500 px-3 py-1 rounded-full hover:bg-red-50">Excluir</button>}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -4740,11 +4985,13 @@ function PreCadastrosTab() {
               </h4>
               <div className="bg-blue-50/40 p-4 rounded-2xl border border-blue-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Nome do Responsável</p><p className="font-bold text-carbono">{selectedItem.parent_name || selectedItem.name}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">CPF Responsável</p><p className="font-semibold text-carbono">{selectedItem.parent_cpf || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">RG Responsável</p><p className="font-semibold text-carbono">{selectedItem.parent_rg || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Vínculo Familiar</p><p className="font-semibold text-carbono">{selectedItem.family_kinship || 'Responsável'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Palavra Segura (Retirada)</p><p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block">{selectedItem.safety_word || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone Principal</p><p className="font-semibold text-carbono">{selectedItem.phone}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Contato Emergência</p><p className="font-bold text-rose-600">{selectedItem.emergency_phone || '—'}</p></div>
-                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedItem.email || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedItem.parent_email || selectedItem.email || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Profissão</p><p className="font-semibold text-carbono">{selectedItem.parents_profession || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Faixa Salarial</p><p className="font-semibold text-carbono">{selectedItem.family_income || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Local de Trabalho</p><p className="font-semibold text-carbono">{selectedItem.workplace || '—'}</p></div>

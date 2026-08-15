@@ -123,6 +123,18 @@ router.put('/:id', authMiddleware, async (req, res) => {
       education || null, availability_schedule || null, positive_points || null, negative_points || null
     ]
 
+    const extraFields = [
+      'student_name', 'student_email', 'student_cpf', 'student_rg', 'gender', 'rnm', 'school_name', 'school_shift', 'school_grade',
+      'health_allergies', 'blood_type', 'weight', 'height', 'medications', 'health_conditions',
+      'parent_name', 'parent_email', 'parent_cpf', 'parent_rg', 'workplace', 'emergency_phone', 'family_kinship', 'safety_word'
+    ]
+    extraFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateCols.push(`${field} = ?`)
+        updateVals.push(req.body[field] || null)
+      }
+    })
+
     if (photo_url) {
       updateCols.push('photo_url = ?')
       updateVals.push(photo_url)

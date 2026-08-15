@@ -38,6 +38,8 @@ export default function PreCadastroPage() {
     // Responsável
     name: '', // Nome do responsável
     parent_email: '',
+    parent_cpf: '',
+    parent_rg: '',
     phone: '', // Telefone principal
     emergency_phone: '', // Segundo contato de emergência
     family_kinship: 'Mãe', // Vínculo familiar
@@ -95,6 +97,9 @@ export default function PreCadastroPage() {
           medications: form.medications,
           health_conditions: form.health_conditions,
           parent_name: form.name,
+          parent_email: form.parent_email,
+          parent_cpf: form.parent_cpf,
+          parent_rg: form.parent_rg,
           family_income: form.family_income,
           parents_profession: form.parents_profession,
           workplace: form.workplace,
@@ -145,6 +150,8 @@ export default function PreCadastroPage() {
       health_conditions: '',
       name: '',
       parent_email: '',
+      parent_cpf: '',
+      parent_rg: '',
       phone: '',
       emergency_phone: '',
       family_kinship: 'Mãe',
@@ -541,6 +548,27 @@ export default function PreCadastroPage() {
                             <option key={v} value={v}>{v}</option>
                           ))}
                         </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">CPF do Responsável</label>
+                        <input 
+                          value={form.parent_cpf} 
+                          onChange={e => setForm({...form, parent_cpf: e.target.value})} 
+                          className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-sm focus:border-dourado outline-none" 
+                          placeholder="000.000.000-00" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">RG do Responsável</label>
+                        <input 
+                          value={form.parent_rg} 
+                          onChange={e => setForm({...form, parent_rg: e.target.value})} 
+                          className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-sm focus:border-dourado outline-none" 
+                          placeholder="Nº do Documento" 
+                        />
                       </div>
                     </div>
 
