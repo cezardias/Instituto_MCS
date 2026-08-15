@@ -487,6 +487,7 @@ const studentExtraColumns = [
   "ADD COLUMN parents_profession TEXT",
   "ADD COLUMN workplace TEXT",
   "ADD COLUMN emergency_phone TEXT",
+  "ADD COLUMN emergency_phone_2 TEXT",
   "ADD COLUMN family_kinship TEXT",
   "ADD COLUMN image_voice_authorization INTEGER DEFAULT 1",
   "ADD COLUMN pick_drop_responsibility INTEGER DEFAULT 1",

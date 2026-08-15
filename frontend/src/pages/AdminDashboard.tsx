@@ -867,8 +867,9 @@ function AlunosTab() {
     student_name:'', student_email:'', student_cpf:'', student_rg:'', gender:'Feminino', rnm:'', address:'',
     school_name:'', school_shift:'Matutino', school_grade:'',
     health_allergies:'', blood_type:'Não sei', weight:'', height:'', medications:'', health_conditions:'',
-    parent_name:'', parent_email:'', parent_cpf:'', parent_rg:'', emergency_phone:'', family_kinship:'Mãe',
-    parents_profession:'', workplace:'', family_income:'1 a 2 salários mínimos', safety_word:''
+    parent_name:'', parent_email:'', parent_cpf:'', parent_rg:'', emergency_phone:'', emergency_phone_2:'', family_kinship:'Mãe',
+    parents_profession:'', workplace:'', family_income:'1 a 2 salários mínimos', safety_word:'', project_expectations:'',
+    image_voice_authorization: 1, pick_drop_responsibility: 1
   }
   const [form, setForm] = useState<any>(blank)
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null)
@@ -1161,28 +1162,44 @@ function AlunosTab() {
                     <input value={form.phone || ''} onChange={e=>setForm({...form, phone: e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
                   </div>
                   <div>
-                    <label className="label-dash">Contato de Emergência</label>
+                    <label className="label-dash">1º Contato de Emergência</label>
                     <input value={form.emergency_phone || ''} onChange={e=>setForm({...form, emergency_phone: e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
                   </div>
                   <div>
-                    <label className="label-dash">E-mail do Responsável</label>
-                    <input type="email" value={form.parent_email || ''} onChange={e=>setForm({...form, parent_email: e.target.value})} className="input-field" placeholder="responsavel@email.com" />
+                    <label className="label-dash">2º Contato de Emergência</label>
+                    <input value={form.emergency_phone_2 || ''} onChange={e=>setForm({...form, emergency_phone_2: e.target.value})} className="input-field" placeholder="(00) 00000-0000" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
-                    <label className="label-dash">Profissão</label>
-                    <input value={form.parents_profession || ''} onChange={e=>setForm({...form, parents_profession: e.target.value})} className="input-field" placeholder="Ocupação / Cargo" />
+                    <label className="label-dash">E-mail do Responsável</label>
+                    <input type="email" value={form.parent_email || ''} onChange={e=>setForm({...form, parent_email: e.target.value})} className="input-field" placeholder="responsavel@email.com" />
                   </div>
                   <div>
-                    <label className="label-dash">Local de Trabalho</label>
-                    <input value={form.workplace || ''} onChange={e=>setForm({...form, workplace: e.target.value})} className="input-field" placeholder="Empresa / Cidade" />
+                    <label className="label-dash">Profissão</label>
+                    <input value={form.parents_profession || ''} onChange={e=>setForm({...form, parents_profession: e.target.value})} className="input-field" placeholder="Ocupação / Cargo" />
                   </div>
                   <div>
                     <label className="label-dash">Palavra Segura (Retirada)</label>
                     <input value={form.safety_word || ''} onChange={e=>setForm({...form, safety_word: e.target.value})} className="input-field" placeholder="Código familiar" />
                   </div>
+                </div>
+
+                <div>
+                  <label className="label-dash">Qual sua expectativa com esse projeto?</label>
+                  <textarea rows={2} value={form.project_expectations || ''} onChange={e=>setForm({...form, project_expectations: e.target.value})} className="input-field resize-none" placeholder="Expectativas do responsável ou aluno com a participação no projeto..." />
+                </div>
+
+                <div className="pt-2 space-y-2 border-t border-blue-100/60 mt-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={form.image_voice_authorization !== 0} onChange={e=>setForm({...form, image_voice_authorization: e.target.checked ? 1 : 0})} className="w-4 h-4 accent-dourado rounded" />
+                    <span className="text-xs font-semibold text-gray-700">📷 Autorização de Uso de Imagem e Voz</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={form.pick_drop_responsibility !== 0} onChange={e=>setForm({...form, pick_drop_responsibility: e.target.checked ? 1 : 0})} className="w-4 h-4 accent-dourado rounded" />
+                    <span className="text-xs font-semibold text-gray-700">🚗 Ciência sobre a Responsabilidade de Levar e Buscar o Menor</span>
+                  </label>
                 </div>
               </div>
 
@@ -1240,17 +1257,35 @@ function AlunosTab() {
 
             <div className="mb-6 space-y-3">
               <h4 className="font-bold text-sm text-carbono uppercase tracking-wider flex items-center gap-2 text-blue-600">
-                <span>👨‍👩‍👧</span> Responsável Legal & Documentos
+                <span>👨‍👩‍👧</span> Responsável Legal & Contatos
               </h4>
               <div className="bg-blue-50/40 p-4 rounded-2xl border border-blue-100 grid grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Nome do Responsável</p><p className="font-bold text-carbono">{selectedStudent.parent_name || selectedStudent.name}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">CPF Responsável</p><p className="font-semibold text-carbono">{selectedStudent.parent_cpf || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">RG Responsável</p><p className="font-semibold text-carbono">{selectedStudent.parent_rg || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Vínculo Familiar</p><p className="font-semibold text-carbono">{selectedStudent.family_kinship || 'Responsável'}</p></div>
-                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone / WhatsApp</p><p className="font-semibold text-carbono">{selectedStudent.phone || '—'}</p></div>
-                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Contato Emergência</p><p className="font-bold text-rose-600">{selectedStudent.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone Principal</p><p className="font-semibold text-carbono">{selectedStudent.phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">1º Contato Emergência</p><p className="font-bold text-rose-600">{selectedStudent.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">2º Contato Emergência</p><p className="font-bold text-rose-600">{selectedStudent.emergency_phone_2 || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedStudent.parent_email || selectedStudent.email || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Palavra Segura</p><p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block">{selectedStudent.safety_word || '—'}</p></div>
+                <div className="col-span-2 md:col-span-3"><p className="text-gray-400 font-bold uppercase text-[10px]">Expectativa com o Projeto</p><p className="font-semibold text-carbono">{selectedStudent.project_expectations || '—'}</p></div>
+              </div>
+            </div>
+
+            {/* SEÇÃO: AUTORIZAÇÕES */}
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-200 text-xs space-y-2 mb-6">
+              <div className="flex items-center justify-between">
+                <span>📷 Autorização de Imagem e Voz:</span>
+                <span className={`font-bold px-2 py-0.5 rounded ${selectedStudent.image_voice_authorization !== 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {selectedStudent.image_voice_authorization !== 0 ? 'AUTORIZADO' : 'NÃO AUTORIZADO'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>🚗 Ciência da Responsabilidade pelo Transporte (Levar e Buscar):</span>
+                <span className={`font-bold px-2 py-0.5 rounded ${selectedStudent.pick_drop_responsibility !== 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                  {selectedStudent.pick_drop_responsibility !== 0 ? 'CIENTE E DE ACORDO' : 'NÃO DECLARADO'}
+                </span>
               </div>
             </div>
 
@@ -4820,14 +4855,15 @@ function PreCadastrosTab() {
   }
 
   const exportCSV = () => {
-    const csvHeader = "Data,Responsável,Vínculo,Telefone,Emergência,Email,Aluno,Data Nasc Aluno,Escola,Turno,Turma,Tipo Sanguíneo,Peso,Altura,Alergias,Medicamentos,Patologia/Diagnóstico,Palavra Segura,Projeto,Status\n"
+    const csvHeader = "Data,Responsável,Vínculo,Telefone Principal,1º Emergência,2º Emergência,Email Responsável,Aluno,Data Nasc Aluno,Escola,Turno,Turma,Tipo Sanguíneo,Peso,Altura,Alergias,Medicamentos,Patologia/Diagnóstico,Palavra Segura,Expectativa Projeto,Status\n"
     const csvRows = items.map(e => [
       new Date(e.created_at).toLocaleDateString('pt-BR'),
       `"${e.parent_name || e.name || ''}"`,
       `"${e.family_kinship || ''}"`,
       `"${e.phone || ''}"`,
       `"${e.emergency_phone || ''}"`,
-      `"${e.email || ''}"`,
+      `"${e.emergency_phone_2 || ''}"`,
+      `"${e.parent_email || e.email || ''}"`,
       `"${e.student_name || ''}"`,
       `"${e.birth_date ? new Date(e.birth_date+'T00:00:00').toLocaleDateString('pt-BR') : ''}"`,
       `"${e.school_name || ''}"`,
@@ -4840,7 +4876,7 @@ function PreCadastrosTab() {
       `"${e.medications || ''}"`,
       `"${e.health_conditions || ''}"`,
       `"${e.safety_word || ''}"`,
-      `"${e.project_name || 'Geral'}"`,
+      `"${e.project_expectations || ''}"`,
       `"${e.status}"`
     ].join(",")).join("\n")
 
@@ -4990,7 +5026,8 @@ function PreCadastrosTab() {
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Vínculo Familiar</p><p className="font-semibold text-carbono">{selectedItem.family_kinship || 'Responsável'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Palavra Segura (Retirada)</p><p className="font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded border border-amber-200 inline-block">{selectedItem.safety_word || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Telefone Principal</p><p className="font-semibold text-carbono">{selectedItem.phone}</p></div>
-                <div><p className="text-gray-400 font-bold uppercase text-[10px]">Contato Emergência</p><p className="font-bold text-rose-600">{selectedItem.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">1º Contato Emergência</p><p className="font-bold text-rose-600">{selectedItem.emergency_phone || '—'}</p></div>
+                <div><p className="text-gray-400 font-bold uppercase text-[10px]">2º Contato Emergência</p><p className="font-bold text-rose-600">{selectedItem.emergency_phone_2 || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">E-mail Responsável</p><p className="font-semibold text-carbono truncate">{selectedItem.parent_email || selectedItem.email || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Profissão</p><p className="font-semibold text-carbono">{selectedItem.parents_profession || '—'}</p></div>
                 <div><p className="text-gray-400 font-bold uppercase text-[10px]">Faixa Salarial</p><p className="font-semibold text-carbono">{selectedItem.family_income || '—'}</p></div>

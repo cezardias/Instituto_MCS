@@ -41,7 +41,8 @@ export default function PreCadastroPage() {
     parent_cpf: '',
     parent_rg: '',
     phone: '', // Telefone principal
-    emergency_phone: '', // Segundo contato de emergência
+    emergency_phone: '', // 1º contato de emergência
+    emergency_phone_2: '', // 2º contato de emergência
     family_kinship: 'Mãe', // Vínculo familiar
     parents_profession: '',
     family_income: '1 a 2 salários mínimos',
@@ -104,6 +105,7 @@ export default function PreCadastroPage() {
           parents_profession: form.parents_profession,
           workplace: form.workplace,
           emergency_phone: form.emergency_phone,
+          emergency_phone_2: form.emergency_phone_2,
           family_kinship: form.family_kinship,
           image_voice_authorization: form.image_voice_authorization,
           pick_drop_responsibility: form.pick_drop_responsibility,
@@ -154,6 +156,7 @@ export default function PreCadastroPage() {
       parent_rg: '',
       phone: '',
       emergency_phone: '',
+      emergency_phone_2: '',
       family_kinship: 'Mãe',
       parents_profession: '',
       family_income: '1 a 2 salários mínimos',
@@ -572,7 +575,7 @@ export default function PreCadastroPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Telefone Principal (WhatsApp) *</label>
                         <input 
@@ -584,13 +587,22 @@ export default function PreCadastroPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Segundo Contato de Emergência *</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">1º Contato de Emergência *</label>
                         <input 
                           required 
                           value={form.emergency_phone} 
                           onChange={e => setForm({...form, emergency_phone: e.target.value})} 
                           className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-sm focus:border-dourado outline-none" 
                           placeholder="(00) 00000-0000 (Parente/Vizinho)" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">2º Contato de Emergência</label>
+                        <input 
+                          value={form.emergency_phone_2} 
+                          onChange={e => setForm({...form, emergency_phone_2: e.target.value})} 
+                          className="w-full border border-gray-200 rounded-xl px-4 py-3 bg-gray-50 text-sm focus:border-dourado outline-none" 
+                          placeholder="(00) 00000-0000 (Outro Parente)" 
                         />
                       </div>
                     </div>
